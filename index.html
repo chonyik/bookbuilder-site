@@ -1,4 +1,13 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"></head><body><title>Statements to Books</title>
+<link rel="canonical" href="https://bookbuilder.adroitie.com/">
+<script>
+/* P16-1 (D91): one public URL. The old GitHub Pages mirror sends visitors to the live host, #hash kept; every other host
+   (the live site, claude.ai, the gate's localhost / 127.0.0.1) stays. Runs before the font requests. Static hosts open
+   <body> before this fragment (D90) and search engines read rel=canonical only in <head>, so the link moves there. */
+const canonTarget = (host, hash) => host === 'amos843.github.io' ? 'https://bookbuilder.adroitie.com/' + (hash || '') : null;
+{ const t = canonTarget(location.hostname, location.hash); if (t) location.replace(t); }
+document.head.appendChild(document.querySelector('link[rel="canonical"]'));
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
@@ -689,7 +698,7 @@ main { padding-block: 24px 120px; }
 (() => {
   'use strict';
   if (!document.documentElement.lang) document.documentElement.lang = 'en';   // the host wrapper has no lang (P5-4)
-  const APP_VERSION = '2.0';   // P10-2: footer, and the Overview sheet (P10-5)
+  const APP_VERSION = '2.0.1';   // P10-2: footer, and the Overview sheet (P10-5)
   document.getElementById('app-ver').textContent = 'v' + APP_VERSION;
 
   // ---------- App state (money in integer cents throughout) ----------
@@ -4791,7 +4800,7 @@ main { padding-block: 24px 120px; }
   }
 
   // Test hook: only when the page URL carries ?stb-test (the test harness). The published page exposes nothing (D38).
-  if (/[?&]stb-test\b/.test(location.search)) window.__stb = { APP_VERSION, state, commitRules, crossChecks, fileHash, go, STEPS, render, addFiles, detectKind, decodeText, tidyGrid, detectHeader, autoMap, validateMap, looksDate, looksMoney, parseMoney, parseDate, inferYear, fmtCents, buildTxns, reconcile, autoBalances,
+  if (/[?&]stb-test\b/.test(location.search)) window.__stb = { APP_VERSION, canonTarget, state, commitRules, crossChecks, fileHash, go, STEPS, render, addFiles, detectKind, decodeText, tidyGrid, detectHeader, autoMap, validateMap, looksDate, looksMoney, parseMoney, parseDate, inferYear, fmtCents, buildTxns, reconcile, autoBalances,
     loadPdfjs, pdfLines, parsePdfLines, parsePdfSource, applyPdfSigns, resolvePdfSign, sectionOf, isPdfMoney, isPdfDate, pdfDate, statementPeriod,
     syncSourceAccounts, coaAdd, coaEdit, coaDelete, taxLineOf, SCHED_LINES, DEFAULT_COA, compileRule, normDesc, categorize, matchTransfers, assignTxns, unlinkPair, reviewStats, filteredTxns, renderReview, renderCategorize, suggestPattern,
     buildJournal, booksOf, buildWorkbook, downloadWorkbook, prepareExport, workbookName, SHEET,
