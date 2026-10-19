@@ -698,7 +698,7 @@ main { padding-block: 24px 120px; }
 (() => {
   'use strict';
   if (!document.documentElement.lang) document.documentElement.lang = 'en';   // the host wrapper has no lang (P5-4)
-  const APP_VERSION = '2.0.1';   // P10-2: footer, and the Overview sheet (P10-5)
+  const APP_VERSION = '2.0.2';   // P10-2: footer, and the Overview sheet (P10-5)
   document.getElementById('app-ver').textContent = 'v' + APP_VERSION;
 
   // ---------- App state (money in integer cents throughout) ----------
@@ -712,7 +712,8 @@ main { padding-block: 24px 120px; }
     manual: new Map(),   // txn key → account no (0 = keep uncategorized). Survives txn rebuilds (flip, re-read).
     noMatch: new Map(),  // txn key → partner key, for pairs the user unlinked
     review: { tab: 'txns', filter: 'all', source: '', account: '', q: '', page: 0, pageSize: 100, sel: new Set(), draft: null, newAcct: null, msg: null,
-      importMode: 'replace', coaImport: null },   // P6-6/7: "When opening" choice; the chart-of-accounts import being previewed
+      importMode: 'replace', coaImport: null,   // P6-6/7: "When opening" choice; the chart-of-accounts import being previewed
+      coaNew: null },   // P17-1 (D92): the Chart of accounts tab's Add row while it is being filled in
     cz: { pick: new Map(), acct: new Map(), rule: new Set(), msg: null,   // P14-4 (D86): Categorize suggestions: ticked groups, chosen accounts, "also add a rule" groups, status line
       file: new Map(), fileRule: new Map(), fileErr: '' },   // P14-5 (D87): categories from the files: per-category edits, ticked rule proposals, batch error
     cats: new Map(),   // P14-5 (D87): category key (catKey) → {kind:'acct', no} | {kind:'transfer'} | {kind:'ignore'}; not in the setup file
@@ -912,21 +913,24 @@ main { padding-block: 24px 120px; }
   async function addFiles(fileList) {
     const files = [...fileList];
     if (!files.length) return;
-    const have = new Set(state.sources.map(s => s.fileKey));
-    const hashes = new Map(state.sources.filter(s => s.hash).map(s => [s.hash, s]));
+    // P17-1 (D92): the duplicate checks read state.sources after every await, so a second drop while this one is still
+    // reading (two addFiles calls at once) can't add the same file, or the same bytes, twice.
+    const sameKey = key => state.sources.some(s => s.fileKey === key);
     const added = [];
     for (const f of files) {
       const key = `${f.name}|${f.size}|${f.lastModified}`;
-      if (have.has(key)) { pushNotice('warn', `<b>${esc(f.name)}</b> is already added. Skipped.`); continue; }
+      if (sameKey(key)) { pushNotice('warn', `<b>${esc(f.name)}</b> is already added. Skipped.`); continue; }
       if (f.size > MAX_BYTES) { pushNotice('bad', `<b>${esc(f.name)}</b> is ${fmtSize(f.size)}. The limit is 50 MB.`); continue; }
       const r = await detectKind(f);
       if (r.error) { pushNotice('bad', `<b>${esc(f.name)}</b>: ${esc(r.error)}`); continue; }
       // Same bytes under another name (e.g. "statement (1).csv") would book every row twice (P5-2).
       const hash = await fileHash(f);
-      if (hash && hashes.has(hash)) { pushNotice('warn', `<b>${esc(f.name)}</b> has the same contents as <b>${esc(hashes.get(hash).fileName)}</b>, which is already added. Skipped.`); continue; }
+      if (sameKey(key)) { pushNotice('warn', `<b>${esc(f.name)}</b> is already added. Skipped.`); continue; }
+      const twin = hash && state.sources.find(s => s.hash === hash);
+      if (twin) { pushNotice('warn', `<b>${esc(f.name)}</b> has the same contents as <b>${esc(twin.fileName)}</b>, which is already added. Skipped.`); continue; }
       const src = makeSource(f, r.kind, r.note);
       src.hash = hash;
-      state.sources.push(src); have.add(key); if (hash) hashes.set(hash, src); added.push(src);
+      state.sources.push(src); added.push(src);
     }
     if (added.length) { renderSources(); render(); }
     await Promise.all(added.map(readSource));
@@ -1120,15 +1124,17 @@ main { padding-block: 24px 120px; }
   }
 
   // ---------- Header detection + column mapping (P1-4) ----------
-  // Loose shape tests only. Real value parsing (to cents / ISO dates) is P1-5.
+  // Loose shape tests (parseDate does the real reading). P17-1 (D92): every shape parseDate reads passes here too, or
+  // autoMap never picks the column: Y/M/D with slashes, a time of day after the date, ordinals ("Jul 8th").
+  const RE_TIME = /[ T]\d{1,2}:\d{2}(:\d{2}(\.\d+)?)?\s*([AP]M)?\s*(Z|[+-]\d{2}:?\d{2})?$/i;   // "10:15", "9:02 PM", "T10:15:00Z"
   const RE_DATE = [
-    /^\d{4}-\d{1,2}-\d{1,2}$/,                                   // 2024-06-03
+    /^\d{4}[/-]\d{1,2}[/-]\d{1,2}$/,                             // 2024-06-03, 2024/06/03
     /^\d{1,2}[\/\-]\d{1,2}([\/\-]\d{2,4})?\*?$/,                 // 06/03/24, 06/03, 01/13/2026*
     /^\d{1,2}\.\d{1,2}\.\d{2,4}$/,                                // 02.01.2026 (dotted needs a year, else 9.02 reads as a date)
-    /^[A-Za-z]{3,9}\.? \d{1,2}(,? \d{4})?\*?$/,                   // Jul 8, Jan 5, 2026
-    /^\d{1,2} [A-Za-z]{3,9}\.?( \d{4})?$/,                        // 8 Jul 2024
+    /^[A-Za-z]{3,9}\.? \d{1,2}(st|nd|rd|th)?(,? \d{4})?\*?$/,     // Jul 8, Jul 8th, Jan 5, 2026
+    /^\d{1,2} [A-Za-z]{3,9}\.?(,? \d{4})?$/,                      // 8 Jul, 8 Jul 2024
   ];
-  const looksDate = v => typeof v === 'string' && v.length <= 20 && RE_DATE.some(r => r.test(v));
+  const looksDate = v => typeof v === 'string' && v.length <= 32 && RE_DATE.some(r => r.test(v.trim().replace(RE_TIME, '').trim()));
   // P6-12 / N2: an Excel date left in General format (45322 = 2024-01-31) arrives as a number. A serial is a whole day between
   // 1990-01-01 and 2099-12-31; `loose` also allows a time-of-day fraction. Only the date-COLUMN checks use these (autoMap,
   // validateMap); buildTxns already read any workbook number through parseDate.
@@ -1204,20 +1210,21 @@ main { padding-block: 24px 120px; }
     return n ? hit / n : 0;
   }
 
-  // Rough number from a money-looking cell, for direction checks only (exact cents parsing is P1-5).
-  const roughNum = v => typeof v === 'number' ? v : parseFloat(String(v).replace(/[^0-9.\-]/g, '')) || 0;
+  // Cents of a money-looking cell, for the direction vote only (0 when it isn't an amount). P17-1 (D92): through parseMoney,
+  // so "(100.00)" and "100.00-" keep their sign and the vote compares whole cents.
+  const centsOf = v => parseMoney(v).cents ?? 0;
   // +1 if column a behaves like money out (balance falls by it), -1 if like money in, 0 if unclear.
   function splitDirection(rows, a, b, bal) {
     let vote = 0;
     for (let i = 1; i < rows.length; i++) {
       if (isBlank(rows[i][bal]) || isBlank(rows[i - 1][bal])) continue;
-      const d = roughNum(rows[i][bal]) - roughNum(rows[i - 1][bal]);
-      const va = isBlank(rows[i][a]) ? 0 : Math.abs(roughNum(rows[i][a]));
-      const vb = isBlank(rows[i][b]) ? 0 : Math.abs(roughNum(rows[i][b]));
-      if (va && Math.abs(d + va) < 0.005) vote++;      // balance fell by a → a is out
-      else if (va && Math.abs(d - va) < 0.005) vote--;
-      else if (vb && Math.abs(d - vb) < 0.005) vote++;  // balance rose by b → b is in
-      else if (vb && Math.abs(d + vb) < 0.005) vote--;
+      const d = centsOf(rows[i][bal]) - centsOf(rows[i - 1][bal]);
+      const va = isBlank(rows[i][a]) ? 0 : Math.abs(centsOf(rows[i][a]));
+      const vb = isBlank(rows[i][b]) ? 0 : Math.abs(centsOf(rows[i][b]));
+      if (va && d === -va) vote++;      // balance fell by a → a is out
+      else if (va && d === va) vote--;
+      else if (vb && d === vb) vote++;  // balance rose by b → b is in
+      else if (vb && d === -vb) vote--;
     }
     return Math.sign(vote);
   }
@@ -1410,7 +1417,7 @@ main { padding-block: 24px 120px; }
       return { error: `${v} isn't a date.` };
     }
     let t = String(v).trim().replace(/\*+$/, '').trim();                        // "01/13/2026*" posting marker
-    t = t.replace(/[ T]\d{1,2}:\d{2}(:\d{2}(\.\d+)?)?\s*([AP]M)?\s*(Z|[+-]\d{2}:?\d{2})?$/i, '').trim();  // time part
+    t = t.replace(RE_TIME, '').trim();                                         // time part
     let y, mo, d, m;
     const needYear = () => {
       if (!ctx.year) return { error: `"${v}" has no year and none could be inferred from the other rows. Enter the statement year above.`, noYear: true };
@@ -1427,7 +1434,10 @@ main { padding-block: 24px 120px; }
       mo = monthNo(m[1]); d = +m[2];
       if (m[3]) y = +m[3]; else { const e = needYear(); if (e) return e; y = ctx.year; }
     }
-    else if ((m = t.match(/^(\d{1,2}) ([A-Za-z]{3,9})\.?,? (\d{4})$/))) { d = +m[1]; mo = monthNo(m[2]); y = +m[3]; }
+    else if ((m = t.match(/^(\d{1,2}) ([A-Za-z]{3,9})\.?(?:,? (\d{4}))?$/))) {   // "8 Jul 2024"; "8 Jul" takes the statement year (P17-1)
+      d = +m[1]; mo = monthNo(m[2]); if (!mo) return { error: `"${v}" isn't a date.` };
+      if (m[3]) y = +m[3]; else { const e = needYear(); if (e) return e; y = ctx.year; }
+    }
     else return { error: `"${v}" isn't a date.` };
     if (!mo || !validYmd(y, mo, d)) return { error: `"${v}" isn't a real date.` };
     return { iso: iso(y, mo, d) };
@@ -2520,7 +2530,7 @@ main { padding-block: 24px 120px; }
     const r = parseAcctNo(noText); if (r.error) return r.error;
     name = String(name ?? '').trim(); if (!name) return 'Enter a name for the new account.';
     if (!ACCT_TYPES.includes(type)) return 'Choose a type for the new account.';
-    state.coa.push({ no: r.no, name, type, taxLine: SCHED_TAGS.has(taxLine) ? taxLine : '', system: false }); indexCoa();
+    state.coa.push({ no: r.no, name, type, taxLine: IS_TYPES.includes(type) && SCHED_TAGS.has(taxLine) ? taxLine : '', system: false }); indexCoa();   // balance-sheet accounts carry no tag (P17-1)
     return '';
   }
   function coaEdit(no, field, value) {
@@ -2902,9 +2912,12 @@ main { padding-block: 24px 120px; }
       let n = 0; for (const [k, c] of small) if (big.has(k)) n += Math.min(c, big.get(k));
       if (n >= 3 && n >= 0.2 * Math.min(a.txns.length, b.txns.length)) out.push({ kind: 'dup', a, b, n });
     }
-    // Consecutive statements of one account uploaded as separate files: B opens exactly where A ends.
+    // Consecutive statements of one account uploaded as separate files: B opens exactly where A ends. P17-1 (D92): a $0.00
+    // ending counts too (a card paid off), but only when B starts within 45 days of A's last row: many unrelated paid-off
+    // accounts end and open at 0.00, so for zero the dates have to line up as well.
     for (const a of srcs) for (const b of srcs) {
-      if (a === b || leadOf(a) === leadOf(b) || a.type !== b.type || !a.endingCents || a.endingCents !== b.openingCents || !a.txnStats || !b.txnStats) continue;
+      if (a === b || leadOf(a) === leadOf(b) || a.type !== b.type || a.endingCents == null || a.endingCents !== b.openingCents || !a.txnStats || !b.txnStats) continue;
+      if (a.endingCents === 0 && dayNo(b.txnStats.first) - dayNo(a.txnStats.last) > 45) continue;
       if (a.txnStats.first < b.txnStats.first || (a.txnStats.first === b.txnStats.first && a.txnStats.last <= b.txnStats.last && state.sources.indexOf(a) < state.sources.indexOf(b))) out.push({ kind: 'chain', a, b });
     }
     return out;
@@ -3530,7 +3543,21 @@ main { padding-block: 24px 120px; }
       <tbody>${rows || '<tr><td colspan="7" class="muted">No rules. Every row is uncategorized until you assign it.</td></tr>'}</tbody></table></div>`;
   }
 
+  // P17-1 (D92): the Add row lives in state.review.coaNew, so a failed Add keeps every field, and its Schedule C line starts
+  // from defaultTaxLine(type, name) like "+ New account…" (D85) until the user picks one.
+  const coaNewDraft = () => state.review.coaNew || (state.review.coaNew = { no: '', name: '', type: 'Expense', taxLine: defaultTaxLine('Expense', ''), taxTouched: false });
+  function coaNewEdit(el) {
+    const N = coaNewDraft(), k = { 'coa-new-no': 'no', 'coa-new-name': 'name', 'coa-new-type': 'type', 'coa-new-tax': 'taxLine' }[el.id];
+    if (!k) return false;
+    N[k] = el.value;
+    if (k === 'taxLine') N.taxTouched = true;
+    else if (!N.taxTouched && k !== 'no') N.taxLine = defaultTaxLine(N.type, N.name);
+    const t = $('coa-new-tax'), is = IS_TYPES.includes(N.type);
+    if (t && k !== 'taxLine') { t.disabled = !is; t.value = is ? N.taxLine : ''; }
+    return true;
+  }
   function coaHtml() {
+    const N = coaNewDraft();
     const used = new Map(); for (const t of state.txns) if (t.offsetAccountNo != null) used.set(t.offsetAccountNo, (used.get(t.offsetAccountNo) || 0) + 1);
     const typeSel = (sel, attrs) => `<select class="inp" ${attrs}>${ACCT_TYPES.map(t => opt(t, t, sel)).join('')}</select>`;
     const taxSel = (sel, attrs) => `<select class="inp" ${attrs}><option value=""${sel === '' ? ' selected' : ''}>Not mapped</option>${SCHED_LINES.map(([k, v]) => opt(k, v, sel)).join('')}</select>`;
@@ -3548,10 +3575,10 @@ main { padding-block: 24px 120px; }
       <p class="bal-note">System accounts can be renamed, but not renumbered, retyped or deleted. Accounts for your files follow the file name until you rename them. The type decides where an account lands: Income Statement (Revenue, COGS, Expense) or Balance Sheet. The Schedule C line decides where an income or expense account lands on the Schedule C worksheet in the Excel file; any account that isn't mapped shows up as a difference there.</p>
       <div class="grid-wrap"><table class="grid" aria-label="Chart of accounts"><thead><tr><th>No</th><th>Name</th><th>Type</th><th>Schedule C line</th><th class="money">Rows assigned</th><th><span class="sr-only">Delete</span></th></tr></thead>
       <tbody>${rows}
-        <tr><td><input class="inp num" id="coa-new-no" inputmode="numeric" placeholder="e.g. 6120" style="width:90px" aria-label="New account number"></td>
-          <td><input class="inp" id="coa-new-name" placeholder="New account name" aria-label="New account name"></td>
-          <td>${typeSel('Expense', 'id="coa-new-type" aria-label="New account type"')}</td>
-          <td>${taxSel('', 'id="coa-new-tax" aria-label="New account Schedule C line"')}</td><td></td>
+        <tr><td><input class="inp num" id="coa-new-no" value="${esc(N.no)}" inputmode="numeric" placeholder="e.g. 6120" style="width:90px" aria-label="New account number"></td>
+          <td><input class="inp" id="coa-new-name" value="${esc(N.name)}" placeholder="New account name" aria-label="New account name"></td>
+          <td>${typeSel(N.type, 'id="coa-new-type" aria-label="New account type"')}</td>
+          <td>${taxSel(IS_TYPES.includes(N.type) ? N.taxLine : '', `id="coa-new-tax" aria-label="New account Schedule C line"${IS_TYPES.includes(N.type) ? '' : ' disabled'}`)}</td><td></td>
           <td><button class="btn btn-sm" type="button" data-coa-add>Add</button></td></tr>
       </tbody></table></div>`;
   }
@@ -3849,7 +3876,7 @@ main { padding-block: 24px 120px; }
     }
     Z.file.clear(); Z.fileRule.clear();
     categorize();
-    const rows = state.txns.filter(t => t.fromFile).length;
+    const ids = new Set(plan.srcs.map(s => s.id)), rows = state.txns.filter(t => t.fromFile && ids.has(t.sourceId)).length;   // this apply's files only (P17-1)
     Z.msg = null;
     renderCategorize();
     const h = $('cz-files-h'); if (h) h.focus();
@@ -3990,6 +4017,7 @@ main { padding-block: 24px 120px; }
   body.addEventListener('input', e => {
     const el = e.target;
     if (el.dataset.na) { naInput(el); return; }
+    if (coaNewEdit(el)) return;
     if (el.dataset.rv === 'q') { clearTimeout(qTimer); qTimer = setTimeout(() => { state.review.q = el.value; state.review.page = 0; renderReview(); }, 150); return; }
     if (el.dataset.d) { readDraft(el); const c = $('draft-count'); if (c) c.innerHTML = draftCountText(); }
   });
@@ -4001,6 +4029,7 @@ main { padding-block: 24px 120px; }
   body.addEventListener('change', e => {
     const el = e.target, R = state.review;
     if (el.dataset.na) { naChange(el); return; }
+    if (coaNewEdit(el)) return;
     if (el.id === 'bulk-acct' && el.value === '__new') { naOpen([...R.sel], 'bulk-acct'); return; }
     if (el.dataset.rv && el.dataset.rv !== 'q') { R[el.dataset.rv] = el.value; R.page = 0; renderReview(); return; }
     if (el.dataset.d) { readDraft(el); const c = $('draft-count'); if (c) c.innerHTML = draftCountText(); return; }
@@ -4090,10 +4119,10 @@ main { padding-block: 24px 120px; }
       return;
     }
     if (b.hasAttribute('data-coa-add')) {
-      const err = coaAdd($('coa-new-no').value, $('coa-new-name').value, $('coa-new-type').value, $('coa-new-tax').value);
-      setMsg('coa', err ? 'err' : 'ok', err || `Added ${$('coa-new-no').value.trim()} · ${$('coa-new-name').value.trim()}.`);
-      if (err) { const keepNo = $('coa-new-no').value, keepName = $('coa-new-name').value, keepType = $('coa-new-type').value; rerender(); $('coa-new-no').value = keepNo; $('coa-new-name').value = keepName; $('coa-new-type').value = keepType; }
-      else rerender();
+      const N = coaNewDraft(), err = coaAdd(N.no, N.name, N.type, N.taxLine);
+      setMsg('coa', err ? 'err' : 'ok', err || `Added ${N.no.trim()} · ${N.name.trim()}.`);
+      if (!err) R.coaNew = null;   // a failed Add keeps the row as typed (rendered from R.coaNew)
+      rerender();
       return;
     }
     if (b.dataset.coaDel) {
