@@ -32,6 +32,10 @@ document.head.appendChild(document.querySelector('link[rel="canonical"]'));
   --bad-soft: #fbe6e4;
   --focus: #1d5fc4;
   --shadow: 0 1px 2px rgba(22, 32, 47, .06), 0 2px 8px rgba(22, 32, 47, .05);
+  --scrim: rgba(13, 19, 29, .45);              /* dialog backdrop */
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, .25);   /* help dialog */
+  --shadow-toast: 0 4px 16px rgba(0, 0, 0, .2);
+  --shadow-thumb: 0 1px 2px rgba(0, 0, 0, .25);  /* switch thumb */
 
   --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
@@ -48,6 +52,7 @@ document.head.appendChild(document.querySelector('link[rel="canonical"]'));
     --ok: #5cc98f; --ok-soft: #15311f; --warn: #f0b252; --warn-soft: #36280f;
     --bad: #ff8a80; --bad-soft: #3a1917; --focus: #6ea4ff;
     --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+    --scrim: rgba(13, 19, 29, .45); --shadow-lg: 0 12px 40px rgba(0, 0, 0, .25); --shadow-toast: 0 4px 16px rgba(0, 0, 0, .2); --shadow-thumb: 0 1px 2px rgba(0, 0, 0, .25);
     color-scheme: dark;
   }
 }
@@ -58,6 +63,7 @@ document.head.appendChild(document.querySelector('link[rel="canonical"]'));
   --ok: #5cc98f; --ok-soft: #15311f; --warn: #f0b252; --warn-soft: #36280f;
   --bad: #ff8a80; --bad-soft: #3a1917; --focus: #6ea4ff;
   --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  --scrim: rgba(13, 19, 29, .45); --shadow-lg: 0 12px 40px rgba(0, 0, 0, .25); --shadow-toast: 0 4px 16px rgba(0, 0, 0, .2); --shadow-thumb: 0 1px 2px rgba(0, 0, 0, .25);
   color-scheme: dark;
 }
 
@@ -103,8 +109,8 @@ button, input, select { font: inherit; color: inherit; }
 .head-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 
 /* Help dialog (P5-5) */
-#help { width: min(640px, calc(100% - 32px)); max-height: min(85vh, 760px); overflow: auto; padding: 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); color: var(--fg); box-shadow: 0 12px 40px rgba(0,0,0,.25); }
-#help::backdrop { background: rgba(13, 19, 29, .45); }
+#help { width: min(640px, calc(100% - 32px)); max-height: min(85vh, 760px); overflow: auto; padding: 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); color: var(--fg); box-shadow: var(--shadow-lg); }
+#help::backdrop { background: var(--scrim); }
 .help-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); }
 .help-head h2 { font-size: var(--fs-lg); font-weight: 600; }
 .help-body { padding: 16px; display: grid; gap: 12px; font-size: var(--fs-sm); }
@@ -150,7 +156,6 @@ main { padding-block: 24px 120px; }
 .points b { font-weight: 600; color: var(--fg); }
 .points span { color: var(--muted); }
 .app-foot { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: var(--fs-xs); color: var(--muted); }
-@media (max-width: 640px) { .points { grid-template-columns: minmax(0, 1fr); gap: 12px; order: 1; } }   /* phones: the drop zone stays on the first screen */
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); }
 
@@ -177,14 +182,6 @@ main { padding-block: 24px 120px; }
 .list-head h3 { font-size: var(--fs-md); font-weight: 600; }
 .list-head span { font-size: var(--fs-xs); color: var(--muted); }
 
-.planned { display: grid; gap: 10px; padding: 16px; }
-.planned li { color: var(--muted); font-size: var(--fs-sm); }
-.planned ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
-.tag {
-  display: inline-block; font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--warn); background: var(--warn-soft); padding: 2px 8px; border-radius: 4px; justify-self: start;
-}
-
 /* Buttons */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -205,7 +202,6 @@ main { padding-block: 24px 120px; }
 }
 .actionbar .wrap { display: flex; align-items: center; gap: 12px; padding-block: 12px; }
 .actionbar .reason { flex: 1; min-width: 0; font-size: var(--fs-sm); color: var(--muted); text-align: right; }
-.actionbar .spacer { flex: 1; }
 
 /* Notices (rejected files, warnings) */
 .notices { display: grid; gap: 8px; }
@@ -213,8 +209,17 @@ main { padding-block: 24px 120px; }
   display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--r);
   font-size: var(--fs-sm); border: 1px solid transparent;
 }
-.notice.bad { background: var(--bad-soft); color: var(--bad); border-color: color-mix(in srgb, var(--bad) 25%, transparent); }
-.notice.warn { background: var(--warn-soft); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 25%, transparent); }
+/* Tones (S9): one colour + soft background per state; every status component reads --tone / --tone-soft. */
+.ok { --tone: var(--ok); --tone-soft: var(--ok-soft); }
+.warn { --tone: var(--warn); --tone-soft: var(--warn-soft); }
+.bad, .err { --tone: var(--bad); --tone-soft: var(--bad-soft); }
+.acc { --tone: var(--accent); --tone-soft: var(--accent-soft); }
+.muted { --tone: var(--muted); --tone-soft: var(--surface-2); }
+:is(.pill, .recon, .dl-status):is(.ok, .warn, .bad, .muted),
+:is(.notice, .banner):is(.warn, .bad),
+.st .tagx:is(.ok, .warn, .acc) { color: var(--tone); background: var(--tone-soft); }
+.notice:is(.bad, .warn) { border-color: color-mix(in srgb, var(--tone) 25%, transparent); }
+.msg:is(.ok, .warn, .err) { color: var(--tone); }
 .notice span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .notice b { font-weight: 600; }
 .icon-btn {
@@ -245,12 +250,11 @@ main { padding-block: 24px 120px; }
   padding: 4px 8px; margin-left: -8px; border: 1px solid transparent; border-radius: 6px; background: transparent;
 }
 .src-name:hover { border-color: var(--line); }
-.src-name:focus { border-color: var(--accent); background: var(--surface); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
 .src-meta { font-size: var(--fs-xs); color: var(--muted); overflow-wrap: anywhere; }
 .src-meta .warn { color: var(--warn); }
 
 .seg { display: inline-flex; border: 1px solid var(--control-line); border-radius: 6px; padding: 2px; background: var(--surface-2); }
-.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg input, .switch input { position: absolute; opacity: 0; pointer-events: none; }   /* visually hidden, still focusable */
 .seg label {
   padding: 5px 12px; font-size: var(--fs-sm); font-weight: 500; border-radius: 4px; cursor: pointer; color: var(--muted); white-space: nowrap;
 }
@@ -258,28 +262,16 @@ main { padding-block: 24px 120px; }
 .seg input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 1px; }
 
 .switch { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-sm); cursor: pointer; white-space: nowrap; }
-.switch input { position: absolute; opacity: 0; pointer-events: none; }
 .switch .track {
   width: 34px; height: 20px; border-radius: 999px; background: var(--control-line); position: relative; flex: none; transition: background .15s;
 }
 .switch .track::after {
   content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
-  background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s;
+  background: var(--surface); box-shadow: var(--shadow-thumb); transition: transform .15s;
 }
 .switch input:checked + .track { background: var(--accent); }
 .switch input:checked + .track::after { transform: translateX(14px); }
 .switch input:focus-visible + .track { outline: 2px solid var(--focus); outline-offset: 2px; }
-
-/* P8-4 (U-D): Windows High Contrast / forced colors repaint backgrounds and drop shadows, so the on/off switch and the selected
-   segment would look identical to their off state. Use system colours: Highlight fill = on/selected, bordered CanvasText = off. */
-@media (forced-colors: active) {
-  .switch .track { forced-color-adjust: none; background: Canvas; border: 2px solid CanvasText; }
-  .switch .track::after { top: 0; left: 0; background: CanvasText; box-shadow: none; }   /* inside the 2px border */
-  .switch input:checked + .track { background: Highlight; border-color: Highlight; }
-  .switch input:checked + .track::after { background: HighlightText; }
-  .seg input:checked + label { forced-color-adjust: none; background: Highlight; color: HighlightText; box-shadow: none; }
-  .seg input:focus-visible + label, .switch input:focus-visible + .track { outline: 2px solid CanvasText; outline-offset: 2px; }
-}
 
 .src-status { font-size: var(--fs-xs); color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 2px; }
 .src-status .ok { color: var(--ok); font-weight: 500; }
@@ -304,16 +296,15 @@ main { padding-block: 24px 120px; }
   display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-xs); font-weight: 600;
   padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line);
 }
-.pill.ok { color: var(--ok); background: var(--ok-soft); border-color: transparent; }
-.pill.warn { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+.pill:is(.ok, .warn, .bad) { border-color: transparent; }
 .map-head .pill:last-child { margin-left: auto; }
 .map-body { display: grid; gap: 16px; padding: 16px; }
 .fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px 16px; }
 .field { display: grid; gap: 4px; min-width: 0; align-content: start; }
 .field label, .field .lbl { font-size: var(--fs-xs); font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-.field select {
-  width: 100%; min-width: 0; padding: 7px 8px; border: 1px solid var(--control-line); border-radius: 6px; background: var(--surface); font-size: var(--fs-sm);
-}
+/* Input chrome (S9): one base for the text/number/select controls; per-control size below, one focus rule after .grid. */
+.inp, .field select, .money-in, .grid select { border: 1px solid var(--control-line); border-radius: 6px; background: var(--surface); }
+.inp, .field select { width: 100%; min-width: 0; padding: 7px 8px; font-size: var(--fs-sm); }
 .field select.missing { border-color: var(--bad); box-shadow: 0 0 0 3px var(--bad-soft); }
 .field .seg { justify-self: start; }
 .notes { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: var(--fs-sm); color: var(--muted); }
@@ -331,24 +322,18 @@ main { padding-block: 24px 120px; }
 .preview .off { color: var(--muted); }
 .preview td.money, .preview th.money { text-align: right; }
 .preview tbody tr:last-child td { border-bottom: 0; }
-.panel-foot { font-size: var(--fs-sm); color: var(--muted); }
 .parsed { display: grid; gap: 10px; }
 .balances { display: grid; gap: 10px; padding-top: 12px; border-top: 1px dashed var(--line); }
-.money-in { font: 500 var(--fs-sm) var(--font-mono); padding: 7px 10px; border: 1px solid var(--control-line); border-radius: 6px; background: var(--surface); text-align: right; width: 100%; }
-.money-in:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.money-in { font: 500 var(--fs-sm) var(--font-mono); padding: 7px 10px; text-align: right; width: 100%; }
 .opt { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted); }
 .field-switch { align-self: end; min-height: 36px; white-space: normal; }
 .bal-note { font-size: var(--fs-xs); color: var(--muted); }
 .recon { font-size: var(--fs-sm); border-radius: 6px; padding: 10px 12px; display: grid; gap: 6px; }
-.recon.ok { color: var(--ok); background: var(--ok-soft); display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.recon.ok { display: flex; align-items: center; gap: 8px; font-weight: 500; }
 .recon.ok svg { width: 16px; height: 16px; flex: none; }
-.recon.warn { color: var(--warn); background: var(--warn-soft); }
-.recon.muted { color: var(--muted); background: var(--surface-2); }
-.recon.bad { color: var(--bad); background: var(--bad-soft); }
 .recon p { margin: 0; }
 .recon .btn { margin-left: 6px; }
 .btn-sm { min-height: 30px; padding: 4px 10px; font-size: var(--fs-xs); }
-.pill.bad { color: var(--bad); background: var(--bad-soft); border-color: transparent; }
 .stats { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
 .stats > div { background: var(--surface); padding: 8px 12px; min-width: 0; }
 .stats dt { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
@@ -385,8 +370,6 @@ main { padding-block: 24px 120px; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: end; }
 .toolbar .field { min-width: 140px; flex: 1 1 140px; }
 .toolbar .field.grow { flex: 3 1 220px; }
-.inp { width: 100%; min-width: 0; padding: 7px 8px; border: 1px solid var(--control-line); border-radius: 6px; background: var(--surface); font-size: var(--fs-sm); }
-.inp:focus, .grid select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
 .inp.bad-in { border-color: var(--bad); }
 .bulkbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 12px; border-radius: 6px; background: var(--accent-soft); font-size: var(--fs-sm); }
 .bulkbar select { max-width: 260px; }
@@ -401,29 +384,36 @@ main { padding-block: 24px 120px; }
 .grid td.desc .sub, .preview td .sub { display: block; color: var(--muted); font-size: var(--fs-xs); overflow-wrap: anywhere; }   /* P10-3: memo · cardholder */
 .grid td.desc > div { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .grid td.src-c { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-xs); }
-.grid td.nw, .grid th.nw { white-space: nowrap; }
-.grid select { width: 100%; min-width: 170px; max-width: 240px; padding: 4px 6px; border: 1px solid var(--control-line); border-radius: 4px; background: var(--surface); font-size: var(--fs-xs); }
+.grid select { width: 100%; min-width: 170px; max-width: 240px; padding: 4px 6px; border-radius: 4px; font-size: var(--fs-xs); }
+/* Focus for the controls that draw their own ring (box-shadow). Forced colors removes shadows, so X1 restores an outline there. */
+.inp:focus, .grid select:focus, .money-in:focus, .src-name:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.src-name:focus { background: var(--surface); }
+/* P8-4 (U-D): Windows High Contrast / forced colors repaint backgrounds and drop shadows, so the on/off switch and the selected
+   segment would look identical to their off state. Use system colours: Highlight fill = on/selected, bordered CanvasText = off. */
+@media (forced-colors: active) {
+  .switch .track { forced-color-adjust: none; background: Canvas; border: 2px solid CanvasText; }
+  .switch .track::after { top: 0; left: 0; background: CanvasText; box-shadow: none; }   /* inside the 2px border */
+  .switch input:checked + .track { background: Highlight; border-color: Highlight; }
+  .switch input:checked + .track::after { background: HighlightText; }
+  .seg input:checked + label { forced-color-adjust: none; background: Highlight; color: HighlightText; box-shadow: none; }
+  .seg input:focus-visible + label, .switch input:focus-visible + .track { outline: 2px solid CanvasText; outline-offset: 2px; }
+  /* X1: these fields show focus with border colour + box-shadow only, and forced colors drops both. */
+  .inp:focus, .grid select:focus, .money-in:focus, .src-name:focus { outline: 2px solid CanvasText; outline-offset: 2px; }
+}
 .grid select.unc { border-color: var(--warn); }
 .grid input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
 .grid .inp { font-size: var(--fs-xs); padding: 4px 6px; }
 .st { font-size: var(--fs-xs); color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 6px; align-items: center; }
 .st .tagx { font-weight: 600; padding: 1px 6px; border-radius: 4px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
-.st .tagx.warn { background: var(--warn-soft); color: var(--warn); }
-.st .tagx.ok { background: var(--ok-soft); color: var(--ok); }
-.st .tagx.acc { background: var(--accent-soft); color: var(--accent); }
 .pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: var(--fs-sm); color: var(--muted); }
 .pager .btns { display: flex; gap: 6px; }
 .draft { border: 1px solid var(--accent); border-radius: 6px; padding: 12px; display: grid; gap: 10px; background: var(--surface); }
 .draft h4 { margin: 0; font-size: var(--fs-sm); }
 .msg { font-size: var(--fs-sm); }
-.msg.err { color: var(--bad); }
-.msg.warn { color: var(--warn); }
-.msg.ok { color: var(--ok); }
 .banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px; border-radius: 6px; font-size: var(--fs-sm); background: var(--warn-soft); color: var(--warn); }
 .banner > span { flex: 1 1 260px; min-width: 0; overflow-wrap: anywhere; }
 .money-in.bad-in { border-color: var(--bad); box-shadow: 0 0 0 3px var(--bad-soft); }
 .map-list > .banner { margin: 0; }
-.banner.bad { background: var(--bad-soft); color: var(--bad); }
 .muted { color: var(--muted); }
 .st .linkish { font-size: var(--fs-xs); }
 
@@ -431,13 +421,8 @@ main { padding-block: 24px 120px; }
 .grid tr.tot td { font-weight: 600; border-top: 1px solid var(--fg); }
 .grid tr.chk td { font-weight: 600; }
 .dl-status { font-size: var(--fs-sm); border-radius: 6px; padding: 10px 12px; }
-.dl-status.ok { color: var(--ok); background: var(--ok-soft); }
-.dl-status.warn { color: var(--warn); background: var(--warn-soft); }
-.dl-status.bad { color: var(--bad); background: var(--bad-soft); }
-.dl-status.muted { color: var(--muted); background: var(--surface-2); }
 .file-line { font-size: var(--fs-sm); color: var(--muted); overflow-wrap: anywhere; }
-@media (max-width: 640px) { .stats.even > div:last-child { grid-column: auto; } .grid .c-type { display: none; } #export-tb .grid { font-size: var(--fs-xs); } #export-tb .grid th, #export-tb .grid td { padding: 6px 4px; } #export-tb .tab-body { padding: 12px 8px; } }
-/* P6-5: select-all-on-page for the phone card layout (the header checkbox is hidden there); shown only ≤640px below. */
+/* P6-5: select-all-on-page for the phone card layout (the header checkbox is hidden there); shown only ≤640px (see the phone block at the end). */
 .sel-page-m { display: none; align-items: center; gap: 10px; font-size: var(--fs-sm); font-weight: 600; padding: 4px 12px; min-height: 36px; cursor: pointer; }
 .sel-page-m input { width: 16px; height: 16px; accent-color: var(--accent); }
 .co-field { max-width: 420px; }
@@ -449,32 +434,8 @@ main { padding-block: 24px 120px; }
 .ci-panel ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: var(--fs-sm); }
 .ci-panel h4 { overflow-wrap: anywhere; }
 .ci-panel .grid select { min-width: 0; max-width: 100%; }
-@media (max-width: 640px) { .ci-panel .grid th, .ci-panel .grid td { padding: 6px 4px; } .ci-panel .grid .c-row { display: none; } }
-@media (max-width: 640px) {
-  /* Transactions grid → one card per row on phones */
-  .grid.txg thead { display: none; }
-  .grid.txg, .grid.txg tbody { display: block; }
-  .grid.txg tr { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 4px 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-  .grid.txg tbody tr:last-child { border-bottom: 0; }
-  .grid.txg td { border: 0; padding: 0; min-width: 0; max-width: none; }
-  .grid.txg .c-sel { grid-row: 1 / span 2; }
-  .grid.txg .c-date { grid-column: 2; }
-  .grid.txg td.money { grid-column: 3; grid-row: 1; }
-  .grid.txg .src-c { grid-column: 2 / -1; }
-  .grid.txg td.desc, .grid.txg .c-acct, .grid.txg .c-st { grid-column: 2 / -1; }
-  .grid.txg select { max-width: none; }
-  .sel-page-m { display: flex; }
-}
 
 /* Phone touch targets (U-F, D68): 44px hit areas; the visible glyphs keep their size */
-@media (max-width: 640px) {
-  .icon-btn { width: 44px; height: 44px; }
-  .btn-sm { min-height: 44px; }
-  .switch { min-height: 44px; }
-  .sel-page-m { min-height: 44px; }
-  .grid.txg .c-sel { align-self: center; }
-  .grid.txg .c-sel .tap { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -11px; cursor: pointer; }
-}
 
 /* Categorize suggestions (P14-4, D86): a list, not a table, so it holds at 375px */
 .cz-wrap { display: grid; gap: 12px; padding: 16px; }
@@ -501,21 +462,12 @@ main { padding-block: 24px 120px; }
 .czf-rules { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 4px; }
 .czf-rules legend { font-size: var(--fs-sm); font-weight: 600; padding: 0; margin-bottom: 4px; }
 .czf-rules .cz-item, .czf-rules li { padding: 4px 0; }
-@media (max-width: 640px) {
-  .cz-wrap { padding: 16px 12px; }
-  .cz-pick, .cz-rule { min-height: 44px; align-items: center; }
-  .cz-pick input, .cz-rule input { margin: 0; }
-  .cz-ev, .cz-ctl, .cz-ex { padding-left: 0; }
-  .cz-ctl .field { max-width: none; }
-  .cz-ctl select { min-height: 44px; }
-  .cz-ex summary { min-height: 44px; display: flex; align-items: center; }
-}
 
 /* Toast */
 .toast {
   position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--bar-h, 72px) + 8px); z-index: 20;
   display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; border-radius: var(--r);
-  background: var(--fg); color: var(--bg); font-size: var(--fs-sm); box-shadow: 0 4px 16px rgba(0,0,0,.2);
+  background: var(--fg); color: var(--bg); font-size: var(--fs-sm); box-shadow: var(--shadow-toast);
   max-width: calc(100% - 32px);
 }
 .toast button { background: none; border: 0; color: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 4px; }
@@ -528,6 +480,45 @@ main { padding-block: 24px 120px; }
 }
 
 @media (max-width: 640px) {
+  /* what you get: the drop zone stays on the first screen */
+  .points { grid-template-columns: minmax(0, 1fr); gap: 12px; order: 1; }
+  /* export / chart-of-accounts tables */
+  .stats.even > div:last-child { grid-column: auto; }
+  .grid .c-type { display: none; }
+  #export-tb .grid { font-size: var(--fs-xs); }
+  #export-tb .grid th, #export-tb .grid td { padding: 6px 4px; }
+  #export-tb .tab-body { padding: 12px 8px; }
+  .ci-panel .grid th, .ci-panel .grid td { padding: 6px 4px; }
+  .ci-panel .grid .c-row { display: none; }
+  /* Transactions grid → one card per row on phones */
+  .grid.txg thead { display: none; }
+  .grid.txg, .grid.txg tbody { display: block; }
+  .grid.txg tr { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 4px 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .grid.txg tbody tr:last-child { border-bottom: 0; }
+  .grid.txg td { border: 0; padding: 0; min-width: 0; max-width: none; }
+  .grid.txg .c-sel { grid-row: 1 / span 2; }
+  .grid.txg .c-date { grid-column: 2; }
+  .grid.txg td.money { grid-column: 3; grid-row: 1; }
+  .grid.txg .src-c { grid-column: 2 / -1; }
+  .grid.txg td.desc, .grid.txg .c-acct, .grid.txg .c-st { grid-column: 2 / -1; }
+  .grid.txg select { max-width: none; }
+  .sel-page-m { display: flex; }
+  /* Phone touch targets (U-F, D68): 44px hit areas; the visible glyphs keep their size */
+  .icon-btn { width: 44px; height: 44px; }
+  .btn-sm { min-height: 44px; }
+  .switch { min-height: 44px; }
+  .sel-page-m { min-height: 44px; }
+  .grid.txg .c-sel { align-self: center; }
+  .grid.txg .c-sel .tap { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: -11px; cursor: pointer; }
+  /* Categorize suggestions */
+  .cz-wrap { padding: 16px 12px; }
+  .cz-pick, .cz-rule { min-height: 44px; align-items: center; }
+  .cz-pick input, .cz-rule input { margin: 0; }
+  .cz-ev, .cz-ctl, .cz-ex { padding-left: 0; }
+  .cz-ctl .field { max-width: none; }
+  .cz-ctl select { min-height: 44px; }
+  .cz-ex summary { min-height: 44px; display: flex; align-items: center; }
+  /* stepper, action bar, panel chrome */
   .stepper { gap: 0; padding-block: 12px 6px; }
   .step-text { display: none; }
   .step-btn { justify-content: center; padding: 4px 0; }
@@ -557,6 +548,7 @@ main { padding-block: 24px 120px; }
       <span class="privacy" title="Files are read in this browser tab. Nothing is uploaded to a server.">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
         Your files stay in this browser
+        <span class="sr-only">. Files are read in this browser tab. Nothing is uploaded to a server.</span>
       </span>
       <button class="btn btn-sm" type="button" id="btn-help" aria-haspopup="dialog">How it works</button>
     </div>
@@ -605,7 +597,7 @@ main { padding-block: 24px 120px; }
 
 <main class="wrap" id="main">
   <!-- Step 1: Upload -->
-  <section class="panel" id="panel-upload" data-step="upload" aria-labelledby="h-upload">
+  <section class="panel" data-step="upload" aria-labelledby="h-upload">
     <div class="panel-head">
       <h2 id="h-upload" tabindex="-1">Turn your statements into books</h2>
       <p>Add bank and credit-card statements as PDF, CSV or Excel files. You get one Excel workbook with a general ledger, trial balance, income statement, balance sheet and Schedule C.</p>
@@ -628,7 +620,7 @@ main { padding-block: 24px 120px; }
       </div>
     </div>
     <div class="notices" id="notices" aria-live="polite"></div>
-    <div class="card" id="source-list">
+    <div class="card">
       <div class="list-head"><h3>Statements</h3><span class="num" id="source-count">0 files</span></div>
       <div class="empty" id="source-empty">
         <strong>No statements yet</strong>
@@ -639,7 +631,7 @@ main { padding-block: 24px 120px; }
   </section>
 
   <!-- Step 2: Map -->
-  <section class="panel" id="panel-map" data-step="map" aria-labelledby="h-map" hidden>
+  <section class="panel" data-step="map" aria-labelledby="h-map" hidden>
     <div class="panel-head">
       <h2 id="h-map" tabindex="-1">Map columns and check balances</h2>
       <p>Confirm which column holds the date, description, and amount for each file. Enter the opening balance so each account can be reconciled to its statement.</p>
@@ -698,10 +690,12 @@ main { padding-block: 24px 120px; }
 (() => {
   'use strict';
   if (!document.documentElement.lang) document.documentElement.lang = 'en';   // the host wrapper has no lang (P5-4)
-  const APP_VERSION = '2.0.2';   // P10-2: footer, and the Overview sheet (P10-5)
+  const APP_VERSION = '2.0.3';   // P10-2: footer, and the Overview sheet (P10-5)
   document.getElementById('app-ver').textContent = 'v' + APP_VERSION;
 
   // ---------- App state (money in integer cents throughout) ----------
+  const STB_TEST = /[?&]stb-test\b/.test(location.search);   // the ?stb-test page: test hooks and their counters (D38)
+  let catPlanRuns = 0;   // test-only count of catPlan() runs (P17-3, S8)
   const state = {
     step: 'upload',
     sources: [],   // Source objects (SPEC §2); populated from P1-2
@@ -848,6 +842,9 @@ main { padding-block: 24px 120px; }
   const fmtSize = b => b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`;
   const MAX_BYTES = 50 * 1048576;
   let seq = 0, noticeSeq = 0;
+  // Shared limits (S10): header-candidate rows, content-sample rows, longest account/category name, longest statement name,
+  // days before a balance counts as stale, Excel date-serial range 1990-01-01 .. 2099-12-31 (max exclusive).
+  const HEADER_SCAN_ROWS = 30, SAMPLE_ROWS = 200, NAME_MAX = 100, SRC_NAME_MAX = 60, STALE_DAYS = 31, SERIAL_MIN = 32874, SERIAL_MAX = 73051;
 
   // Kind from magic bytes first, extension second. Returns { kind, note } or { error }.
   async function detectKind(file) {
@@ -859,7 +856,6 @@ main { padding-block: 24px 120px; }
     const isPdf = head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46;       // %PDF
     const isZip = head[0] === 0x50 && head[1] === 0x4B && head[2] === 0x03 && head[3] === 0x04;       // PK..
     const isOle = head[0] === 0xD0 && head[1] === 0xCF && head[2] === 0x11 && head[3] === 0xE0;       // legacy .xls
-    const known = ['csv', 'tsv', 'txt', 'xlsx', 'xls', 'pdf'];
     if (isPdf) return { kind: 'pdf', note: ext !== 'pdf' ? `Named .${ext} but it is a PDF.` : '' };
     if (isZip) {
       if (ext === 'xlsx' || ext === 'xlsm') return { kind: 'xlsx', note: '' };
@@ -871,8 +867,7 @@ main { padding-block: 24px 120px; }
     if (ext === 'xlsx') return { error: 'The file is named .xlsx but is not a valid Excel workbook.' };
     if (ext === 'xls') return { kind: 'xls', note: 'Not a true Excel file (many banks export text as .xls). It will be read as a table.' };
     if (ext === 'csv' || ext === 'tsv' || ext === 'txt') return { kind: 'csv', note: '' };
-    if (!known.includes(ext)) return { error: `.${ext || 'unknown'} files aren't supported. Use CSV, XLSX, XLS, or PDF.` };
-    return { error: 'Unrecognized file.' };
+    return { error: `.${ext || 'unknown'} files aren't supported. Use CSV, XLSX, XLS, or PDF.` };
   }
 
   // Name + type guess from the file name. The user can override both.
@@ -880,7 +875,7 @@ main { padding-block: 24px 120px; }
   const CARD_HINT = { test: n => /\b(amex|american express|visa|mastercard|master card|discover|credit ?card)\b/i.test(n) || (/\bcard\b/i.test(n) && !/\b(debit|atm|check|checking|bank)\s*card\b/i.test(n)) };
   function defaultName(fileName) {
     const base = fileName.replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
-    return (base || 'Statement').slice(0, 60);
+    return (base || 'Statement').slice(0, SRC_NAME_MAX);
   }
 
   function makeSource(file, kind, note) {
@@ -896,7 +891,7 @@ main { padding-block: 24px 120px; }
       status: 'reading', error: '',        // reading | ready | error | unsupported
       map: null, mapNotes: [], mapErrors: [],
       grid: null, rowNo: null, rowCount: 0, colCount: 0, // raw cells: string | number; ISO 'YYYY-MM-DD' for Excel date cells
-      sheets: [], sheetName: null, wb: null,
+      sheets: [], sheetName: null, hasWb: false,
       obEntered: null, ebEntered: null, balAuto: false, balNote: '',  // balances as the statement prints them (card: amount owed)
     };
   }
@@ -951,7 +946,7 @@ main { padding-block: 24px 120px; }
       <div class="src-kind" data-kind="${s.kind}" aria-hidden="true">${s.kind.toUpperCase()}</div>
       <div class="src-main">
         <label class="sr-only" for="name-${s.id}">Account name for ${esc(s.fileName)}</label>
-        <input class="src-name" id="name-${s.id}" type="text" value="${esc(s.name)}" maxlength="60" data-field="name" spellcheck="false">
+        <input class="src-name" id="name-${s.id}" type="text" value="${esc(s.name)}" maxlength="${SRC_NAME_MAX}" data-field="name" spellcheck="false">
         <div class="src-meta"><span class="mono">${esc(s.fileName)}</span> · <span class="num">${fmtSize(s.size)}</span>${
           s.parseWarnings.map(w => ` · <span class="warn">${esc(w)}</span>`).join('')}</div>
         <div class="src-status" id="status-${s.id}" aria-live="polite">${statusHtml(s)}</div>
@@ -979,21 +974,26 @@ main { padding-block: 24px 120px; }
     xlsx: { url: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js', global: 'XLSX', sri: 'sha256-yVBhl8r4CaB1tt7h2g02+xnacVj/6KiOewyWxdhiPJk=' },
     exceljs: { url: 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js', global: 'ExcelJS', sri: 'sha256-fknaaFiOJQ27i7oZDSyqirN4fMAoS9odiy+AXE33Qsk=' },   // P4: workbook writer
   };
-  const libPromises = {};
+  // One load per library: the first call starts it, later calls share it, a failure is forgotten so the next call retries (P17-4).
+  const loadCache = {};
+  function loadOnce(key, start) {
+    if (!loadCache[key]) loadCache[key] = start().catch(err => { delete loadCache[key]; throw err; });
+    return loadCache[key];
+  }
   function loadLib(key) {
     const lib = LIBS[key];
     if (window[lib.global]) return Promise.resolve(window[lib.global]);
-    if (!libPromises[key]) {
-      libPromises[key] = new Promise((resolve, reject) => {
-        const el = document.createElement('script');
-        el.src = lib.url; el.async = true; el.integrity = lib.sri; el.crossOrigin = 'anonymous';
-        el.onload = () => window[lib.global] ? resolve(window[lib.global]) : reject(new Error('missing global'));
-        el.onerror = () => { delete libPromises[key]; el.remove(); reject(new Error('load failed')); };
-        document.head.appendChild(el);
-      });
-    }
-    return libPromises[key];
+    return loadOnce(key, () => new Promise((resolve, reject) => {
+      const el = document.createElement('script');
+      el.src = lib.url; el.async = true; el.integrity = lib.sri; el.crossOrigin = 'anonymous';
+      el.onload = () => window[lib.global] ? resolve(window[lib.global]) : reject(new Error('missing global'));
+      el.onerror = () => { el.remove(); reject(new Error('load failed')); };
+      document.head.appendChild(el);
+    }));
   }
+  // A reader (CSV, Excel, PDF) that did not load: one message for all of them.
+  const READER_NAME = { papa: 'CSV', xlsx: 'Excel', pdf: 'PDF' };
+  const loadReader = key => (key === 'pdf' ? loadPdfjs() : loadLib(key)).catch(() => { throw new Error(`The ${READER_NAME[key]} reader did not load. Check your connection and reload the page.`); });
 
   // Bytes → text. Handles UTF-8 (with/without BOM), UTF-16 LE/BE (Excel "Unicode text"), else Windows-1252.
   function decodeText(buf) {
@@ -1021,13 +1021,16 @@ main { padding-block: 24px 120px; }
     return { grid: out, rowNo, rowCount: out.length, colCount: width };
   }
 
-  async function parseCsv(src) {
-    const Papa = await loadLib('papa').catch(() => { throw new Error('The CSV reader did not load. Check your connection and reload the page.'); });
-    const text = decodeText(await src.file.arrayBuffer());
-    // Guess the delimiter on a blank-line-free preview (blank lines skew Papa's guess), then parse everything
-    // with blank lines kept so tidyGrid can record original row numbers.
+  // Guess the delimiter on a blank-line-free preview (blank lines skew Papa's guess), then parse everything
+  // with blank lines kept so tidyGrid can record original row numbers. -> Papa's result ({ data, errors }).
+  function csvGrid(Papa, text) {
     const guess = Papa.parse(text, { preview: 100, skipEmptyLines: 'greedy', delimitersToGuess: [',', '\t', ';', '|'] });
-    const res = Papa.parse(text, { skipEmptyLines: false, delimiter: guess.meta.delimiter || ',' });
+    return Papa.parse(text, { skipEmptyLines: false, delimiter: guess.meta.delimiter || ',' });
+  }
+  async function parseCsv(src) {
+    const Papa = await loadReader('papa');
+    const text = decodeText(await src.file.arrayBuffer());
+    const res = csvGrid(Papa, text);
     if (res.errors.some(e => e.code === 'MissingQuotes')) src.parseWarnings.push('Unclosed quote found; some rows may be merged.');
     return tidyGrid(res.data);
   }
@@ -1060,22 +1063,27 @@ main { padding-block: 24px 120px; }
     }
     return rows;
   }
-  async function parseWorkbook(src) {
-    const XLSX = await loadLib('xlsx').catch(() => { throw new Error('The Excel reader did not load. Check your connection and reload the page.'); });
-    const buf = await src.file.arrayBuffer();
+  // Open a workbook and tidy every sheet. openErr is the text when it cannot be opened. -> [{ name, rows, cols, tidy }]
+  function workbookSheets(XLSX, buf, openErr) {
     let wb;
     try { wb = XLSX.read(buf, { type: 'array', cellNF: true, raw: true, dense: false }); }
-    catch (_) { throw new Error('This workbook could not be opened. It may be password-protected or damaged. Save it again from Excel, or export a CSV.'); }
+    catch (_) { throw new Error(openErr); }
     const date1904 = !!(wb.Workbook && wb.Workbook.WBProps && wb.Workbook.WBProps.date1904);
-    src.wb = { XLSX, wb, date1904 };
-    src.sheets = wb.SheetNames.map(name => {
+    return wb.SheetNames.map(name => {
       const ws = wb.Sheets[name];
       const r0 = ws && ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']).s.r + 1 : 1;
       const t = tidyGrid(sheetGrid(XLSX, ws, date1904), r0);
       return { name, rows: t.rowCount, cols: t.colCount, tidy: t };
     });
-    // Default: the first sheet that looks like a table (2+ rows); else the first sheet.
-    const pick = src.sheets.find(sh => sh.rows >= 2) || src.sheets[0];
+  }
+  // Default sheet: the first one that looks like a table (2+ rows); else the first sheet.
+  const pickSheet = sheets => sheets.find(sh => sh.rows >= 2) || sheets[0];
+  async function parseWorkbook(src) {
+    const XLSX = await loadReader('xlsx');
+    const buf = await src.file.arrayBuffer();
+    src.sheets = workbookSheets(XLSX, buf, 'This workbook could not be opened. It may be password-protected or damaged. Save it again from Excel, or export a CSV.');
+    src.hasWb = true;
+    const pick = pickSheet(src.sheets);
     if (!pick) throw new Error('The workbook has no sheets.');
     return useSheet(src, pick.name);
   }
@@ -1129,7 +1137,7 @@ main { padding-block: 24px 120px; }
   const RE_TIME = /[ T]\d{1,2}:\d{2}(:\d{2}(\.\d+)?)?\s*([AP]M)?\s*(Z|[+-]\d{2}:?\d{2})?$/i;   // "10:15", "9:02 PM", "T10:15:00Z"
   const RE_DATE = [
     /^\d{4}[/-]\d{1,2}[/-]\d{1,2}$/,                             // 2024-06-03, 2024/06/03
-    /^\d{1,2}[\/\-]\d{1,2}([\/\-]\d{2,4})?\*?$/,                 // 06/03/24, 06/03, 01/13/2026*
+    /^\d{1,2}[/-]\d{1,2}([/-]\d{2,4})?\*?$/,                 // 06/03/24, 06/03, 01/13/2026*
     /^\d{1,2}\.\d{1,2}\.\d{2,4}$/,                                // 02.01.2026 (dotted needs a year, else 9.02 reads as a date)
     /^[A-Za-z]{3,9}\.? \d{1,2}(st|nd|rd|th)?(,? \d{4})?\*?$/,     // Jul 8, Jul 8th, Jan 5, 2026
     /^\d{1,2} [A-Za-z]{3,9}\.?(,? \d{4})?$/,                      // 8 Jul, 8 Jul 2024
@@ -1138,7 +1146,7 @@ main { padding-block: 24px 120px; }
   // P6-12 / N2: an Excel date left in General format (45322 = 2024-01-31) arrives as a number. A serial is a whole day between
   // 1990-01-01 and 2099-12-31; `loose` also allows a time-of-day fraction. Only the date-COLUMN checks use these (autoMap,
   // validateMap); buildTxns already read any workbook number through parseDate.
-  const isSerial = (v, loose = false) => typeof v === 'number' && isFinite(v) && v >= 32874 && v < 73051 && (loose || Number.isInteger(v));
+  const isSerial = (v, loose = false) => typeof v === 'number' && isFinite(v) && v >= SERIAL_MIN && v < SERIAL_MAX && (loose || Number.isInteger(v));
   const dateOrSerial = v => looksDate(v) || isSerial(v, true);
   // Content guess for a column with no date header (used only after no column of text dates was found): whole-day serials,
   // and only if the column spans at most 10 years, so a column of whole-dollar amounts, balances or IDs is not mistaken for dates.
@@ -1180,9 +1188,9 @@ main { padding-block: 24px 120px; }
   const DESC_RANK = [/\b(description|desc)\b/, /\b(payee|merchant|name)\b/, /\b(memo|details?|narrative|particulars)\b/, /\btransaction\b/];
   const HEADER_WORDS = /\b(date|posted|description|memo|payee|details?|amount|debits?|credits?|withdrawals?|deposits?|balance|merchant|reference|type|category|check|name|narrative)\b/;
 
-  // Score each of the first 30 rows as a header candidate.
+  // Score each of the first HEADER_SCAN_ROWS rows as a header candidate.
   function detectHeader(grid) {
-    const limit = Math.min(grid.length, 30);
+    const limit = Math.min(grid.length, HEADER_SCAN_ROWS);
     let best = { idx: -1, score: 0 };
     for (let i = 0; i < limit; i++) {
       const row = grid[i];
@@ -1233,7 +1241,7 @@ main { padding-block: 24px 120px; }
     const grid = src.grid, notes = [];
     const header = detectHeaderOverride ?? detectHeader(grid);
     const m = { header, date: null, transDate: null, desc: null, mode: 'single', amount: null, debit: null, credit: null, balance: null, category: null };   // category: P14-5 (D87)
-    const rows = grid.slice(header + 1, header + 1 + 200);   // sample for content checks
+    const rows = grid.slice(header + 1, header + 1 + SAMPLE_ROWS);   // sample for content checks
     const cols = [...Array(src.colCount).keys()];
 
     if (header >= 0) {
@@ -1401,6 +1409,7 @@ main { padding-block: 24px 120px; }
   const MONTH_NAMES = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
   const monthNo = w => { const k = w.toLowerCase().replace(/\.$/, ''); return k.length < 3 ? 0 : MONTH_NAMES.findIndex(n => n.startsWith(k)) + 1; };
   const iso = (y, m, d) => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  const dayNo = d => Math.round(Date.parse(d + 'T00:00:00Z') / 86400000);
   function validYmd(y, m, d) {
     if (!(y >= 1900 && y <= 2100 && m >= 1 && m <= 12 && d >= 1)) return false;
     const dim = [31, (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1];
@@ -1423,13 +1432,13 @@ main { padding-block: 24px 120px; }
       if (!ctx.year) return { error: `"${v}" has no year and none could be inferred from the other rows. Enter the statement year above.`, noYear: true };
       return null;
     };
-    if ((m = t.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/))) { y = +m[1]; mo = +m[2]; d = +m[3]; }
-    else if ((m = t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2}|\d{4})$/))) {
+    if ((m = t.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/))) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+    else if ((m = t.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2}|\d{4})$/))) {
       mo = +m[1]; d = +m[2]; y = +m[3]; if (m[3].length === 2) y += y < 70 ? 2000 : 1900;
     }
     else if (/^\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(t))
       return { error: `"${v}" is in the European date format, which isn't supported. Export the file with US dates (MM/DD/YYYY).` };
-    else if ((m = t.match(/^(\d{1,2})[\/-](\d{1,2})$/))) { const e = needYear(); if (e) return e; mo = +m[1]; d = +m[2]; y = ctx.year; }
+    else if ((m = t.match(/^(\d{1,2})[/-](\d{1,2})$/))) { const e = needYear(); if (e) return e; mo = +m[1]; d = +m[2]; y = ctx.year; }
     else if ((m = t.match(/^([A-Za-z]{3,9})\.? (\d{1,2})(?:st|nd|rd|th)?(?:,? (\d{4}))?$/))) {
       mo = monthNo(m[1]); d = +m[2];
       if (m[3]) y = +m[3]; else { const e = needYear(); if (e) return e; y = ctx.year; }
@@ -1441,20 +1450,6 @@ main { padding-block: 24px 120px; }
     else return { error: `"${v}" isn't a date.` };
     if (!mo || !validYmd(y, mo, d)) return { error: `"${v}" isn't a real date.` };
     return { iso: iso(y, mo, d) };
-  }
-
-  // Most common 4-digit year among a column's full dates (for "Jul 8" / "06/03" rows).
-  function inferYear(values) {
-    const count = {};
-    for (const v of values) {
-      if (typeof v !== 'string') continue;
-      const m = v.match(/\b(19|20)\d{2}\b/) || v.match(/^\d{1,2}[\/-]\d{1,2}[\/-](\d{2})$/);
-      if (!m) continue;
-      const y = m[0].length === 4 ? +m[0] : 2000 + +m[1];
-      count[y] = (count[y] || 0) + 1;
-    }
-    const best = Object.entries(count).sort((a, b) => b[1] - a[1])[0];
-    return best ? +best[0] : null;
   }
 
   // cents → "1,234.56" / "(1,234.56)" (matches the workbook format).
@@ -1473,11 +1468,13 @@ main { padding-block: 24px 120px; }
     const body = g.slice(m.header + 1);
     // Year-less dates ("12/30"): take the year that lands closest to the rows that do print a year, so a
     // Dec→Jan statement wraps correctly (P5-1 M1). With no full dates at all, the user enters the statement year (M2).
+    const plain = new Map();   // parseDate(v) once per distinct cell (P17-3, S8): read twice below, never changed
+    const parsePlain = v => { let d = plain.get(v); if (!d) plain.set(v, d = parseDate(v)); return d; };
     let fullMin = null, fullMax = null, yearless = 0;
     for (const r of body) {
       const v = r[m.date];
       if (!(looksDate(v) || (typeof v === 'number' && src.kind !== 'csv'))) continue;
-      const d = parseDate(v);
+      const d = parsePlain(v);
       if (d.iso) { if (!fullMin || d.iso < fullMin) fullMin = d.iso; if (!fullMax || d.iso > fullMax) fullMax = d.iso; }
       else if (d.noYear) yearless++;
     }
@@ -1488,7 +1485,7 @@ main { padding-block: 24px 120px; }
       wrapYear = [...months].some(x => x >= 11) && [...months].some(x => x >= 1 && x <= 2);
     }
     const dateOf = v => {
-      const d = parseDate(v);
+      const d = parsePlain(v);
       if (!d.noYear) return d;
       if (fullMax) {
         const Y = +fullMax.slice(0, 4), lo = dayNo(fullMin), hi = dayNo(fullMax);
@@ -1539,7 +1536,7 @@ main { padding-block: 24px 120px; }
       let balanceCents = null;
       if (m.balance != null) { const b = parseMoney(r[m.balance]); if (b.cents != null) balanceCents = b.cents; }
       const desc = String(r[m.desc] ?? '').replace(/\s+/g, ' ').trim() || '(no description)';
-      const fileCat = m.category != null ? String(r[m.category] ?? '').replace(/\s+/g, ' ').trim().slice(0, 100) : '';   // P14-5 (D87)
+      const fileCat = m.category != null ? String(r[m.category] ?? '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX) : '';   // P14-5 (D87)
       src.txns.push({ id: `${src.id}-${++seq}`, sourceId: src.id, date: d.iso, description: desc, amountCents: cents,
         balanceCents, rowNo: src.rowNo[i], offsetAccountNo: null, ruleId: null, transferPairId: null, fileCat });
     }
@@ -1550,20 +1547,16 @@ main { padding-block: 24px 120px; }
   // pdf.js v4 ships only as an ES module, so it is loaded with import() (D25). The worker is set by URL:
   // pdf.js wraps a cross-origin worker in a blob and, if the frame blocks that, runs it on the main thread.
   const PDFJS_BASE = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/';
-  let pdfjsPromise = null;
   function loadPdfjs() {
-    if (!pdfjsPromise) {
-      pdfjsPromise = import(PDFJS_BASE + 'pdf.min.mjs').then(lib => {
-        lib.GlobalWorkerOptions.workerSrc = PDFJS_BASE + 'pdf.worker.min.mjs';
-        return lib;
-      }).catch(err => { pdfjsPromise = null; throw err; });
-    }
-    return pdfjsPromise;
+    return loadOnce('pdfjs', () => import(PDFJS_BASE + 'pdf.min.mjs').then(lib => {
+      lib.GlobalWorkerOptions.workerSrc = PDFJS_BASE + 'pdf.worker.min.mjs';
+      return lib;
+    }));
   }
 
   // P2-1: text items → lines. Items within 2pt of a line's y join it; items close in x merge into one cell.
   async function pdfLines(data) {
-    const pdfjs = await loadPdfjs().catch(() => { throw new Error('The PDF reader did not load. Check your connection and reload the page.'); });
+    const pdfjs = await loadReader('pdf');
     let doc;
     try { doc = await pdfjs.getDocument({ data, isEvalSupported: false }).promise; }
     catch (err) {
@@ -1615,6 +1608,12 @@ main { padding-block: 24px 120px; }
   const RE_LEAD_DATE = new RegExp(`^(\\d{1,2}/\\d{1,2}(?:/\\d{2}(?:\\d{2})?)?\\*?|${MON_RE} \\d{1,2}(?:, \\d{4})?\\*?)\\s+(.+)$`, 'i');
   const isPdfDate = t => RE_PDF_DATE.test(t);
   const RE_CHECK_NO = /^#?\d{1,8}\*?$/;
+  // Per-row patterns, built once (none has the g flag, so .test/.match keep no state).
+  const RE_CARD_ENDING = /^card ending\b/i, RE_CR = /CR$/i, RE_DR = /DR$/i, RE_CR_OR_DR = /(CR|DR)$/i, RE_EXPLICIT_SIGN = /^[=\s]*[-+(]|[-)]$|(CR|DR)$/i;
+  const RE_BAL_LABEL_AMT = /^(.*?balance(?:\s+(?:on|as of)\s+.+?)?)\s+(\S*\$?[\d,]+\.\d{2}\S*)$/i;
+  const RE_CYCLE = /[A-Z][a-z]{2,8}\.?\s+\d{1,2},?\s+\d{4}\s*[-–]\s*([A-Z][a-z]{2,8}\.?\s+\d{1,2},?\s+\d{4})/;
+  const RE_CHK_NO_FIRST = /^(#?\d{1,8}\*?)\s+(\S+)$/, RE_CHK_NO_LAST = /^(\S+)\s+(#?\d{1,8}\*?)$/;
+  const RE_PERIOD_END = /\b(?:closing date|statement ending|statement date|period ending)\s*:?\s*(\d{1,2}\/\d{1,2}\/\d{2,4}|[A-Za-z]{3,9}\.? \d{1,2},? \d{4})/i;
 
   // Section headers (SPEC §3.2). sign is in book terms: + = money in through this account, − = money out.
   const PDF_SECTIONS = new Map([
@@ -1647,28 +1646,26 @@ main { padding-block: 24px 120px; }
     for (let i = 0; i < line.cells.length; i++) {
       let c = line.cells[i], m = c.match(re), money = line.cells[i + 1];
       if (!m) {                                            // label and amount in one cell
-        const k = c.match(/^(.*?balance(?:\s+(?:on|as of)\s+.+?)?)\s+(\S*\$?[\d,]+\.\d{2}\S*)$/i);
+        const k = c.match(RE_BAL_LABEL_AMT);
         if (k && (m = k[1].match(re)) && isPdfMoney(k[2])) money = k[2]; else continue;
       }
       if (!money || !isPdfMoney(money)) continue;
       const v = parseMoney(money);
       if (v.cents == null) continue;
       const dateText = m[2] || (c.match(/^(\d{1,2}\/\d{1,2}\/\d{2,4})\s/) || [])[1] || (i > 0 && isPdfDate(line.cells[i - 1]) ? line.cells[i - 1] : null);
-      return { cents: v.cents, cr: /CR$/i.test(money.trim()), dateText };
+      return { cents: v.cents, cr: RE_CR.test(money.trim()), dateText };
     }
     return null;
   }
 
   // Statement period for dates printed without a year ("Jul 8", "06/01").
   function statementPeriod(lines) {
-    const D = `(${MON_RE} \\d{1,2},? \\d{4}|\\d{1,2}/\\d{1,2}/\\d{2,4})`;
-    const range = new RegExp(`${D}\\s*(?:-|–|to|through)\\s*${D}`, 'i');
     for (const l of lines.slice(0, 400)) {
-      const m = l.text.match(range);
+      const m = l.text.match(RE_RANGE);
       if (m) { const a = parseDate(m[1].replace(',', '').replace(/(\d)\s(\d{4})$/, '$1, $2')), b = parseDate(m[2].replace(/(\d),? (\d{4})$/, '$1, $2')); if (a.iso && b.iso) return { start: a.iso, end: b.iso }; }
     }
     for (const l of lines.slice(0, 400)) {
-      const m = l.text.match(/\b(?:closing date|statement ending|statement date|period ending)\s*:?\s*(\d{1,2}\/\d{1,2}\/\d{2,4}|[A-Za-z]{3,9}\.? \d{1,2},? \d{4})/i);
+      const m = l.text.match(RE_PERIOD_END);
       if (m) { const b = parseDate(m[1].replace(/(\d),? (\d{4})$/, '$1, $2')); if (b.iso) return { start: null, end: b.iso }; }
     }
     return null;
@@ -1699,7 +1696,8 @@ main { padding-block: 24px 120px; }
     const ctx = { end: per && per.end, year: +(Object.entries(years).sort((a, b) => b[1] - a[1])[0] || [0])[0] || null };
     const periods = [], raws = [], warnings = [];
     // With recognized transaction sections, dated lines outside them are summaries; without any, read every dated line.
-    const hasSections = lines.some(l => { const k = sectionOf(l); return k && k.kind !== 'x'; });
+    const secOf = new Map(lines.map(l => [l, sectionOf(l)]));   // once per line (P17-3, S8)
+    const hasSections = lines.some(l => { const k = secOf.get(l); return k && k.kind !== 'x'; });
     let cur = null, section = null, last = null, pending = null;
     // P10-3: card statements name the cardholder above each card's block ("NAME" over "Card Ending 1-23456", AMEX) or as a
     // header prefix ("NAME #1234: Transactions", Capital One). The name and card go to txn.cardholder; a leading copy of a
@@ -1711,7 +1709,7 @@ main { padding-block: 24px 120px; }
     for (let i = 0; i + 1 < lines.length; i++) {
       const l = lines[i], t = l.text.trim(), m = t.match(RE_HOLDER_PREFIX);
       if (m) holderNames.add(m[1].trim());
-      else if (/^card ending\b/i.test(lines[i + 1].text.trim()) && l.cells.length === 1 && !isPdfMoney(t) && !RE_LEAD_DATE.test(t) && !isPdfDate(t) && /[a-z]/i.test(t)) holderNames.add(t);
+      else if (RE_CARD_ENDING.test(lines[i + 1].text.trim()) && l.cells.length === 1 && !isPdfMoney(t) && !RE_LEAD_DATE.test(t) && !isPdfDate(t) && /[a-z]/i.test(t)) holderNames.add(t);
     }
     const namesLongFirst = [...holderNames].sort((a, b) => b.length - a.length);
     const splitHolder = d => {
@@ -1731,8 +1729,8 @@ main { padding-block: 24px 120px; }
       const clean = desc.replace(/\s+/g, ' ').trim(), lead = splitHolder(clean);
       const r = {
         page: l.page, period: (cur || newPeriod()).idx, date, description: desc.replace(/\s+/g, ' ').trim() || '(no description)',
-        printed: Math.abs(v.cents), crdr: /CR$/i.test(tok) ? 1 : /DR$/i.test(tok) ? -1 : 0,
-        neg: v.cents < 0 && !/(CR|DR)$/i.test(tok), explicit: /^[=\s]*[-+(]|[-)]$|(CR|DR)$/i.test(tok),
+        printed: Math.abs(v.cents), crdr: RE_CR.test(tok) ? 1 : RE_DR.test(tok) ? -1 : 0,
+        neg: v.cents < 0 && !RE_CR_OR_DR.test(tok), explicit: RE_EXPLICIT_SIGN.test(tok),
         sectionSign: typeof (section && section.kind) === 'number' ? section.kind : 0, section: section ? section.name : '',
         balanceCents: balTok ? (parseMoney(balTok).cents ?? null) : null, line: l.text, y: l.y, cont: 0,
         desc: (lead ? lead.rest : clean) || clean || '(no description)', memo: [], cardholder: holder || (lead ? lead.name : ''), ...extra,
@@ -1746,7 +1744,7 @@ main { padding-block: 24px 120px; }
       if (last && l.page !== last.page) last = null;
       // P2-3: opening / ending balance lines start or fill a period.
       // P13-4: a card statement prints its cycle as "Jun 23, 2024 - Jul 23, 2024" and no date on the closing balance: that end is its date.
-      const cyc = l.text.match(/[A-Z][a-z]{2,8}\.?\s+\d{1,2},?\s+\d{4}\s*[-–]\s*([A-Z][a-z]{2,8}\.?\s+\d{1,2},?\s+\d{4})/);
+      const cyc = l.text.match(RE_CYCLE);
       if (cyc) { const d = pdfDate(cyc[1], ctx).iso; if (d) cycleEnds.set(l.page, d); }
       const ob = balanceOf(l, RE_OB), eb = !ob && balanceOf(l, RE_EB);
       if (ob) {
@@ -1762,7 +1760,7 @@ main { padding-block: 24px 120px; }
       // P2-2b: section headers set the sign and the exclusion zones.
       const hm = l.text.trim().match(RE_HOLDER_PREFIX);
       if (hm) holder = holderLabel(hm[1].trim(), hm[2]);
-      const sec = sectionOf(l);
+      const sec = secOf.get(l);
       if (sec) {
         if (pending) { warn(pending.line, 'A dated line had no amount within 3 lines and was skipped.'); pending = null; }
         section = sec; last = null; continue;
@@ -1773,9 +1771,9 @@ main { padding-block: 24px 120px; }
       // P2-2c: check tables, possibly several checks per row: "date | check# | amount" or "check# | date | amount".
       if (section && section.kind === 'chk') {
         // Close-set cells can merge ("2598* 08/15/2023"): split check numbers from dates first.
-        const c = []; for (const x of l.cells) { const m = x.match(/^(#?\d{1,8}\*?)\s+(\S+)$/) || x.match(/^(\S+)\s+(#?\d{1,8}\*?)$/); if (m && ((RE_CHECK_NO.test(m[1]) && isPdfDate(m[2])) || (isPdfDate(m[1]) && RE_CHECK_NO.test(m[2])))) c.push(m[1], m[2]); else c.push(x); }
+        const c = []; for (const x of l.cells) { const m = x.match(RE_CHK_NO_FIRST) || x.match(RE_CHK_NO_LAST); if (m && ((RE_CHECK_NO.test(m[1]) && isPdfDate(m[2])) || (isPdfDate(m[1]) && RE_CHECK_NO.test(m[2])))) c.push(m[1], m[2]); else c.push(x); }
         const found = []; let k = 0;
-        while (k + 2 < c.length + 0) {
+        while (k + 2 < c.length) {
           const a = c[k], b = c[k + 1], m = c[k + 2];
           if (isPdfMoney(m || '') && ((isPdfDate(a) && RE_CHECK_NO.test(b)) || (RE_CHECK_NO.test(a) && isPdfDate(b)))) {
             const [d, no] = isPdfDate(a) ? [a, b] : [b, a];
@@ -1815,8 +1813,8 @@ main { padding-block: 24px 120px; }
       }
       // Description continuation: close below the last txn on the same page, no money, not page furniture.
       const nextText = lines[i + 1] ? lines[i + 1].text : '';   // a cardholder name sits right above "Card Ending …"
-      if (/^card ending\b/i.test(nextText.trim()) && holderNames.has(text)) { holder = holderLabel(text, lastDigits(nextText)); last = null; continue; }   // P10-3
-      if (last && !startsDate && !c.some(isPdfMoney) && last.cont < 3 && l.page === last.page && (last.y - l.y) < l.h * 2.6 && !RE_NOISE.test(text) && !/^card ending\b/i.test(nextText)) {
+      if (RE_CARD_ENDING.test(nextText.trim()) && holderNames.has(text)) { holder = holderLabel(text, lastDigits(nextText)); last = null; continue; }   // P10-3
+      if (last && !startsDate && !c.some(isPdfMoney) && last.cont < 3 && l.page === last.page && (last.y - l.y) < l.h * 2.6 && !RE_NOISE.test(text) && !RE_CARD_ENDING.test(nextText)) {
         last.description += ' ' + text; last.memo.push(text); last.cont++; last.y = l.y; continue;
       }
       last = null;
@@ -1866,7 +1864,7 @@ main { padding-block: 24px 120px; }
   function pdfPeriodChecks(src) {
     const P = src.pdf, card = src.type === 'card';
     // parseMoney already reads "CR" as +. On a card, a CR balance is a credit balance (owed < 0); on a bank it is plain cash (P5-1 L11).
-    const book = b => b == null ? null : card ? -(b.cr ? -b.cents : b.cents) : b.cents;
+    const book = b => b == null ? null : bookSign(src, card && b.cr ? -b.cents : b.cents);
     const out = [];
     for (const idx of P.periodOrder) {
       const p = P.periods[idx];
@@ -1961,7 +1959,7 @@ main { padding-block: 24px 120px; }
     const moneyCols = new Set([m.amount, m.debit, m.credit, m.balance].filter(c => c != null));
 
     const headerOpts = ['<option value="-1"' + (m.header < 0 ? ' selected' : '') + '>None (first row is data)</option>']
-      .concat(s.grid.slice(0, Math.min(s.grid.length, 30)).map((r, i) =>
+      .concat(s.grid.slice(0, Math.min(s.grid.length, HEADER_SCAN_ROWS)).map((r, i) =>
         `<option value="${i}" ${m.header === i ? 'selected' : ''}>Row ${s.rowNo[i]}: ${esc(clip(r.filter(v => !isBlank(v)).map(cellText).join(', '), 48))}</option>`)).join('');
 
     const hdr = m.header >= 0 ? s.grid[m.header] : null;
@@ -1972,20 +1970,9 @@ main { padding-block: 24px 120px; }
     const rows = body.map((r, k) => `<tr><td class="rn num">${s.rowNo[m.header + 1 + k]}</td>${r.map((v, c) =>
       `<td class="${roleOf[c] && !roleOf[c].startsWith('Ignored') ? '' : 'off'} ${moneyCols.has(c) ? 'money num' : ''}" title="${esc(cellText(v))}">${esc(clip(cellText(v), 40))}</td>`).join('')}</tr>`).join('');
 
-    const typeLabel = s.type === 'card' ? 'Credit card' : 'Bank';
     const rc = s.mapped ? reconcile(s) : null;
-    const status = !s.mapped ? '<span class="pill warn">Needs columns</span>'
-      : rc.state === 'ok' ? '<span class="pill ok">Reconciled</span>'
-      : rc.state === 'off' ? '<span class="pill bad">Doesn\'t reconcile</span>'
-      : rc.state === 'none' ? '<span class="pill warn">Needs opening balance</span>'
-      : '<span class="pill">Not checked</span>';
     return `<article class="card map-card" data-id="${id}" aria-labelledby="mh-${id}">
-      <div class="map-head">
-        <h3 id="mh-${id}">${esc(s.name)}</h3>
-        <span class="pill">${typeLabel}</span>${s.flip ? '<span class="pill">Signs flipped</span>' : ''}
-        <span class="pill num">${dataCount.toLocaleString()} data row${dataCount === 1 ? '' : 's'}</span>
-        ${status}
-      </div>
+      ${mapHead(s, `${dataCount.toLocaleString()} data row${dataCount === 1 ? '' : 's'}`, mapStatus(s, rc, 'Needs columns'))}
       <div class="map-body">
         <div class="fields">
           <div class="field"><label for="m-header-${id}">Column names row</label><select id="m-header-${id}" data-m="header">${headerOpts}</select></div>
@@ -2018,13 +2005,8 @@ main { padding-block: 24px 120px; }
   const SIGN_FROM = { section: 'Section', explicit: 'Printed sign', crdr: 'CR / DR', balance: 'Balance change', guess: 'Guessed' };
   function pdfCardHtml(s) {
     const id = s.id, P = s.pdf, card = s.type === 'card';
-    const show = c => c == null ? '—' : fmtCents(card ? -c : c);
+    const show = c => c == null ? '—' : fmtCents(bookSign(s, c));
     const rc = s.mapped ? reconcile(s) : null;
-    const status = !s.mapped ? '<span class="pill warn">No transactions</span>'
-      : rc.state === 'ok' ? '<span class="pill ok">Reconciled</span>'
-      : rc.state === 'off' ? '<span class="pill bad">Doesn\'t reconcile</span>'
-      : rc.state === 'none' ? '<span class="pill warn">Needs opening balance</span>'
-      : '<span class="pill">Not checked</span>';
     const per = s.periods || [];
     const notes = [`Read ${s.txns.length.toLocaleString()} transaction${s.txns.length === 1 ? '' : 's'} from ${P.pages} page${P.pages === 1 ? '' : 's'}${per.length > 1 ? `, in ${per.length} statements (sorted oldest first)` : ''}.`];
     if (s.typeFromPdf) notes.push(card ? 'This looks like a credit card statement, so it is set to Credit card. Printed charges are money out and payments are money in.' : 'This looks like a bank statement, so it is set to Bank.');
@@ -2042,12 +2024,7 @@ main { padding-block: 24px 120px; }
       `<li><span class="num">${esc(x.row)}</span> ${esc(x.msg)}${x.text ? ` <span class="mono src-line">${esc(clip(x.text, 90))}</span>` : ''}</li>`).join('')}</ul>${issues.length > 8 ? `<span>and ${issues.length - 8} more</span>` : ''}</div>` : '';
     const rows = s.txns.map(t => `<tr class="${t.signFrom === 'guess' ? 'flag' : ''}"><td class="rn num">${t.page}</td><td class="num nw">${t.date}</td><td title="${esc(t.description)}">${esc(clip(descOf(t), 60))}${subOf(t) ? `<span class="sub">${esc(clip(subOf(t), 70))}</span>` : ''}</td><td class="off">${esc(SIGN_FROM[t.signFrom] || '')}${t.section ? ` · ${esc(t.section.charAt(0).toUpperCase() + t.section.slice(1))}` : ''}</td><td class="money num">${fmtCents(t.amountCents)}</td></tr>`).join('');
     return `<article class="card map-card" data-id="${id}" aria-labelledby="mh-${id}">
-      <div class="map-head">
-        <h3 id="mh-${id}">${esc(s.name)}</h3>
-        <span class="pill">${card ? 'Credit card' : 'Bank'}</span>${s.flip ? '<span class="pill">Signs flipped</span>' : ''}
-        <span class="pill num">PDF · ${P.pages} page${P.pages === 1 ? '' : 's'}</span>
-        ${status}
-      </div>
+      ${mapHead(s, `PDF · ${P.pages} page${P.pages === 1 ? '' : 's'}`, mapStatus(s, rc, 'No transactions'))}
       <div class="map-body">
         <ul class="notes">${notes.map(n => `<li>${esc(n)}</li>`).join('')}${warnList.map(n => `<li class="warn">${esc(n)}</li>`).join('')}</ul>
         ${parsedHtml(s)}
@@ -2069,6 +2046,9 @@ main { padding-block: 24px 120px; }
   // ---------- Balances + reconciliation (P1-6) ----------
   // Users type balances the way the statement prints them: a bank balance, or the amount owed on a card.
   // Internally (D7) a card balance owed is negative, so the entered value is negated for cards.
+  // Book terms <-> the statement's own terms: a card's amount owed is negative in the books, so the same negation goes both ways.
+  const bookSign = (s, c) => s.type === 'card' ? -c : c;
+  // toBook keeps the negation inline: tests/mutants.sh (m2) breaks exactly this expression to prove t_prop catches a wrong card sign.
   const toBook = (s, entered) => entered == null ? null : (s.type === 'card' ? -entered : entered) || 0;
   function syncBalances(s) { s.openingCents = toBook(s, s.obEntered); s.endingCents = toBook(s, s.ebEntered); }
 
@@ -2101,8 +2081,8 @@ main { padding-block: 24px 120px; }
     const conv = owedStyle ? -1 : 1;                                   // book balance = conv × column balance
     const colOpen = seq[0].balanceCents - dir * seq[0].amountCents, colEnd = seq[seq.length - 1].balanceCents;
     const bookOpen = conv * colOpen, bookEnd = conv * colEnd;
-    s.obEntered = (card ? -bookOpen : bookOpen) || 0;
-    s.ebEntered = (card ? -bookEnd : bookEnd) || 0;
+    s.obEntered = bookSign(s, bookOpen) || 0;
+    s.ebEntered = bookSign(s, bookEnd) || 0;
     s.balAuto = true;
     s.balNote = (hits === steps ? 'Filled in from the running balance column.'
       : `Filled in from the running balance column (${steps - hits} row${steps - hits === 1 ? '' : 's'} out of order; check them).`)
@@ -2131,13 +2111,13 @@ main { padding-block: 24px 120px; }
     const val = (v, k) => s.balRaw && s.balRaw.key === k ? esc(s.balRaw.text) : v == null ? '' : fmtPlain(v);
     const L1 = card ? 'Balance owed at start' : 'Opening balance', L2 = card ? 'Balance owed at end' : 'Ending balance';
     let res;
-    const show = c => fmtCents(card ? -c : c);   // show in the statement's own terms
+    const show = c => fmtCents(bookSign(s, c));   // show in the statement's own terms
     if (r.state === 'none') res = `<p class="recon warn">Enter the ${card ? 'balance owed at the start' : 'opening balance'} from the statement.</p>`;
     else if (r.state === 'unchecked') res = `<p class="recon muted">Calculated ${card ? 'balance owed at end' : 'ending balance'}: <b class="num">${show(r.expected)}</b>. Enter the ending balance from the statement to check it.</p>`;
     else if (r.state === 'ok') res = `<p class="recon ok"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>Reconciled. Opening balance plus transactions equals the statement's ending balance.</p>`;
     else {
       const what = r.fix ? (s.flip ? 'turn off Flip signs' : 'turn on Flip signs') : '';   // reconcile() only ever offers the flip
-      res = `<div class="recon bad" role="alert"><p><b>Off by <span class="num">${fmtCents(Math.abs(card ? -r.diff : r.diff))}</span>.</b> Calculated ${card ? 'balance owed' : 'ending balance'} is <span class="num">${show(r.expected)}</span>; the statement says <span class="num">${show(s.endingCents)}</span>.</p>
+      res = `<div class="recon bad" role="alert"><p><b>Off by <span class="num">${fmtCents(Math.abs(r.diff))}</span>.</b> Calculated ${card ? 'balance owed' : 'ending balance'} is <span class="num">${show(r.expected)}</span>; the statement says <span class="num">${show(s.endingCents)}</span>.</p>
         ${r.fix ? `<p>It ties if you ${what}. <button class="btn btn-sm" type="button" data-fix="${id}" data-fix-flip="1" data-fix-type="0">${what.charAt(0).toUpperCase() + what.slice(1)}</button></p>`
                  // A wrong account type ties in exactly the same cases as backwards signs (D24). When nobody confirmed the
                  // type, offer both so a one-click flip can't turn a mislabeled bank file into a "reconciled" card (D36).
@@ -2174,7 +2154,7 @@ main { padding-block: 24px 120px; }
   }
   function joinHtml(s) {
     const g = groupOf(s); if (g.length < 2) return '';
-    const card = s.type === 'card', show = c => fmtCents(card ? -c : c);
+    const show = c => fmtCents(bookSign(s, c));
     const others = g.filter(x => x !== s).map(x => `<b>${esc(x.name)}</b>`).join(', ');
     const prev = g[g.indexOf(s) - 1], j = prev ? joinsOf([prev, s])[0] : null;
     if (j && j.diff) return `<div class="recon bad" role="alert"><p>One account with ${others}, but this statement opens at <span class="num">${show(s.openingCents)}</span> while <b>${esc(prev.name)}</b> ends at <span class="num">${show(prev.endingCents)}</span> (difference <span class="num">${fmtCents(Math.abs(j.diff))}</span>). A statement may be missing between them, or a balance is wrong.</p><p><button class="btn btn-sm" type="button" data-unlink-src="${s.id}">Separate this statement</button></p></div>`;
@@ -2186,7 +2166,7 @@ main { padding-block: 24px 120px; }
     if (typeof r === 'string') { if (r) s.balError = r; renderMap(); render(); return; }
     renderMap(); render();
     if (!r) return;
-    showToast(toId ? `Combined ${clip(s.name, 30)} with ${clip(leadOf(s).name, 30)}` : `Separated ${clip(s.name, 40)}`, () => { restoreLinks(r); renderMap(); render(); });
+    undoToast(toId ? `Combined ${clip(s.name, 30)} with ${clip(leadOf(s).name, 30)}` : `Separated ${clip(s.name, 40)}`, r, () => { renderMap(); render(); });
   }
   // "1234.5" style for inputs (no parentheses; a minus for negatives).
   function fmtPlain(c) { const a = Math.abs(c); return (c < 0 ? '-' : '') + Math.floor(a / 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + String(a % 100).padStart(2, '0'); }
@@ -2307,7 +2287,7 @@ main { padding-block: 24px 120px; }
     const [src] = state.sources.splice(i, 1);
     const after = () => { renderSources(); if (state.step === 'map') { if (state.sources.length) renderMap(); else { go('upload'); return; } } render(); };
     after();
-    showToast(`Removed ${src.name}`, () => { state.sources.splice(i, 0, src); if (links) restoreLinks(links); after(); });
+    showToast(`Removed ${src.name}`, () => { state.sources.splice(i, 0, src); if (links) restoreSnapshot(links); after(); });
   }
   function showToast(msg, undo = null) {
     $('toast-msg').textContent = msg;
@@ -2345,7 +2325,7 @@ main { padding-block: 24px 120px; }
   $('sources').addEventListener('change', e => {
     const el = e.target; if (el.dataset.field !== 'sheet') return;
     const s = state.sources.find(x => x.id === el.closest('.src').dataset.id);
-    if (s && s.wb) { useSheet(s, el.value); updateStatus(s); render(); }
+    if (s && s.hasWb) { useSheet(s, el.value); updateStatus(s); render(); }
   });
   $('sources').addEventListener('click', e => { const b = e.target.closest('[data-remove]'); if (b) removeSource(b.dataset.remove); });
   $('notices').addEventListener('click', e => {
@@ -2447,18 +2427,13 @@ main { padding-block: 24px 120px; }
     }
     return out;
   }
-  const snapLinks = () => ({ links: state.sources.map(x => [x, x.sameAs || null]), acct: null });
-  function restoreLinks(r) {
-    for (const [x, v] of r.links) x.sameAs = v;
-    if (r.acct) r.acct[0].sourceId = r.acct[1];
-  }
   // Put s (and any statements already sharing its account) on toId's account. → snapshot for Undo, or an error text.
   function linkSources(id, toId) {
     const s = srcById(id), T = srcById(toId); if (!s || !T) return '';
     const L = leadOf(T);
     if (leadOf(s) === L) return '';
     if (s.type !== L.type) return 'Only statements of the same type (bank or credit card) can share an account.';
-    const r = snapLinks();
+    const r = snapAll();
     for (const m of groupOf(s)) m.sameAs = L.id;
     L.sameAs = null;
     return r;
@@ -2466,14 +2441,14 @@ main { padding-block: 24px 120px; }
   // Take s out of its group. If s owned the account, the next statement takes it over (with its rules and choices).
   function unlinkSource(id) {
     const s = srcById(id); if (!s) return null;
-    const r = snapLinks();
+    const r = snapAll();
     if (s.sameAs) { s.sameAs = null; return r; }
     const rest = groupOf(s).filter(x => x !== s);
     if (!rest.length) return null;
     const N = rest[0];
     for (const m of rest) m.sameAs = m === N ? null : N.id;
     const a = state.coa.find(x => x.sourceId === s.id);
-    if (a) { r.acct = [a, s.id]; a.sourceId = N.id; }
+    if (a) a.sourceId = N.id;
     return r;
   }
 
@@ -2526,10 +2501,18 @@ main { padding-block: 24px 120px; }
     if (no !== self && acctByNo.has(no)) return { error: `${no} is already used by "${acctByNo.get(no).name}".` };
     return { no };
   }
-  function coaAdd(noText, name, type, taxLine = '') {
+  // P17-3 (S4): the one check of a NEW account's number, name and type, in this order; '' = fine. coaAdd and czfValidate both use it.
+  // used: numbers already taken by other new accounts in the same batch (the file-categories list).
+  function acctError(noText, name, type, used = null) {
     const r = parseAcctNo(noText); if (r.error) return r.error;
-    name = String(name ?? '').trim(); if (!name) return 'Enter a name for the new account.';
+    if (used && used.has(r.no)) return `${r.no} is used by another new account in this list.`;
+    if (!String(name ?? '').trim()) return 'Enter a name for the new account.';
     if (!ACCT_TYPES.includes(type)) return 'Choose a type for the new account.';
+    return '';
+  }
+  function coaAdd(noText, name, type, taxLine = '') {
+    const bad = acctError(noText, name, type); if (bad) return bad;
+    const r = parseAcctNo(noText); name = String(name).trim();
     state.coa.push({ no: r.no, name, type, taxLine: IS_TYPES.includes(type) && SCHED_TAGS.has(taxLine) ? taxLine : '', system: false }); indexCoa();   // balance-sheet accounts carry no tag (P17-1)
     return '';
   }
@@ -2559,7 +2542,7 @@ main { padding-block: 24px 120px; }
     // A rule counts while either copy uses the account: the edited one (Rules tab) or the applied one (not re-run yet, LINT A3).
     const rules = new Set([...state.rules, ...state.applied].filter(r => r.accountNo === no).map(r => r.id)).size;
     let cats = 0; for (const v of state.cats.values()) if (v.kind === 'acct' && v.no === no) cats++;   // P14-5: file categories mapped to it
-    return { rules, manual, cats, rows: state.txns.filter(t => t.offsetAccountNo === no).length };
+    return { rules, manual, cats };
   }
   function coaDelete(no) {
     const a = acctByNo.get(no); if (!a) return 'That account no longer exists.';
@@ -2601,9 +2584,23 @@ main { padding-block: 24px 120px; }
     ['CHARGEBACK', 4050, 'out'],
   ];
   let ruleSeq = 0;
-  state.rules = SEED_RULES.map(([pattern, accountNo, direction, match], i) => ({ id: 'r' + (++ruleSeq), match: match || 'contains', pattern, accountNo, direction, priority: (i + 1) * 10, seed: true, hits: 0 }));
+  let czfPlan = null;   // the last catPlan() the "Categories from your files" card drew (see czfRulesRefresh); categorize() clears it
+  // P17-3 (S3): the one place a rule object is made. It goes on the edited list (state.rules, the Rules tab) and, with {applied: true},
+  // on the applied copy too (state.applied, what categorize() uses), so it takes effect now while other pending edits stay pending.
+  // f: { match?, pattern, accountNo, direction, priority, seed?, fromFile? }.
+  function addRule(f, { applied = false } = {}) {
+    const r = { id: 'r' + (++ruleSeq), match: f.match || 'contains', pattern: f.pattern, accountNo: f.accountNo, direction: f.direction, priority: f.priority,
+      ...(f.seed ? { seed: true } : {}), hits: 0, ...(f.fromFile ? { fromFile: true } : {}) };
+    state.rules.push(r);
+    if (applied) state.applied.push({ ...r });
+    return r;
+  }
+  // An exact copy of this rule (match + pattern + direction + account) is already on the edited list or the applied copy.
+  const hasRule = r => state.applied.some(x => ruleKey(x) === ruleKey(r)) || state.rules.some(x => ruleKey(x) === ruleKey(r));
+  state.rules = [];
+  SEED_RULES.forEach(([pattern, accountNo, direction, match], i) => addRule({ match, pattern, accountNo, direction, priority: (i + 1) * 10, seed: true }));
   // state.rules = what the Rules tab edits; state.applied = the copy categorize() uses. Only Re-run rules (or
-  // "+ Rule" for its own new rule) copies edits across, so a half-typed pattern never reaches the books (D31, P5-1 M6).
+  // "+ Rule" for its own new rule) copies edits across, so a half-typed pattern never reaches the books (D42, P5-1 M6).
   state.applied = [];
   function commitRules() { state.applied = state.rules.map(r => ({ ...r })); state.rulesDirty = false; }
   commitRules();
@@ -2626,7 +2623,6 @@ main { padding-block: 24px 120px; }
   const dirOk = (r, t) => r.direction === 'in' ? t.amountCents > 0 : r.direction === 'out' ? t.amountCents < 0 : true;
   const sortedRules = (list = state.rules) => list.slice().sort((a, b) => a.priority - b.priority || (+a.id.slice(1)) - (+b.id.slice(1)));
   const txnKey = t => `${t.id}|${t.date}|${Math.abs(t.amountCents)}`;
-  const dayNo = d => Math.round(Date.parse(d + 'T00:00:00Z') / 86400000);
   const srcOf = t => state.sources.find(s => s.id === t.sourceId);
 
   // ---------- Categories read from the file (P14-5, D87) ----------
@@ -2679,7 +2675,7 @@ main { padding-block: 24px 120px; }
   // Defaults for a new account made from a category: the name as written, the type from the name else the rows' majority sign
   // (money out → Expense, in → Revenue, ties → Expense), the next free number (adds it to `used`), and the Schedule C line.
   function catNewForm(text, used, rows) {
-    const name = String(text).replace(/\s+/g, ' ').trim().slice(0, 100), hint = catTypeHint(catKey(name));
+    const name = String(text).replace(/\s+/g, ' ').trim().slice(0, NAME_MAX), hint = catTypeHint(catKey(name));
     const type = hint || (rows && rows.in > rows.out ? 'Revenue' : 'Expense');
     const no = nextAcctNo(type, used); if (no != null) used.add(no);
     const label = { Equity: 'owner equity', Liability: 'a loan or payable', COGS: 'cost of goods sold', Revenue: 'income', Expense: 'an expense' }[type];
@@ -2717,7 +2713,7 @@ main { padding-block: 24px 120px; }
       if (type && rest) {
         if (!ctx.used.has(no) && (nm[2] || no < 1900 || no > 2100)) {   // a bare year-like number ("2024 Taxes") is not an account number
           ctx.used.add(no);
-          return { kind: 'new', name: rest.slice(0, 100), type, no, taxLine: defaultTaxLine(type, rest), how: `Account number ${no} in your file is not in your chart yet.`, fromNumber: true };
+          return { kind: 'new', name: rest.slice(0, NAME_MAX), type, no, taxLine: defaultTaxLine(type, rest), how: `Account number ${no} in your file is not in your chart yet.`, fromNumber: true };
         }
         if (ctx.used.has(no)) base = rest;   // number taken by another new account in this batch: match the name alone
       }
@@ -2741,6 +2737,7 @@ main { padding-block: 24px 120px; }
   // rows), that category goes to an account, the rule would hit no row of another category, and no rule already gives those rows
   // the account. The account of a rule is the one the user finally picks, so it is resolved when applying.
   function catPlan() {
+    if (STB_TEST) catPlanRuns++;
     const srcs = catSrcs().filter(catPending), ids = new Set(srcs.map(s => s.id)), items = new Map();
     for (const s of srcs) for (const t of s.txns) {
       if (!t.fileCat) continue;
@@ -2780,6 +2777,7 @@ main { padding-block: 24px 120px; }
   // Rules → transfer matcher → final account. Precedence: manual > file category (P14-5) > matched transfer pair (1950) > first rule > uncategorized.
   // A transfer-keyword hit with no matched pair stays uncategorized and is flagged "possible transfer" (D19).
   function categorize() {
+    czfPlan = null;
     const txns = [], srcIdx = new Map(), srcNo = new Map();
     state.sources.forEach((s, i) => { srcIdx.set(s.id, i); srcNo.set(s.id, s.coaAccountNo); if (s.status === 'ready' && s.mapped && s.txns) txns.push(...s.txns); });
     for (const t of txns) {           // per-object caches (txn objects are replaced when a file is re-read or flipped)
@@ -2862,7 +2860,6 @@ main { padding-block: 24px 120px; }
       const id = 'tp' + (++n);
       c.p.transferPairId = c.n.transferPairId = id; c.p.pairWith = c.n.id; c.n.pairWith = c.p.id;
     }
-    return n;
   }
 
   // Manual assignment. value: account no | 0 (keep uncategorized) | 'auto' (back to rules/transfers).
@@ -2884,16 +2881,15 @@ main { padding-block: 24px 120px; }
     categorize();
   }
   function reviewStats() {
-    let unc = 0, uncIn = 0, uncOut = 0, poss = 0, clearing = 0, manual = 0;
+    let unc = 0, uncIn = 0, uncOut = 0, poss = 0, clearing = 0;
     const pairs = new Set();
     for (const t of state.txns) {
       if (t.offsetAccountNo == null) { unc++; if (t.amountCents > 0) uncIn++; else uncOut++; }
       if (t.possibleTransfer) poss++;
-      if (t.manual) manual++;
       if (t.transferPairId) pairs.add(t.transferPairId);
       if (t.offsetAccountNo === TRANSFER_NO) clearing -= t.amountCents;   // 1950 debit balance
     }
-    return { count: state.txns.length, unc, uncIn, uncOut, poss, manual, pairs: pairs.size, clearing };
+    return { count: state.txns.length, unc, uncIn, uncOut, poss, pairs: pairs.size, clearing };
   }
 
   // ---------- Cross-file checks (P5-2) ----------
@@ -2939,9 +2935,9 @@ main { padding-block: 24px 120px; }
   }
   // TB summary / status text for one account's statements (P6-9): the same words as before for a single file.
   function groupStatus(members) {
-    const n = members.length, rcs = members.map(s => ({ s, rc: reconcile(s), card: s.type === 'card' }));
+    const n = members.length, rcs = members.map(s => ({ s, rc: reconcile(s) }));
     const off = rcs.find(x => x.rc.state === 'off');
-    if (off) return `Off by ${fmtCents(Math.abs(off.card ? -off.rc.diff : off.rc.diff))}${n > 1 ? ` (${off.s.name})` : ''}`;
+    if (off) return `Off by ${fmtCents(Math.abs(off.rc.diff))}${n > 1 ? ` (${off.s.name})` : ''}`;
     const gap = joinsOf(members).find(j => j.diff);
     if (gap) return `Gap of ${fmtCents(Math.abs(gap.diff))} between statements`;
     if (rcs.every(x => x.rc.state === 'ok')) return n > 1 ? `Reconciled (${n} statements)` : 'Reconciled';
@@ -2976,7 +2972,7 @@ main { padding-block: 24px 120px; }
     const accounts = [], names = new Map(), tags = new Map(), seen = new Set();
     let clash = 0;
     for (const a of d.accounts) {
-      const no = a && a.no, name = a && typeof a.name === 'string' ? a.name.trim().slice(0, 100) : '';
+      const no = a && a.no, name = a && typeof a.name === 'string' ? a.name.trim().slice(0, NAME_MAX) : '';
       if (!Number.isInteger(no) || no < 1 || no > 999999 || !name) return { error: 'An account in the setup file has a bad number or no name.' };
       if (seen.has(no)) return { error: `Account ${no} is listed twice in the setup file.` };
       seen.add(no);
@@ -3050,25 +3046,28 @@ main { padding-block: 24px 120px; }
     state.coa = R.coa; indexCoa();
     // A choice you made that points at an account that is gone is reset, so nothing posts to a missing account.
     for (const [k, v] of state.manual) if (v && !acctByNo.has(v)) state.manual.delete(k);
-    const fresh = R.fresh.map(r => ({ id: 'r' + (++ruleSeq), match: r.match, pattern: r.pattern, direction: r.direction, priority: r.priority, accountNo: r.accountNo, hits: 0 }));
-    if (R.replaceRules) { state.rules = fresh; commitRules(); }
-    else { state.rules = R.rules.concat(fresh); state.applied = R.applied.concat(fresh.map(r => ({ ...r }))); }   // new rules apply now; other pending edits stay pending
+    if (R.replaceRules) { state.rules = []; for (const r of R.fresh) addRule(r); commitRules(); }
+    else { state.rules = R.rules.slice(); state.applied = R.applied.slice(); for (const r of R.fresh) addRule(r, { applied: true }); }   // new rules apply now; other pending edits stay pending
     if (R.company) state.company = R.company;
     categorize();
     return before;
   }
   function applySetup(p, mode = 'replace') { const R = importResult(p, mode); return { before: applyImport(R), reset: R.stats.manualReset, R }; }
   // One snapshot shape for every Undo that edits the chart, rules or choices (setup file, COA import, suggestions, new account, file categories).
-  const snapAll = () => ({ coa: state.coa.map(a => ({ ...a })), rules: state.rules.map(r => ({ ...r })), applied: state.applied.map(r => ({ ...r })),
+  const snapAll = () => ({ same: new Map(state.sources.map(x => [x, x.sameAs || null])), coa: state.coa.map(a => ({ ...a })), rules: state.rules.map(r => ({ ...r })), applied: state.applied.map(r => ({ ...r })),
     manual: new Map(state.manual), dirty: state.rulesDirty, company: state.company,
     cats: new Map([...state.cats].map(([k, v]) => [k, { ...v }])), catOn: new Map(state.sources.map(s => [s.id, s.catOn])) });   // cats/catOn: P14-5 (D87)
-  function undoSetup(b) {
+  // Put everything snapAll() recorded back (accounts, rules, choices, file categories, which statements share an account), then re-categorize.
+  function restoreSnapshot(b) {
+    for (const [x, v] of b.same) x.sameAs = v;
     state.coa = b.coa; indexCoa();
     state.rules = b.rules; state.applied = b.applied; state.manual = b.manual; state.rulesDirty = b.dirty; state.company = b.company;
-    if (b.cats) state.cats = b.cats;   // optional: older callers' snapshots have neither
-    if (b.catOn) for (const s of state.sources) if (b.catOn.has(s.id)) s.catOn = b.catOn.get(s.id);
+    state.cats = b.cats;
+    for (const s of state.sources) if (b.catOn.has(s.id)) s.catOn = b.catOn.get(s.id);
     categorize();
   }
+  // The one Undo toast: Undo restores the snapshot, then runs after() to redraw.
+  function undoToast(msg, before, after) { showToast(msg, () => { restoreSnapshot(before); after(); }); }
   async function saveSetup() {
     const tab = state.review.tab, { data, left } = setupData();
     const name = `stb-setup-${data.saved}.json`;
@@ -3098,7 +3097,7 @@ main { padding-block: 24px 120px; }
     if (reset) parts.push(`${plural(reset, 'row choice')} you made pointed at an account the setup doesn't have, so ${reset === 1 ? 'it was' : 'they were'} reset.`);
     setMsg(tab, p.clash || S.dropped || reset ? 'warn' : 'ok', parts.join(' '));
     renderReview();
-    showToast(`${mode === 'merge' ? 'Merged' : 'Opened'} ${clip(file.name, 40)}`, () => { undoSetup(before); setMsg(tab, 'ok', 'Setup file undone. Your accounts, rules and choices are back.'); renderReview(); });
+    undoToast(`${mode === 'merge' ? 'Merged' : 'Opened'} ${clip(file.name, 40)}`, before, () => { setMsg(tab, 'ok', 'Setup file undone. Your accounts, rules and choices are back.'); renderReview(); });
   }
   $('setup-input').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; openSetupFile(f); });
   // Shared "When opening" choice (P6-7, D50): used by Open setup file and Import chart of accounts. Default Replace.
@@ -3172,7 +3171,7 @@ main { padding-block: 24px 120px; }
   }
   function coaDetect(grid) {
     let best = -1, bestN = 0;
-    for (let i = 0; i < Math.min(grid.length, 30); i++) {
+    for (let i = 0; i < Math.min(grid.length, HEADER_SCAN_ROWS); i++) {
       const m = coaRoles(grid[i]); if (m.name == null || m.type == null) continue;
       const n = 2 + (m.no != null);
       if (n > bestN) { best = i; bestN = n; }
@@ -3183,7 +3182,7 @@ main { padding-block: 24px 120px; }
     const m = { header, no: null, name: null, type: null };
     if (header >= 0) return Object.assign(m, coaRoles(grid[header]));
     // No header row: the column whose values are known types, a column of whole numbers, and the longest text column.
-    const rows = grid.slice(0, 200), cols = [...Array(grid[0] ? grid[0].length : 0).keys()];
+    const rows = grid.slice(0, SAMPLE_ROWS), cols = [...Array(grid[0] ? grid[0].length : 0).keys()];
     const rate = (c, f) => { let n = 0, hit = 0; for (const r of rows) { if (isBlank(r[c])) continue; n++; if (f(r[c])) hit++; } return n ? hit / n : 0; };
     const byRate = f => cols.filter(c => c !== m.type && c !== m.no).map(c => [c, rate(c, f)]).sort((a, b) => b[1] - a[1])[0];
     const t = byRate(v => !!coaTypeOf(v)); if (t && t[1] >= 0.6) m.type = t[0];
@@ -3204,7 +3203,7 @@ main { padding-block: 24px 120px; }
     const accounts = [], skipped = [], unknown = [], seen = new Set();
     for (let i = m.header + 1; i < imp.grid.length; i++) {
       const r = imp.grid[i], rowNo = imp.rowNo[i];
-      const name = String(r[m.name] ?? '').replace(/\s+/g, ' ').trim().slice(0, 100), raw = m.no == null ? '' : r[m.no], typeText = String(r[m.type] ?? '').trim();
+      const name = String(r[m.name] ?? '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX), raw = m.no == null ? '' : r[m.no], typeText = String(r[m.type] ?? '').trim();
       if (!name && isBlank(raw) && !typeText) continue;
       const label = name || String(raw);
       if (!name) { skipped.push({ rowNo, label, reason: 'No account name.' }); continue; }
@@ -3244,18 +3243,12 @@ main { padding-block: 24px 120px; }
     if (k.error) throw new Error(k.error);
     if (k.kind === 'pdf') throw new Error('A chart of accounts must be a CSV or Excel file.');
     if (k.kind === 'csv') {
-      const Papa = await loadLib('papa').catch(() => { throw new Error('The CSV reader did not load. Check your connection and reload the page.'); });
-      const text = decodeText(await file.arrayBuffer());
-      const guess = Papa.parse(text, { preview: 100, skipEmptyLines: 'greedy', delimitersToGuess: [',', '\t', ';', '|'] });
-      return tidyGrid(Papa.parse(text, { skipEmptyLines: false, delimiter: guess.meta.delimiter || ',' }).data);
+      const Papa = await loadReader('papa');
+      return tidyGrid(csvGrid(Papa, decodeText(await file.arrayBuffer())).data);
     }
-    const XLSX = await loadLib('xlsx').catch(() => { throw new Error('The Excel reader did not load. Check your connection and reload the page.'); });
-    let wb;
-    try { wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellNF: true, raw: true }); }
-    catch (_) { throw new Error('This workbook could not be opened. It may be password-protected or damaged.'); }
-    const date1904 = !!(wb.Workbook && wb.Workbook.WBProps && wb.Workbook.WBProps.date1904);
-    const sheets = wb.SheetNames.map(n => { const ws = wb.Sheets[n]; const r0 = ws && ws['!ref'] ? XLSX.utils.decode_range(ws['!ref']).s.r + 1 : 1; return tidyGrid(sheetGrid(XLSX, ws, date1904), r0); });
-    return sheets.find(t => t.rowCount >= 2) || sheets[0] || { grid: [], rowNo: [], rowCount: 0 };
+    const XLSX = await loadReader('xlsx');
+    const pick = pickSheet(workbookSheets(XLSX, await file.arrayBuffer(), 'This workbook could not be opened. It may be password-protected or damaged.'));
+    return pick ? pick.tidy : { grid: [], rowNo: [], rowCount: 0 };
   }
   async function openCoaFile(file) {
     if (!file) return;
@@ -3285,7 +3278,7 @@ main { padding-block: 24px 120px; }
     if (S.manualReset) parts.push(`${plural(S.manualReset, 'row choice')} you made pointed at a removed account and ${S.manualReset === 1 ? 'was' : 'were'} reset.`);
     setMsg('coa', S.ruleReset || S.manualReset || P.skipped.length ? 'warn' : 'ok', parts.join(' '));
     renderReview();
-    showToast(`Imported ${clip(imp.fileName, 40)}`, () => { undoSetup(before); setMsg('coa', 'ok', 'Import undone. Your accounts, rules and choices are back.'); renderReview(); });
+    undoToast(`Imported ${clip(imp.fileName, 40)}`, before, () => { setMsg('coa', 'ok', 'Import undone. Your accounts, rules and choices are back.'); renderReview(); });
   }
   $('coa-input').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; openCoaFile(f); });
   function coaImportHtml() {
@@ -3296,7 +3289,7 @@ main { padding-block: 24px 120px; }
       const sample = (imp.grid.slice(m.header + 1).find(r => !isBlank(r[c])) || [])[c];
       const label = hdr && !isBlank(hdr[c]) ? cellText(hdr[c]) : `e.g. ${cellText(sample ?? '') || '(blank)'}`;
       return `<option value="${c}"${sel === c ? ' selected' : ''}>${colLetter(c)} · ${esc(clip(label, 36))}</option>`; }).join('');
-    const headOpts = `<option value="-1"${m.header < 0 ? ' selected' : ''}>None (first row is data)</option>` + imp.grid.slice(0, 30).map((r, i) =>
+    const headOpts = `<option value="-1"${m.header < 0 ? ' selected' : ''}>None (first row is data)</option>` + imp.grid.slice(0, HEADER_SCAN_ROWS).map((r, i) =>
       `<option value="${i}"${m.header === i ? ' selected' : ''}>Row ${imp.rowNo[i]}: ${esc(clip(r.filter(v => !isBlank(v)).map(cellText).join(', '), 48))}</option>`).join('');
     const fields = `<div class="toolbar">
         <div class="field"><label for="ci-header">Column names row</label><select class="inp" id="ci-header" data-ci="header">${headOpts}</select></div>
@@ -3314,20 +3307,17 @@ main { padding-block: 24px 120px; }
         ? `Merge: ${plural(S.added, 'account')} added, ${plural(S.renamed, 'account')} renamed; every other account stays.${S.typeKept.length ? ` ${plural(S.typeKept.length, 'account')} keep${S.typeKept.length === 1 ? 's' : ''} ${S.typeKept.length === 1 ? 'its' : 'their'} current type (the file says otherwise): ${S.typeKept.slice(0, 5).map(x => `${x.no} ${x.kept} (file: ${x.file})`).join(', ')}.` : ''}`
         : `Replace: your accounts become the ones in this file. ${plural(S.added, 'account')} added, ${plural(S.renamed, 'account')} renamed, ${plural(S.removed, 'account')} removed. System accounts and your files' accounts stay.`;
       const resets = S.ruleReset || S.manualReset ? `<p class="msg warn">${[S.ruleReset && plural(S.ruleReset, 'rule'), S.manualReset && plural(S.manualReset, 'row choice')].filter(Boolean).join(' and ')} point${S.ruleReset + S.manualReset === 1 ? 's' : ''} at accounts this removes and will be reset.</p>` : '';
-      const unk = P.unknown.length ? `<div class="grid-wrap" tabindex="0" role="region" aria-label="Types to choose"><table class="grid" aria-label="Types to choose"><thead><tr><th class="c-row">Row</th><th>Account</th><th>Type in the file</th><th>Use as</th></tr></thead><tbody>${P.unknown.map(u =>
-        `<tr><td class="num c-row">${u.rowNo}</td><td>${esc(u.name)}</td><td>${esc(u.typeText || '(blank)')}</td><td><select class="inp ${u.pick ? '' : 'bad-in'}" id="ci-pick-${u.i}" data-ci-pick="${u.i}" aria-label="Type for ${esc(clip(u.name, 40))}"><option value=""${u.pick ? '' : ' selected'} disabled>Choose a type</option>${ACCT_TYPES.map(t => opt(t, t, u.pick)).join('')}${opt('skip', 'Skip this row', u.pick)}</select></td></tr>`).join('')}</tbody></table></div>` : '';
+      const unk = P.unknown.length ? gridWrap(`<table class="grid" aria-label="Types to choose"><thead><tr><th class="c-row">Row</th><th>Account</th><th>Type in the file</th><th>Use as</th></tr></thead><tbody>${P.unknown.map(u =>
+        `<tr><td class="num c-row">${u.rowNo}</td><td>${esc(u.name)}</td><td>${esc(u.typeText || '(blank)')}</td><td><select class="inp ${u.pick ? '' : 'bad-in'}" id="ci-pick-${u.i}" data-ci-pick="${u.i}" aria-label="Type for ${esc(clip(u.name, 40))}"><option value=""${u.pick ? '' : ' selected'} disabled>Choose a type</option>${ACCT_TYPES.map(t => opt(t, t, u.pick)).join('')}${opt('skip', 'Skip this row', u.pick)}</select></td></tr>`).join('')}</tbody></table>`, 'Types to choose') : '';
       const skip = P.skipped.length ? `<details><summary class="linkish">${plural(P.skipped.length, 'row')} skipped</summary><ul>${P.skipped.slice(0, 30).map(s => `<li><span class="num">Row ${s.rowNo}</span> ${esc(clip(s.label, 50))}: ${esc(s.reason)}</li>`).join('')}${P.skipped.length > 30 ? `<li>and ${P.skipped.length - 30} more</li>` : ''}</ul></details>` : '';
-      const sample = P.accounts.length ? `<div class="grid-wrap" tabindex="0" role="region" aria-label="Accounts to import"><table class="grid" aria-label="Accounts to import"><thead><tr><th>No</th><th>Name</th><th>Type</th></tr></thead><tbody>${P.accounts.slice(0, 8).map(a =>
-        `<tr><td class="num nw">${a.no}${a.auto ? ' <span class="st" style="display:inline-flex"><span class="tagx">auto</span></span>' : ''}</td><td>${esc(a.name)}</td><td>${a.type}</td></tr>`).join('')}${P.accounts.length > 8 ? `<tr><td colspan="3" class="muted">and ${(P.accounts.length - 8).toLocaleString()} more</td></tr>` : ''}</tbody></table></div>` : '';
+      const sample = P.accounts.length ? gridWrap(`<table class="grid" aria-label="Accounts to import"><thead><tr><th>No</th><th>Name</th><th>Type</th></tr></thead><tbody>${P.accounts.slice(0, 8).map(a =>
+        `<tr><td class="num nw">${a.no}${a.auto ? ' <span class="st" style="display:inline-flex"><span class="tagx">auto</span></span>' : ''}</td><td>${esc(a.name)}</td><td>${a.type}</td></tr>`).join('')}${P.accounts.length > 8 ? `<tr><td colspan="3" class="muted">and ${(P.accounts.length - 8).toLocaleString()} more</td></tr>` : ''}</tbody></table>`, 'Accounts to import') : '';
       body = `<dl class="stats even" aria-label="Accounts to import by type">${by.map(([t, n]) => `<div><dt>${t}</dt><dd class="num">${n}</dd></div>`).join('')}<div><dt>Numbered for you</dt><dd class="num">${auto}</dd></div><div><dt>Skipped</dt><dd class="num">${P.skipped.length}</dd></div></dl>
         <p class="msg">${esc(effect)}</p>${resets}${unk}${skip}${sample}`;
     }
     const why = P.errors.length ? 'Choose the columns first.' : P.unresolved ? `Choose a type (or Skip) for ${plural(P.unresolved, 'row')}.` : !P.accounts.length ? 'There are no accounts to import.' : '';
-    return `<div class="draft ci-panel" id="ci-panel" role="group" aria-labelledby="ci-h">
-      <h4 id="ci-h" tabindex="-1">Import chart of accounts: ${esc(imp.fileName)}</h4>
-      ${fields}${modeSeg('-ci')}${body}
-      <div class="toolbar"><button class="btn btn-primary btn-sm" type="button" data-ci-apply ${why ? `disabled aria-describedby="ci-why"` : ''}>Apply</button><button class="btn btn-sm" type="button" data-ci-cancel>Cancel</button>${why ? `<span class="msg warn" id="ci-why">${esc(why)}</span>` : ''}</div>
-    </div>`;
+    return draftPanel('draft ci-panel', 'ci-panel', 'ci-h', `Import chart of accounts: ${esc(imp.fileName)}`, `${fields}${modeSeg('-ci')}${body}
+      <div class="toolbar"><button class="btn btn-primary btn-sm" type="button" data-ci-apply ${why ? `disabled aria-describedby="ci-why"` : ''}>Apply</button><button class="btn btn-sm" type="button" data-ci-cancel>Cancel</button>${why ? `<span class="msg warn" id="ci-why">${esc(why)}</span>` : ''}</div>`, ' tabindex="-1"');
   }
 
   // ---------- Review UI (P3-2, P3-4, P3-5, P3-7) ----------
@@ -3336,9 +3326,9 @@ main { padding-block: 24px 120px; }
     const toks = normDesc(desc).trim().split(' ').filter(w => w.length > 1 && !/\d/.test(w) && !STOPWORDS.has(w));
     return toks.slice(0, 2).join(' ') || normDesc(desc).trim().split(' ').slice(0, 2).join(' ');
   }
-  function acctOptions(sel, { exclude = null, none = 'Uncategorized', noneValue = '', extra = '', tail = '' } = {}) {   // tail: P14-3 (D85) "+ New account…" after the groups
+  function acctOptions(sel, { exclude = null, none = 'Uncategorized', noneValue = '', noneSel = true, extra = '', tail = '' } = {}) {   // tail: P14-3 (D85) "+ New account…" after the groups; noneSel: false when `extra` holds the selected option (P17-3)
     let h = extra;
-    if (none != null) h += `<option value="${noneValue}"${sel == null || sel === '' ? ' selected' : ''}>${none}</option>`;
+    if (none != null) h += `<option value="${noneValue}"${noneSel && (sel == null || sel === '') ? ' selected' : ''}>${none}</option>`;
     else if (sel == null) h += '<option value="" selected disabled>Choose an account</option>';
     for (const type of ACCT_TYPES) {
       let g = '';
@@ -3352,14 +3342,51 @@ main { padding-block: 24px 120px; }
   }
   const opt = (v, label, sel) => `<option value="${v}"${String(v) === String(sel) ? ' selected' : ''}>${esc(label)}</option>`;
 
+  // ---------- Shared markup builders (P17-3, S2): the same HTML as the copies they replaced, written once ----------
+  // attrs: the select's own attributes as a string (id, data-*, aria-label), after class="inp".
+  const typeSel = (sel, attrs) => `<select class="inp" ${attrs}>${ACCT_TYPES.map(t => opt(t, t, sel)).join('')}</select>`;
+  const taxSel = (sel, attrs) => `<select class="inp" ${attrs}><option value=""${sel === '' ? ' selected' : ''}>Not mapped</option>${SCHED_LINES.map(([k, v]) => opt(k, v, sel)).join('')}</select>`;
+  // The Schedule C field of a new-account form: a labelled select, or the "Balance sheet" note for a type that has no line.
+  const taxField = (type, id, sel, attrs) => !IS_TYPES.includes(type) ? '<span class="lbl">Schedule C line</span><span class="muted">Balance sheet</span>'
+    : `<label for="${id}">Schedule C line</label>${taxSel(sel, `id="${id}" ${attrs}`)}`;
+  const matchSel = (sel, attrs) => `<select class="inp" ${attrs}>${Object.entries(MATCH_LABEL).map(([k, v]) => opt(k, v, sel)).join('')}</select>`;
+  const dirSel = (sel, attrs) => `<select class="inp" ${attrs}>${Object.entries(DIR_LABEL).map(([k, v]) => opt(k, v, sel)).join('')}</select>`;
+  const ruleAcctSel = (cls, attrs, no) => `<select class="${cls}" ${attrs}>${acctOptions(no, { none: null })}</select>`;
+  // Number / Name / Type / Schedule C fields of a new account, for the "+ New account…" panel and the file-category form.
+  // ids: { no, name, type, taxWrap }; at(key) = the data attributes of the field; f: { no, name, type }; taxHtml: taxField(...).
+  const newAcctFields = (ids, at, f, errId, taxHtml) =>
+    `<div class="field" style="flex:0 1 110px;min-width:90px"><label for="${ids.no}">Number</label><input class="inp num" id="${ids.no}" ${at('no')} inputmode="numeric" value="${esc(f.no)}" autocomplete="off" aria-describedby="${errId}"></div>
+        <div class="field grow"><label for="${ids.name}">Name</label><input class="inp" id="${ids.name}" ${at('name')} value="${esc(f.name)}" autocomplete="off" aria-describedby="${errId}"></div>
+        <div class="field"><label for="${ids.type}">Type</label>${typeSel(f.type, `id="${ids.type}" ${at('type')}`)}</div>
+        <div class="field grow" id="${ids.taxWrap}">${taxHtml}</div>`;
+  // The boxed panel above the Review table: a heading and its content.
+  const draftPanel = (cls, id, hid, head, body, hAttr = '') => `<div class="${cls}" id="${id}" role="group" aria-labelledby="${hid}">
+      <h4 id="${hid}"${hAttr}>${head}</h4>
+      ${body}
+    </div>`;
+  // A table in the sideways-scrolling box. With a label it is a keyboard-reachable region (tabindex 0).
+  const gridWrap = (table, label = null) => `<div class="grid-wrap"${label ? ` tabindex="0" role="region" aria-label="${label}"` : ''}>${table}</div>`;
+  // The Map card's status pill; unmapped is the card's own wording ("Needs columns" for a table, "No transactions" for a PDF).
+  const mapStatus = (s, rc, unmapped) => !s.mapped ? `<span class="pill warn">${unmapped}</span>`
+    : rc.state === 'ok' ? '<span class="pill ok">Reconciled</span>'
+    : rc.state === 'off' ? '<span class="pill bad">Doesn\'t reconcile</span>'
+    : rc.state === 'none' ? '<span class="pill warn">Needs opening balance</span>'
+    : '<span class="pill">Not checked</span>';
+  const mapHead = (s, countPill, status) => `<div class="map-head">
+        <h3 id="mh-${s.id}">${esc(s.name)}</h3>
+        <span class="pill">${s.type === 'card' ? 'Credit card' : 'Bank'}</span>${s.flip ? '<span class="pill">Signs flipped</span>' : ''}
+        <span class="pill num">${countPill}</span>
+        ${status}
+      </div>`;
+
   function summaryHtml() {
     const st = reviewStats();
     const pct = st.count ? Math.floor((st.count - st.unc) / st.count * 100) : 0;
     const srcs = state.sources.filter(s => s.status === 'ready' && s.mapped);
     const rows = srcs.map(s => {
-      const rc = reconcile(s), card = s.type === 'card';
+      const rc = reconcile(s);
       const cell = rc.state === 'ok' ? '<span class="ok-t">Reconciled</span>'
-        : rc.state === 'off' ? `<span class="bad-t">Off by ${fmtCents(Math.abs(card ? -rc.diff : rc.diff))}</span>`
+        : rc.state === 'off' ? `<span class="bad-t">Off by ${fmtCents(Math.abs(rc.diff))}</span>`
         : rc.state === 'unchecked' ? '<span class="muted">Not checked (no ending balance)</span>' : '<span class="muted">No opening balance</span>';
       return `<tr><td class="num nw">${s.coaAccountNo ?? '—'}</td><td>${esc(s.coaAccountNo != null ? (acctByNo.get(s.coaAccountNo) || {}).name || s.name : s.name)}</td><td class="money num">${(s.txns || []).length.toLocaleString()}</td><td>${cell}</td></tr>`;
     }).join('');
@@ -3379,7 +3406,7 @@ main { padding-block: 24px 120px; }
       </dl>
       ${warns.join('')}
       ${st.unc ? `<p class="bal-note">Uncategorized rows go to 4999 Uncategorized Income (money in) or 6999 Uncategorized Expense (money out) in the workbook. They count in net income, so net income and Schedule C aren't final until you assign them.</p>` : ''}
-      <div class="grid-wrap" tabindex="0" role="region" aria-label="Accounts from your statements (scrolls sideways)"><table class="grid" aria-label="Accounts from your statements"><thead><tr><th class="nw">Account</th><th>Name</th><th class="money">Transactions</th><th>Reconciliation</th></tr></thead><tbody>${rows}</tbody></table></div>
+      ${gridWrap(`<table class="grid" aria-label="Accounts from your statements"><thead><tr><th class="nw">Account</th><th>Name</th><th class="money">Transactions</th><th>Reconciliation</th></tr></thead><tbody>${rows}</tbody></table>`, 'Accounts from your statements (scrolls sideways)')}
     </div>`;
   }
 
@@ -3400,7 +3427,7 @@ main { padding-block: 24px 120px; }
     });
   }
 
-  function statusHtml3(t) {
+  function txnStatusHtml(t) {
     if (t.manual) return `<span class="tagx acc">Your choice</span><button class="linkish" type="button" data-reset="${t.id}">Reset</button>`;
     if (t.fromFile) return `<span class="tagx">From file</span><span title="From file: ${esc(t.fileCat)}">${esc(clip(t.fileCat, 28))}</span>`;   // P14-5 (D87)
     if (t.transferPairId) {
@@ -3415,18 +3442,15 @@ main { padding-block: 24px 120px; }
 
   function draftHtml() {
     const d = state.review.draft; if (!d) return '';
-    return `<div class="draft" id="rule-draft" role="group" aria-labelledby="draft-h">
-      <h4 id="draft-h">New rule</h4>
-      <div class="toolbar">
-        <div class="field"><label for="d-match">Match</label><select class="inp" id="d-match" data-d="match">${Object.entries(MATCH_LABEL).map(([k, v]) => opt(k, v, d.match)).join('')}</select></div>
+    return draftPanel('draft', 'rule-draft', 'draft-h', 'New rule', `<div class="toolbar">
+        <div class="field"><label for="d-match">Match</label>${matchSel(d.match, 'id="d-match" data-d="match"')}</div>
         <div class="field grow"><label for="d-pattern">Pattern <span class="opt">(separate choices with |)</span></label><input class="inp" id="d-pattern" data-d="pattern" value="${esc(d.pattern)}" autocomplete="off" spellcheck="false"></div>
-        <div class="field"><label for="d-dir">Direction</label><select class="inp" id="d-dir" data-d="direction">${Object.entries(DIR_LABEL).map(([k, v]) => opt(k, v, d.direction)).join('')}</select></div>
-        <div class="field grow"><label for="d-acct">Account</label><select class="inp" id="d-acct" data-d="accountNo">${acctOptions(d.accountNo, { none: null })}</select></div>
+        <div class="field"><label for="d-dir">Direction</label>${dirSel(d.direction, 'id="d-dir" data-d="direction"')}</div>
+        <div class="field grow"><label for="d-acct">Account</label>${ruleAcctSel('inp', 'id="d-acct" data-d="accountNo"', d.accountNo)}</div>
         <div class="field" style="flex:0 1 90px;min-width:80px"><label for="d-pri">Priority</label><input class="inp num" id="d-pri" data-d="priority" type="number" step="1" value="${d.priority}"></div>
       </div>
       <p class="msg" id="draft-count" aria-live="polite">${draftCountText()}</p>
-      <div class="toolbar"><button class="btn btn-primary btn-sm" type="button" data-draft-save>Add rule and apply</button><button class="btn btn-sm" type="button" data-draft-cancel>Cancel</button></div>
-    </div>`;
+      <div class="toolbar"><button class="btn btn-primary btn-sm" type="button" data-draft-save>Add rule and apply</button><button class="btn btn-sm" type="button" data-draft-cancel>Cancel</button></div>`);
   }
   function draftCountText() {
     const d = state.review.draft; if (!d) return '';
@@ -3442,24 +3466,15 @@ main { padding-block: 24px 120px; }
 
   // P14-3 (D85): "+ New account…" panel (state.review.newAcct). Typing updates the state and the fields in place (naInput/naChange).
   const NA_NEW = '<option value="__new">+ New account…</option>';
-  function naTaxHtml(na) {
-    if (!IS_TYPES.includes(na.type)) return '<span class="lbl">Schedule C line</span><span class="muted">Balance sheet</span>';
-    return `<label for="na-tax">Schedule C line</label><select class="inp" id="na-tax" data-na="taxLine"><option value=""${na.taxLine === '' ? ' selected' : ''}>Not mapped</option>${SCHED_LINES.map(([k, v]) => opt(k, v, na.taxLine)).join('')}</select>`;
-  }
+  const naTaxHtml = na => taxField(na.type, 'na-tax', na.taxLine, 'data-na="taxLine"');
   function acctDraftHtml() {
     const na = state.review.newAcct; if (!na) return '';
     const n = na.ids.length;
-    return `<div class="draft" id="acct-draft" role="group" aria-labelledby="na-h">
-      <h4 id="na-h">${n === 1 ? 'New account for 1 row' : `New account for ${n.toLocaleString()} selected rows`}</h4>
-      <div class="toolbar">
-        <div class="field" style="flex:0 1 110px;min-width:90px"><label for="na-no">Number</label><input class="inp num" id="na-no" data-na="no" inputmode="numeric" value="${esc(na.no)}" autocomplete="off" aria-describedby="na-err"></div>
-        <div class="field grow"><label for="na-name">Name</label><input class="inp" id="na-name" data-na="name" value="${esc(na.name)}" autocomplete="off" aria-describedby="na-err"></div>
-        <div class="field"><label for="na-type">Type</label><select class="inp" id="na-type" data-na="type">${ACCT_TYPES.map(t => opt(t, t, na.type)).join('')}</select></div>
-        <div class="field grow" id="na-tax-wrap">${naTaxHtml(na)}</div>
+    return draftPanel('draft', 'acct-draft', 'na-h', n === 1 ? 'New account for 1 row' : `New account for ${n.toLocaleString()} selected rows`, `<div class="toolbar">
+        ${newAcctFields({ no: 'na-no', name: 'na-name', type: 'na-type', taxWrap: 'na-tax-wrap' }, k => `data-na="${k}"`, na, 'na-err', naTaxHtml(na))}
       </div>
       <p class="msg err" id="na-err" role="alert">${esc(na.err)}</p>
-      <div class="toolbar"><button class="btn btn-primary btn-sm" type="button" data-na-save>Add account and assign</button><button class="btn btn-sm" type="button" data-na-cancel>Cancel</button></div>
-    </div>`;
+      <div class="toolbar"><button class="btn btn-primary btn-sm" type="button" data-na-save>Add account and assign</button><button class="btn btn-sm" type="button" data-na-cancel>Cancel</button></div>`);
   }
 
   function txnsHtml() {
@@ -3478,7 +3493,7 @@ main { padding-block: 24px 120px; }
         <td class="desc"><div title="${esc(t.description)}">${esc(descOf(t))}</div>${subOf(t) ? `<span class="sub">${esc(subOf(t))}</span>` : ''}</td>
         <td class="money num">${fmtCents(t.amountCents)}</td>
         <td class="c-acct"><select id="acct-${t.id}" data-assign="${t.id}" data-lazy="1" class="${t.offsetAccountNo == null ? 'unc' : ''}" aria-label="Account for ${esc(clip(t.description, 40))}">${t.offsetAccountNo == null ? '<option value="" selected>Uncategorized</option>' : `<option value="${t.offsetAccountNo}" selected>${esc(acctName(t.offsetAccountNo))}</option>`}</select></td>
-        <td class="c-st"><div class="st">${statusHtml3(t)}<button class="linkish" type="button" data-mkrule="${t.id}" title="Create a rule from this row" aria-label="Create a rule from ${esc(clip(t.description, 40))}">+ Rule</button></div></td>
+        <td class="c-st"><div class="st">${txnStatusHtml(t)}<button class="linkish" type="button" data-mkrule="${t.id}" title="Create a rule from this row" aria-label="Create a rule from ${esc(clip(t.description, 40))}">+ Rule</button></div></td>
       </tr>`;
     }).join('');
     const srcOpts = opt('', 'All files', R.source) + state.sources.filter(s => s.status === 'ready' && s.mapped).map(s => opt(s.id, s.name, R.source)).join('');
@@ -3488,7 +3503,7 @@ main { padding-block: 24px 120px; }
     const bulk = n ? `<div class="bulkbar" role="region" aria-label="Bulk assign">
         <b class="num">${n.toLocaleString()} selected</b>
         <label class="sr-only" for="bulk-acct">Assign selected rows to</label>
-        <select class="inp" id="bulk-acct">${acctOptions(null, { none: 'Uncategorized', noneValue: '0', extra: '<option value="" selected disabled>Assign to…</option><option value="auto">Automatic (undo my choices)</option>', tail: NA_NEW }).replace('<option value="0" selected>', '<option value="0">')}</select>
+        <select class="inp" id="bulk-acct">${acctOptions(null, { none: 'Uncategorized', noneValue: '0', extra: '<option value="" selected disabled>Assign to…</option><option value="auto">Automatic (undo my choices)</option>', tail: NA_NEW, noneSel: false })}</select>
         <button class="btn btn-primary btn-sm" type="button" id="bulk-apply">Apply</button>
         <button class="linkish" type="button" id="bulk-clear">Clear selection</button>
         ${n < N ? `<button class="linkish" type="button" id="sel-all">Select all ${N.toLocaleString()} shown</button>` : ''}
@@ -3502,10 +3517,10 @@ main { padding-block: 24px 120px; }
       </div>
       ${bulk}
       ${rows.length ? `<label class="sel-page-m" for="sel-page-m"><input type="checkbox" id="sel-page-m" ${allPageSel ? 'checked' : ''}>Select all ${rows.length.toLocaleString()} on this page</label>` : ''}
-      <div class="grid-wrap"><table class="grid txg" aria-label="Transactions"><thead><tr>
+      ${gridWrap(`<table class="grid txg" aria-label="Transactions"><thead><tr>
         <th><input type="checkbox" id="sel-page" ${allPageSel ? 'checked' : ''} aria-label="Select all rows on this page"></th>
         <th class="nw">Date</th><th>File</th><th>Description</th><th class="money">Amount</th><th>Account</th><th>Status</th>
-      </tr></thead><tbody>${body || `<tr><td colspan="7" class="muted">No transactions match these filters.</td></tr>`}</tbody></table></div>
+      </tr></thead><tbody>${body || `<tr><td colspan="7" class="muted">No transactions match these filters.</td></tr>`}</tbody></table>`)}
       <div class="pager"><span class="num">${N ? `${(from + 1).toLocaleString()}–${(from + rows.length).toLocaleString()} of ${N.toLocaleString()}` : '0 rows'}</span>
         <span class="btns"><button class="btn btn-sm" type="button" data-pg="-1" ${R.page === 0 ? 'disabled' : ''}>Previous</button><span class="num" style="align-self:center">Page ${R.page + 1} of ${pages}</span><button class="btn btn-sm" type="button" data-pg="1" ${R.page >= pages - 1 ? 'disabled' : ''}>Next</button></span></div>`;
   }
@@ -3528,10 +3543,10 @@ main { padding-block: 24px 120px; }
     for (const r of rules) compileRule(r);
     const rows = rules.map(r => `<tr data-rid="${r.id}">
       <td><input class="inp num" type="number" step="1" data-rf="priority" value="${r.priority}" style="width:72px" aria-label="Priority"></td>
-      <td><select class="inp" data-rf="match" aria-label="Match type">${Object.entries(MATCH_LABEL).map(([k, v]) => opt(k, v, r.match)).join('')}</select></td>
+      <td>${matchSel(r.match, 'data-rf="match" aria-label="Match type"')}</td>
       <td style="min-width:280px"><input title="${esc(r.pattern)}" class="inp ${r.error && r.error !== 'Choose an account.' ? 'bad-in' : ''}" id="rp-${r.id}" data-rf="pattern" value="${esc(r.pattern)}" autocomplete="off" spellcheck="false" aria-label="Pattern">${r.error ? `<div class="msg err">${esc(r.error)}</div>` : ''}</td>
-      <td><select class="inp" data-rf="direction" aria-label="Direction">${Object.entries(DIR_LABEL).map(([k, v]) => opt(k, v, r.direction)).join('')}</select></td>
-      <td><select class="inp ${r.accountNo == null ? 'bad-in' : ''}" data-rf="accountNo" aria-label="Account" style="min-width:200px">${acctOptions(r.accountNo, { none: null })}</select></td>
+      <td>${dirSel(r.direction, 'data-rf="direction" aria-label="Direction"')}</td>
+      <td>${ruleAcctSel(`inp ${r.accountNo == null ? 'bad-in' : ''}`, 'data-rf="accountNo" aria-label="Account" style="min-width:200px"', r.accountNo)}</td>
       <td class="money num">${state.rulesDirty ? '—' : r.hits}</td>
       <td><button class="icon-btn" type="button" data-rule-del="${r.id}" aria-label="Delete rule ${esc(clip(r.pattern, 30))}">${XICON}</button></td>
     </tr>`).join('');
@@ -3539,8 +3554,8 @@ main { padding-block: 24px 120px; }
       <div class="toolbar"><button class="btn btn-sm" type="button" data-rule-add>Add rule</button><button class="btn btn-primary btn-sm" type="button" data-rerun>Re-run rules</button>${setupBar()}
         <span class="msg warn" id="rules-dirty" role="status" ${state.rulesDirty ? '' : 'hidden'}>Rules changed. Re-run them to update the transactions (your own choices are kept).</span></div>
       <p class="bal-note">Rules run from the lowest priority number up; the first match wins. "Contains words" matches whole words, ignoring punctuation. Your own choices and matched transfers always beat rules. Save setup file keeps your rules and chart of accounts for next time; opening one replaces them or merges into them, as set by "When opening" (with Undo).</p>
-      <div class="grid-wrap"><table class="grid" aria-label="Rules"><thead><tr><th>Priority</th><th>Match</th><th>Pattern</th><th>Direction</th><th>Account</th><th class="money">Rows</th><th><span class="sr-only">Delete</span></th></tr></thead>
-      <tbody>${rows || '<tr><td colspan="7" class="muted">No rules. Every row is uncategorized until you assign it.</td></tr>'}</tbody></table></div>`;
+      ${gridWrap(`<table class="grid" aria-label="Rules"><thead><tr><th>Priority</th><th>Match</th><th>Pattern</th><th>Direction</th><th>Account</th><th class="money">Rows</th><th><span class="sr-only">Delete</span></th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="7" class="muted">No rules. Every row is uncategorized until you assign it.</td></tr>'}</tbody></table>`)}`;
   }
 
   // P17-1 (D92): the Add row lives in state.review.coaNew, so a failed Add keeps every field, and its Schedule C line starts
@@ -3559,8 +3574,6 @@ main { padding-block: 24px 120px; }
   function coaHtml() {
     const N = coaNewDraft();
     const used = new Map(); for (const t of state.txns) if (t.offsetAccountNo != null) used.set(t.offsetAccountNo, (used.get(t.offsetAccountNo) || 0) + 1);
-    const typeSel = (sel, attrs) => `<select class="inp" ${attrs}>${ACCT_TYPES.map(t => opt(t, t, sel)).join('')}</select>`;
-    const taxSel = (sel, attrs) => `<select class="inp" ${attrs}><option value=""${sel === '' ? ' selected' : ''}>Not mapped</option>${SCHED_LINES.map(([k, v]) => opt(k, v, sel)).join('')}</select>`;
     const rows = state.coa.map(a => `<tr data-no="${a.no}">
       <td>${a.system ? `<span class="num">${a.no}</span>` : `<input class="inp num" id="cn-${a.no}" data-cf="no" value="${a.no}" inputmode="numeric" style="width:90px" aria-label="Number of ${esc(a.name)}">`}</td>
       <td style="min-width:220px"><input class="inp" id="cm-${a.no}" data-cf="name" value="${esc(a.name)}" aria-label="Name of account ${a.no}"></td>
@@ -3573,14 +3586,14 @@ main { padding-block: 24px 120px; }
       <div class="toolbar">${setupBar(true)}</div>
       ${coaImportHtml()}
       <p class="bal-note">System accounts can be renamed, but not renumbered, retyped or deleted. Accounts for your files follow the file name until you rename them. The type decides where an account lands: Income Statement (Revenue, COGS, Expense) or Balance Sheet. The Schedule C line decides where an income or expense account lands on the Schedule C worksheet in the Excel file; any account that isn't mapped shows up as a difference there.</p>
-      <div class="grid-wrap"><table class="grid" aria-label="Chart of accounts"><thead><tr><th>No</th><th>Name</th><th>Type</th><th>Schedule C line</th><th class="money">Rows assigned</th><th><span class="sr-only">Delete</span></th></tr></thead>
+      ${gridWrap(`<table class="grid" aria-label="Chart of accounts"><thead><tr><th>No</th><th>Name</th><th>Type</th><th>Schedule C line</th><th class="money">Rows assigned</th><th><span class="sr-only">Delete</span></th></tr></thead>
       <tbody>${rows}
         <tr><td><input class="inp num" id="coa-new-no" value="${esc(N.no)}" inputmode="numeric" placeholder="e.g. 6120" style="width:90px" aria-label="New account number"></td>
           <td><input class="inp" id="coa-new-name" value="${esc(N.name)}" placeholder="New account name" aria-label="New account name"></td>
           <td>${typeSel(N.type, 'id="coa-new-type" aria-label="New account type"')}</td>
           <td>${taxSel(IS_TYPES.includes(N.type) ? N.taxLine : '', `id="coa-new-tax" aria-label="New account Schedule C line"${IS_TYPES.includes(N.type) ? '' : ' disabled'}`)}</td><td></td>
           <td><button class="btn btn-sm" type="button" data-coa-add>Add</button></td></tr>
-      </tbody></table></div>`;
+      </tbody></table>`)}`;
   }
   function msgHtml(tab) {
     const m = state.review.msg;
@@ -3611,7 +3624,7 @@ main { padding-block: 24px 120px; }
   function rerender() { categorize(); renderReview(); }
 
   // ---------- Categorize step (P14-2, D84) ----------
-  // Shell: an empty state only. Later tickets fill #cz-files (categories read from the files) and #cz-sugg (suggestions).
+  // Two cards: #cz-files (categories read from the files) and #cz-sugg (suggestions).
   // Guarded like renderReview; it never touches state.review.msg (syncSourceAccounts' reset notice is shown on Review).
   let czBusy = false, czAgain = false;
   function renderCategorize() {
@@ -3704,16 +3717,16 @@ main { padding-block: 24px 120px; }
     if (el) el.focus({ preventScroll: true });
   }
 
-  // Apply the ticked groups. Account choice, "also add a rule" per group; one Undo through undoSetup (same snapshot shape as naSave).
+  // Apply the ticked groups. Account choice, "also add a rule" per group; one Undo through restoreSnapshot (same snapshot shape as naSave).
   function czApply() {
     const Z = state.cz, picked = czGroups.filter(czPicked); if (!picked.length) return;
     const before = snapAll();
     let nRules = 0;
     for (const g of picked) if (Z.rule.has(g.key)) {
       // P14-4 (D86): priority 5 sits between the user's own "+ Rule" rules (1) and the seeds (10 and up)
-      const r = { id: 'r' + (ruleSeq + 1), match: 'contains', pattern: g.mk, accountNo: czAcct(g), direction: g.dir, priority: 5, hits: 0 };
-      if (state.applied.some(x => ruleKey(x) === ruleKey(r))) continue;   // an exact copy is already there
-      ruleSeq++; state.rules.push(r); state.applied.push({ ...r }); nRules++;
+      const f = { match: 'contains', pattern: g.mk, accountNo: czAcct(g), direction: g.dir, priority: 5 };
+      if (hasRule(f)) continue;   // an exact copy is already there, applied or still pending (P17-3, B5)
+      addRule(f, { applied: true }); nRules++;
     }
     if (nRules) categorize();
     const byAcct = new Map();   // rows the rules did not put on the account are assigned by hand, one assignTxns per account
@@ -3730,7 +3743,7 @@ main { padding-block: 24px 120px; }
     Z.msg = { kind: 'ok', text };
     renderCategorize();
     const h = $('cz-sugg-h'); if (h) h.focus();
-    showToast(`Applied ${plural(picked.length, 'suggestion')}`, () => { undoSetup(before); Z.msg = null; categorize(); renderCategorize(); });
+    undoToast(`Applied ${plural(picked.length, 'suggestion')}`, before, () => { Z.msg = null; categorize(); renderCategorize(); });
   }
   const czBox = $('cz-sugg');
   czBox.addEventListener('change', e => {
@@ -3770,10 +3783,7 @@ main { padding-block: 24px 120px; }
   // Numbers a new account must avoid: the chart plus the other new accounts in this list.
   const czfUsed = except => { const u = new Set(state.coa.map(a => a.no)); for (const [k, ch] of state.cz.file) if (k !== except && ch.goes === 'new' && ch.form && /^\d+$/.test(ch.form.no)) u.add(+ch.form.no); return u; };
   const czfDest = (it, ch) => ch.goes === 'acct' && acctByNo.has(ch.no) && ch.no !== TRANSFER_NO ? acctName(ch.no) : ch.goes === 'new' && ch.form ? `${ch.form.no || '(no number)'} · ${ch.form.name}` : null;
-  function czfTaxHtml(n, key, f) {
-    if (!IS_TYPES.includes(f.type)) return '<span class="lbl">Schedule C line</span><span class="muted">Balance sheet</span>';
-    return `<label for="czf-tax-${n}">Schedule C line</label><select class="inp" id="czf-tax-${n}" data-czf="taxLine" data-k="${esc(key)}"><option value=""${f.taxLine === '' ? ' selected' : ''}>Not mapped</option>${SCHED_LINES.map(([k, v]) => opt(k, v, f.taxLine)).join('')}</select>`;
-  }
+  const czfTaxHtml = (n, key, f) => taxField(f.type, `czf-tax-${n}`, f.taxLine, `data-czf="taxLine" data-k="${esc(key)}"`);
   function czfGoesOptions(it, ch, full) {
     const sel = g => ch.goes === g ? ' selected' : '';
     const extra = `<option value="__new"${sel('new')}>New account: ${esc(clip(ch.form ? ch.form.name : it.name, 40))}</option><option value="__transfer"${sel('transfer')}>Transfer between my accounts</option><option value="__ignore"${sel('ignore')}>Leave uncategorized</option>`;
@@ -3784,10 +3794,7 @@ main { padding-block: 24px 120px; }
     const n = czN('f:' + it.key), k = esc(it.key), f = ch.form;
     const counts = `${plural(it.n, 'row')} · ${it.rows.in.toLocaleString()} in · ${it.rows.out.toLocaleString()} out`;
     const form = ch.goes === 'new' && f ? `<div class="cz-ctl" role="group" aria-label="New account for ${esc(it.name)}">
-        <div class="field" style="flex:0 1 110px;min-width:90px"><label for="czf-no-${n}">Number</label><input class="inp num" id="czf-no-${n}" data-czf="no" data-k="${k}" inputmode="numeric" value="${esc(f.no)}" autocomplete="off" aria-describedby="czf-err-${n}"></div>
-        <div class="field grow"><label for="czf-name-${n}">Name</label><input class="inp" id="czf-name-${n}" data-czf="name" data-k="${k}" value="${esc(f.name)}" autocomplete="off" aria-describedby="czf-err-${n}"></div>
-        <div class="field"><label for="czf-type-${n}">Type</label><select class="inp" id="czf-type-${n}" data-czf="type" data-k="${k}">${ACCT_TYPES.map(t => opt(t, t, f.type)).join('')}</select></div>
-        <div class="field grow" id="czf-taxw-${n}">${czfTaxHtml(n, it.key, f)}</div>
+        ${newAcctFields({ no: `czf-no-${n}`, name: `czf-name-${n}`, type: `czf-type-${n}`, taxWrap: `czf-taxw-${n}` }, key => `data-czf="${key}" data-k="${k}"`, f, `czf-err-${n}`, czfTaxHtml(n, it.key, f))}
       </div>` : '';
     return `<li class="cz-item" data-k="${k}">
       <p class="czf-cat"><b>${esc(it.name)}</b> <span class="cz-sub">${counts}</span></p>
@@ -3810,7 +3817,7 @@ main { padding-block: 24px 120px; }
     const box = $('cz-files'), Z = state.cz, all = catSrcs();
     if (!all.length) { box.hidden = true; box.innerHTML = ''; return; }
     box.hidden = false;
-    const plan = catPlan(), live = new Set(plan.items.map(it => it.key)), liveR = new Set(plan.rules.map(r => r.id));
+    const plan = czfPlan = catPlan(), live = new Set(plan.items.map(it => it.key)), liveR = new Set(plan.rules.map(r => r.id));
     for (const k of [...Z.file.keys()]) if (!live.has(k)) Z.file.delete(k);
     for (const k of [...Z.fileRule.keys()]) if (!liveR.has(k)) Z.fileRule.delete(k);
     const lines = all.filter(s => !catPending(s)).map(s => s.catOn === catSig(s)
@@ -3827,7 +3834,9 @@ main { padding-block: 24px 120px; }
     }
     box.innerHTML = `<div class="cz-wrap czf"><h3 id="cz-files-h" tabindex="-1">Categories from your files</h3>${body}${lines}</div>`;
   }
-  function czfRulesRefresh() { const el = $('czf-rules'); if (el) el.innerHTML = czfRulesHtml(catPlan()); }
+  // The plan does not depend on what is typed in a new account's number or name, so the keystroke refresh reuses the one renderFilesCard made;
+  // categorize() (any change to rows, rules or files) drops it (P17-3, S8).
+  function czfRulesRefresh() { const el = $('czf-rules'); if (el) el.innerHTML = czfRulesHtml(czfPlan || (czfPlan = catPlan())); }
   // The whole batch is checked first; one bad entry changes nothing.
   function czfValidate(plan) {
     const errs = new Map(), used = new Set(state.coa.map(a => a.no));
@@ -3835,12 +3844,9 @@ main { padding-block: 24px 120px; }
       const ch = czfChoice(it); ch.err = '';
       if (ch.goes === 'acct' && !acctByNo.has(ch.no)) { errs.set(it.key, 'Choose an account.'); continue; }
       if (ch.goes !== 'new') continue;
-      const f = ch.form, p = parseAcctNo(f.no);
-      if (p.error) errs.set(it.key, p.error);
-      else if (used.has(p.no)) errs.set(it.key, `${p.no} is used by another new account in this list.`);
-      else if (!String(f.name).trim()) errs.set(it.key, 'Enter a name for the new account.');
-      else if (!ACCT_TYPES.includes(f.type)) errs.set(it.key, 'Choose a type for the new account.');
-      else used.add(p.no);
+      const f = ch.form, bad = acctError(f.no, f.name, f.type, used);
+      if (bad) errs.set(it.key, bad);
+      else used.add(parseAcctNo(f.no).no);
     }
     return errs;
   }
@@ -3860,7 +3866,13 @@ main { padding-block: 24px 120px; }
     let nNew = 0;
     for (const it of plan.items) {
       const ch = czfChoice(it); let c;
-      if (ch.goes === 'new') { const f = ch.form; coaAdd(f.no, f.name, f.type, IS_TYPES.includes(f.type) ? f.taxLine : ''); c = { kind: 'acct', no: +f.no }; nNew++; }
+      if (ch.goes === 'new') {
+        const f = ch.form, bad = coaAdd(f.no, f.name, f.type, IS_TYPES.includes(f.type) ? f.taxLine : '');
+        if (bad) {   // czfValidate checked every entry first, so this is not expected; if it ever happens nothing is kept (P17-3)
+          restoreSnapshot(before); Z.fileErr = bad; renderCategorize(); return;
+        }
+        c = { kind: 'acct', no: +f.no }; nNew++;
+      }
       else if (ch.goes === 'acct') c = ch.no === TRANSFER_NO ? { kind: 'transfer' } : { kind: 'acct', no: ch.no };
       else c = { kind: ch.goes };
       state.cats.set(it.key, c);
@@ -3870,9 +3882,9 @@ main { padding-block: 24px 120px; }
     for (const r of plan.rules) {
       if (Z.fileRule.has(r.id) && !Z.fileRule.get(r.id)) continue;
       const c = state.cats.get(r.catKey); if (!c || c.kind !== 'acct') continue;
-      const rule = { id: 'r' + (ruleSeq + 1), match: 'contains', pattern: r.mk, accountNo: c.no, direction: r.dir, priority: 5, hits: 0, fromFile: true };
-      if (state.applied.some(x => ruleKey(x) === ruleKey(rule)) || state.rules.some(x => ruleKey(x) === ruleKey(rule))) continue;
-      ruleSeq++; state.rules.push(rule); state.applied.push({ ...rule }); nRules++;
+      const f = { match: 'contains', pattern: r.mk, accountNo: c.no, direction: r.dir, priority: 5, fromFile: true };
+      if (hasRule(f)) continue;
+      addRule(f, { applied: true }); nRules++;
     }
     Z.file.clear(); Z.fileRule.clear();
     categorize();
@@ -3880,7 +3892,7 @@ main { padding-block: 24px 120px; }
     Z.msg = null;
     renderCategorize();
     const h = $('cz-files-h'); if (h) h.focus();
-    showToast(`Applied ${plural(plan.items.length, 'category', 'categories')}: ${plural(nNew, 'new account')}, ${plural(nRules, 'rule')}, ${plural(rows, 'row')} set from your file`, () => { undoSetup(before); Z.file.clear(); Z.fileRule.clear(); Z.fileErr = ''; renderCategorize(); });
+    undoToast(`Applied ${plural(plan.items.length, 'category', 'categories')}: ${plural(nNew, 'new account')}, ${plural(nRules, 'rule')}, ${plural(rows, 'row')} set from your file`, before, () => { Z.file.clear(); Z.fileRule.clear(); Z.fileErr = ''; renderCategorize(); });
   }
   function czfSkip() {
     const plan = catPlan(); if (!plan.srcs.length) return;
@@ -3889,7 +3901,7 @@ main { padding-block: 24px 120px; }
     state.cz.file.clear(); state.cz.fileRule.clear(); state.cz.fileErr = '';
     categorize(); renderCategorize();
     const h = $('cz-files-h'); if (h) h.focus();
-    showToast(`Skipped the categories in ${plural(plan.srcs.length, 'file')}`, () => { undoSetup(before); renderCategorize(); });
+    undoToast(`Skipped the categories in ${plural(plan.srcs.length, 'file')}`, before, () => renderCategorize());
   }
   const czfBox = $('cz-files');
   czfBox.addEventListener('input', e => {
@@ -3986,7 +3998,7 @@ main { padding-block: 24px 120px; }
     R.newAcct = null; if (na.origin === 'bulk-acct') R.sel.clear();
     setMsg('txns', 'ok', `Added ${no} · ${name} and assigned ${n.toLocaleString()} row${n === 1 ? '' : 's'}.`);
     renderReview(); const o = $(na.origin); if (o) o.focus();
-    showToast(`Added ${no} · ${name}`, () => { undoSetup(before); renderReview(); });
+    undoToast(`Added ${no} · ${name}`, before, () => renderReview());
   }
   $('review-body').addEventListener('keydown', e => { if (e.key === 'Escape' && e.target.closest && e.target.closest('#acct-draft')) { e.preventDefault(); naCancel(); } });
 
@@ -4095,8 +4107,7 @@ main { padding-block: 24px 120px; }
     if (b.hasAttribute('data-draft-save')) {
       const d = R.draft, probe = { ...d };
       if (!compileRule(probe)) { const c = $('draft-count'); if (c) c.innerHTML = `<span class="err">${esc(probe.error)}</span>`; return; }
-      const r = { id: 'r' + (++ruleSeq), match: d.match, pattern: d.pattern.trim(), accountNo: d.accountNo, direction: d.direction, priority: d.priority, hits: 0 };
-      state.rules.push(r); state.applied.push({ ...r }); R.draft = null;   // applies now; other pending rule edits stay pending
+      const r = addRule({ match: d.match, pattern: d.pattern.trim(), accountNo: d.accountNo, direction: d.direction, priority: d.priority }, { applied: true }); R.draft = null;   // applies now; other pending rule edits stay pending
       categorize();
       setMsg('txns', 'ok', `Rule added. It now sets ${r.hits.toLocaleString()} row${r.hits === 1 ? '' : 's'} to ${acctName(r.accountNo)}.`);
       renderReview(); return;
@@ -4108,8 +4119,7 @@ main { padding-block: 24px 120px; }
     if (b.hasAttribute('data-ci-cancel')) { R.coaImport = null; renderReview(); return; }
     if (b.hasAttribute('data-rerun')) { const d = state.rulesDirty; commitRules(); categorize(); setMsg('rules', 'ok', d ? 'Rules re-run. Your own choices were kept.' : 'Rules re-run. Nothing changed.'); renderReview(); return; }
     if (b.hasAttribute('data-rule-add')) {
-      const r = { id: 'r' + (++ruleSeq), match: 'contains', pattern: '', accountNo: null, direction: 'any', priority: 1, hits: 0 };
-      state.rules.push(r); state.rulesDirty = true; R.msg = null; renderReview(); const p = $('rp-' + r.id); if (p) p.focus();
+      const r = addRule({ pattern: '', accountNo: null, direction: 'any', priority: 1 }); state.rulesDirty = true; R.msg = null; renderReview(); const p = $('rp-' + r.id); if (p) p.focus();
       return;
     }
     if (b.dataset.ruleDel) {
@@ -4183,13 +4193,16 @@ main { padding-block: 24px 120px; }
 
   // ---------- Books check (P4-2) ----------
   // Same math the workbook formulas do. tbCheck = debits − credits; bsCheck = assets − (liabilities + equity + net income).
+  let booksOfRuns = 0;   // test-only count (read through __stb, D38): booksOf runs once per export (P17-3, S8)
   function booksOf(J) {
+    if (STB_TEST) booksOfRuns++;
     const t = { Asset: 0, Liability: 0, Equity: 0, Revenue: 0, COGS: 0, Expense: 0, unknown: 0 };
     for (const [no, c] of J.net) { const a = acctByNo.get(no); t[a ? a.type : 'unknown'] += c; }
     const revenue = -t.Revenue, cogs = t.COGS, expenses = t.Expense, ni = revenue - cogs - expenses;
     const assets = t.Asset, liabilities = -t.Liability, equity = -t.Equity;
     let unc = 0; for (const x of state.txns) if (x.amountCents && x.offsetAccountNo == null) unc++;
-    return { revenue, cogs, expenses, ni, assets, liabilities, equity, unknown: t.unknown, unc,
+    let tDr = 0, tCr = 0; for (const c of J.net.values()) { tDr += Math.max(0, c); tCr += Math.max(0, -c); }   // trial-balance totals, shared by the preview and the workbook
+    return { revenue, cogs, expenses, ni, assets, liabilities, equity, unknown: t.unknown, unc, tDr, tCr,
       tbCheck: J.dr - J.cr, bsCheck: assets - (liabilities + equity + ni), clearing: J.net.get(TRANSFER_NO) || 0,
       off: J.srcs.filter(s => reconcile(s).state === 'off') };
   }
@@ -4272,12 +4285,12 @@ main { padding-block: 24px 120px; }
       const c = J.net.get(no), a = acctByNo.get(no);
       return `<tr><td class="num nw">${no}</td><td>${esc(a ? a.name : 'Not in the chart of accounts')}</td><td class="nw c-type">${a ? a.type : '—'}</td><td class="money num">${c > 0 ? fmtCents(c) : ''}</td><td class="money num">${c < 0 ? fmtCents(-c) : ''}</td></tr>`;
     }).join('');
-    const tDr = [...J.net.values()].reduce((s, c) => s + Math.max(0, c), 0), tCr = [...J.net.values()].reduce((s, c) => s + Math.max(0, -c), 0);
+    const { tDr, tCr } = B;
     $('export-tb').innerHTML = `<div class="list-head"><h3>Trial balance</h3><span class="num">${usDate(J.first)} – ${usDate(J.last)}</span></div>
-      <div class="tab-body"><div class="grid-wrap" tabindex="0" role="region" aria-label="Trial balance preview"><table class="grid" aria-label="Trial balance"><thead><tr><th class="nw">No</th><th>Account</th><th class="c-type">Type</th><th class="money">Debit</th><th class="money">Credit</th></tr></thead>
+      <div class="tab-body">${gridWrap(`<table class="grid" aria-label="Trial balance"><thead><tr><th class="nw">No</th><th>Account</th><th class="c-type">Type</th><th class="money">Debit</th><th class="money">Credit</th></tr></thead>
       <tbody>${rows || '<tr><td colspan="5" class="muted">No activity.</td></tr>'}
         <tr class="tot"><td></td><td>Total</td><td class="c-type"></td><td class="money num">${fmtCents(tDr)}</td><td class="money num">${fmtCents(tCr)}</td></tr>
-        <tr class="chk"><td></td><td>Debits − credits</td><td class="c-type"></td><td class="money num" colspan="2">${balancedHtml(tDr - tCr)}</td></tr></tbody></table></div></div>`;
+        <tr class="chk"><td></td><td>Debits − credits</td><td class="c-type"></td><td class="money num" colspan="2">${balancedHtml(tDr - tCr)}</td></tr></tbody></table>`, 'Trial balance preview')}</div>`;
   }
   function setDl(kind, text) {
     if (state.exp) state.exp.status = { kind, text };
@@ -4320,7 +4333,7 @@ main { padding-block: 24px 120px; }
     try {
       let blob;
       try {
-        const buf = await buildWorkbook(X.J);
+        const buf = await buildWorkbook(X.J, X.B);
         blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       } catch (err) { setDl('bad', (err && err.message) || 'The workbook could not be built.'); return; }
       const r = await saveBlob(blob, name, { again: 'Download workbook', tooLarge: 'The workbook is too large to save here. Try fewer statements at a time.' });
@@ -4382,9 +4395,8 @@ main { padding-block: 24px 120px; }
   }
   function moneyCols(ws, cols) { for (const k of cols) ws.getColumn(k).numFmt = XL_MONEY; }
 
-  async function buildWorkbook(J = buildJournal()) {
+  async function buildWorkbook(J = buildJournal(), B = booksOf(J)) {   // B: the books check prepareExport already made for this J (P17-3)
     const ExcelJS = await loadLib('exceljs').catch(() => { throw new Error('The Excel writer did not load. Check your connection and try again.'); });
-    const B = booksOf(J);
     const wb = new ExcelJS.Workbook();
     wb.creator = 'Statements to Books'; wb.created = new Date();
     wb.calcProperties.fullCalcOnLoad = true;
@@ -4472,7 +4484,7 @@ main { padding-block: 24px 120px; }
       F(`ROUND((SUM(${GL_G})-SUM(${GL_H}))-SUM(F${a0}:F${a1}),2)`, dollars(B.unknown))];   // P13-2: no 0.00 float residue after Excel recalculates
     tbS.getRow(r).font = { italic: true };
     const unl = r; r++;
-    const tDr = [...J.net.values()].reduce((s, c) => s + Math.max(0, c), 0), tCr = [...J.net.values()].reduce((s, c) => s + Math.max(0, -c), 0);
+    const { tDr, tCr } = B;
     const tot = r; tbS.getRow(r).values = [null, 'Total', '', F(`SUM(D${a0}:D${unl})`, dollars(tDr)), F(`SUM(E${a0}:E${unl})`, dollars(tCr)), F(`SUM(F${a0}:F${unl})`, dollars(J.dr - J.cr))];
     tbS.getRow(r).font = { bold: true }; for (const k of [4, 5, 6]) tbS.getRow(r).getCell(k).border = TOTAL;
     r++;
@@ -4554,14 +4566,14 @@ main { padding-block: 24px 120px; }
     const asOf = new Map(J.accts.map(g => [g.no, stmtEnd(g.srcs[g.srcs.length - 1])]));
     bsS.getCell('D4').value = 'Balance as of'; styleHeader(bsS.getRow(4));
     for (let k = 5; k < bchk; k++) { const no = bsS.getCell(`A${k}`).value; if (asOf.has(no) && asOf.get(no)) { bsS.getCell(`D${k}`).value = xlDate(asOf.get(no)); bsS.getCell(`D${k}`).numFmt = XL_DATE; } }
-    const staleDate = J.last ? addDays(J.last, -31) : null;
+    const staleDate = J.last ? addDays(J.last, -STALE_DAYS) : null;
     const stale = [...asOf].filter(([, d]) => d && staleDate && d < staleDate);
     if (stale.length) {
       const w = bchk + 2;
-      bsS.getCell(`A${w}`).value = `Not one date: ${stale.length === 1 ? '1 account shows a balance' : `${stale.length} accounts show balances`} more than 31 days older than ${usDate(J.last)} (${stale.map(([no, d]) => `${no} as of ${usDate(d)}`).join(', ')}). Each balance is as of its statement's closing date (column D); add the later statements, or read these balances as of their own dates.`;
+      bsS.getCell(`A${w}`).value = `Not one date: ${stale.length === 1 ? '1 account shows a balance' : `${stale.length} accounts show balances`} more than ${STALE_DAYS} days older than ${usDate(J.last)} (${stale.map(([no, d]) => `${no} as of ${usDate(d)}`).join(', ')}). Each balance is as of its statement's closing date (column D); add the later statements, or read these balances as of their own dates.`;
       bsS.getCell(`A${w}`).font = { color: { argb: 'FF9C0006' }, bold: true };
     }
-    const bsAsOf = { range: sref(SHEET.bs, `$D$5:$D$${bchk - 1}`), crit: J.last ? `"<"&(DATE(${+J.last.slice(0, 4)},${+J.last.slice(5, 7)},${+J.last.slice(8, 10)})-31)` : null, n: stale.length };
+    const bsAsOf = { range: sref(SHEET.bs, `$D$5:$D$${bchk - 1}`), crit: J.last ? `"<"&(DATE(${+J.last.slice(0, 4)},${+J.last.slice(5, 7)},${+J.last.slice(8, 10)})-${STALE_DAYS})` : null, n: stale.length };
 
     const scOuts = [];   // P10-5 / P13-3: per tax year { name, Y, r31, v31, chk, chkv, niRow, niV, note } for the Overview
     // Schedule C (P9-1, D69): your books laid out on the lines of Schedule C (Form 1040). Left: the form (A–D). Right (F–K): one
@@ -4786,7 +4798,7 @@ main { padding-block: 24px 120px; }
       const offN = J.accts.filter(g => { const end = g.srcs[g.srcs.length - 1].endingCents; return end != null && (J.net.get(g.no) || 0) !== end; }).length;
       line('Accounts whose ending balance per books doesn\'t match the statement', offRange ? `SUMPRODUCT(ISNUMBER(${offRange})*(${offRange}<>0))` : '0', offN, SHEET.tb, { count: 1, check: 'warn' });
       line(`Transactions in ${UNC_IN} / ${UNC_OUT} (uncategorized)`, `COUNTIF(${GL_A},${UNC_IN})+COUNTIF(${GL_A},${UNC_OUT})`, B.unc, SHEET.gl, { count: 1, check: 'warn' });
-      line('Accounts whose balance is more than 31 days older than the balance sheet', bsAsOf.crit ? `COUNTIFS(${bsAsOf.range},${bsAsOf.crit})` : '0', bsAsOf.n, SHEET.bs, { count: 1, check: 'warn' });   // P13-4
+      line(`Accounts whose balance is more than ${STALE_DAYS} days older than the balance sheet`, bsAsOf.crit ? `COUNTIFS(${bsAsOf.range},${bsAsOf.crit})` : '0', bsAsOf.n, SHEET.bs, { count: 1, check: 'warn' });   // P13-4
       // P13-2 (D78): balances on the wrong side of their normal balance (e.g. a loan repaid that was never booked), and money that
       // probably isn't income: transfers with no other side, and payments or refunds credited to a card. Live on the TB / Transactions.
       { const F_ = ref(SHEET.tb, `$F$${a0}:$F$${a1}`), G_ = ref(SHEET.tb, `$G$${a0}:$G$${a1}`), A_ = ref(SHEET.tb, `$A$${a0}:$A$${a1}`);
@@ -4829,11 +4841,11 @@ main { padding-block: 24px 120px; }
   }
 
   // Test hook: only when the page URL carries ?stb-test (the test harness). The published page exposes nothing (D38).
-  if (/[?&]stb-test\b/.test(location.search)) window.__stb = { APP_VERSION, canonTarget, state, commitRules, crossChecks, fileHash, go, STEPS, render, addFiles, detectKind, decodeText, tidyGrid, detectHeader, autoMap, validateMap, looksDate, looksMoney, parseMoney, parseDate, inferYear, fmtCents, buildTxns, reconcile, autoBalances,
+  if (STB_TEST) window.__stb = { get booksOfRuns() { return booksOfRuns; }, get catPlanRuns() { return catPlanRuns; }, APP_VERSION, canonTarget, state, commitRules, crossChecks, fileHash, go, STEPS, render, addFiles, detectKind, decodeText, tidyGrid, detectHeader, autoMap, validateMap, looksDate, looksMoney, parseMoney, parseDate, fmtCents, buildTxns, reconcile, autoBalances,
     loadPdfjs, pdfLines, parsePdfLines, parsePdfSource, applyPdfSigns, resolvePdfSign, sectionOf, isPdfMoney, isPdfDate, pdfDate, statementPeriod,
     syncSourceAccounts, coaAdd, coaEdit, coaDelete, taxLineOf, SCHED_LINES, DEFAULT_COA, compileRule, normDesc, categorize, matchTransfers, assignTxns, unlinkPair, reviewStats, filteredTxns, renderReview, renderCategorize, suggestPattern,
     buildJournal, booksOf, buildWorkbook, downloadWorkbook, prepareExport, workbookName, SHEET,
-    setupData, parseSetup, applySetup, undoSetup, saveSetup, openSetupFile, SEED_RULES,
+    setupData, parseSetup, applySetup, restoreSnapshot, saveSetup, openSetupFile, SEED_RULES,
     importResult, applyImport, coaTypeOf, autoMapCoa, coaImportPlan, openCoaFile, applyCoaImport, companySlug,
     linkSources, unlinkSource, groupOf, joinsOf, leadOf, groupStatus, isPeriods,
     nextAcctNo, defaultTaxLine,   // P14-3 (D85)
