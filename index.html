@@ -1,4 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net blob:; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob:; worker-src blob:; base-uri 'none'; form-action 'none'">
+<script>/* P24-1: frame-ancestors works only as a header, which GitHub Pages can't send, so a framed copy stops before the app loads */ if (window.top !== window.self) { window.stop(); document.documentElement.innerHTML = ''; }</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
@@ -606,7 +608,8 @@ main { padding-block: 24px 120px; }
       <li>To add or rename accounts, use the Chart of accounts tab here and export again. A number that isn't on the Chart of Accounts sheet is flagged in Excel.</li>
     </ul>
     <h3>Privacy</h3>
-    <p>Your files are read inside this browser tab and are never uploaded. The page loads its reading and Excel tools from the jsDelivr CDN, and its fonts from Google Fonts; no file data is sent to either, or anywhere else. Check it yourself: open your browser's DevTools, choose the Network tab, then add a file. You will see the tools load from jsDelivr, but no request carries your file. Nothing is saved when you close the page.</p>
+    <p>Your files are read inside this browser tab and are never uploaded. The page loads its reading and Excel tools from the jsDelivr CDN and from this site, and its fonts from Google Fonts; no file data is sent to any of them, or anywhere else. Check it yourself: open your browser's DevTools, choose the Network tab, then add a file. You will see the tools load, but no request carries your file. Nothing is saved when you close the page.</p>
+    <p>This page sets no cookies. Your browser may hold Google Analytics and HubSpot cookies from adroitie.com, Adroitie's main site. The browser sends them to this site's host, GitHub, with each page request, but this page never reads them or sends them anywhere.</p>
     <h3>Limits</h3>
     <ul>
       <li>US number and date formats only (1,234.56 and MM/DD/YYYY).</li>
@@ -983,11 +986,12 @@ main { padding-block: 24px 120px; }
   }
 
   // ---------- Readers (P1-3) ----------
-  // Libraries load on first use so the page paints fast; pinned versions from jsdelivr (npm mirror).
+  // Libraries load on first use so the page paints fast; pinned versions from jsdelivr (npm mirror) or this site.
   const LIBS = {
     // integrity = SHA-256 of the exact npm file, checked against jsDelivr's published hash (D39). A changed file won't run.
     papa: { url: 'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js', global: 'Papa', sri: 'sha256-uOhwxdKyl3LxDJ+pppPIuJaqyFQO1nAePMYwTGg/69s=' },
-    xlsx: { url: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js', global: 'XLSX', sri: 'sha256-yVBhl8r4CaB1tt7h2g02+xnacVj/6KiOewyWxdhiPJk=' },
+    // P24-1: SheetJS 0.20.3 (fixes CVE-2023-30533 and CVE-2024-22363) is not on npm, so this site serves SheetJS's own build
+    xlsx: { url: '/xlsx-0.20.3.full.min.js', global: 'XLSX', sri: 'sha256-zAFRMKqFIefwiPiImOupSczcv7ON8L0Sm0S3Jzw6b0E=' },
     exceljs: { url: 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js', global: 'ExcelJS', sri: 'sha256-fknaaFiOJQ27i7oZDSyqirN4fMAoS9odiy+AXE33Qsk=' },   // P4: workbook writer
   };
   // One load per library: the first call starts it, later calls share it, a failure is forgotten so the next call retries (P17-4).
@@ -1565,14 +1569,23 @@ main { padding-block: 24px 120px; }
   }
 
   // ---------- PDF reading (P2) ----------
-  // pdf.js v4 ships only as an ES module, so it is loaded with import() (D25). The worker is set by URL:
-  // pdf.js wraps a cross-origin worker in a blob and, if the frame blocks that, runs it on the main thread.
+  // pdf.js v4 ships only as an ES module, so it is loaded with import() (D25). import() can't carry an integrity hash, so
+  // both files are fetched with one (P24-1, as D39) and only the checked bytes are imported, from a blob: URL. The worker
+  // is set by that URL too; if the frame blocks workers, pdf.js imports it and runs it on the main thread.
   const PDFJS_BASE = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/';
+  const PDFJS_SRI = { 'pdf.min.mjs': 'sha256-J/wqBXoA+SpDNK0G4X29clmRKVTp+392QAvMpf0ZCpw=', 'pdf.worker.min.mjs': 'sha256-G6oYRMicgKWyeXyRbnWrKSVL5G2OnLU8tjZNeq2EvjY=' };
+  async function pinnedBlobUrl(f) {
+    const res = await fetch(PDFJS_BASE + f, { integrity: PDFJS_SRI[f] });   // a changed file rejects here
+    if (!res.ok) throw new Error('load failed');
+    return URL.createObjectURL(new Blob([await res.arrayBuffer()], { type: 'text/javascript' }));
+  }
   function loadPdfjs() {
-    return loadOnce('pdfjs', () => import(PDFJS_BASE + 'pdf.min.mjs').then(lib => {
-      lib.GlobalWorkerOptions.workerSrc = PDFJS_BASE + 'pdf.worker.min.mjs';
+    return loadOnce('pdfjs', async () => {
+      const [main, worker] = await Promise.all([pinnedBlobUrl('pdf.min.mjs'), pinnedBlobUrl('pdf.worker.min.mjs')]);
+      const lib = await import(main);
+      lib.GlobalWorkerOptions.workerSrc = worker;
       return lib;
-    }));
+    });
   }
 
   // P2-1: text items → lines. Items within 2pt of a line's y join it; items close in x merge into one cell.
