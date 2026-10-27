@@ -173,6 +173,7 @@ main { padding-block: 24px 120px; }
 .points b { font-weight: 600; color: var(--fg); }
 .points span { color: var(--muted); }
 .app-foot { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: var(--fs-xs); color: var(--muted); }
+.app-foot a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }   /* P23-2: the publisher link */
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); }
 
@@ -459,6 +460,12 @@ main { padding-block: 24px 120px; }
 .cz-wrap h3 { font-size: var(--fs-md); font-weight: 600; }
 .cz-sub { font-size: var(--fs-sm); color: var(--muted); }
 .cz-list { list-style: none; margin: 0; padding: 0; display: grid; }
+/* Payee list and download section on the check screen (P22-2, D100) */
+.py-wrap { padding: 16px 20px; }
+.py-wrap h3 { margin: 0 0 4px; }
+.py .c-acct select { width: 100%; min-width: 180px; }
+.py .py-more { margin-top: 8px; }
+.dl-sec { margin-top: 32px; }
 .cz-item { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); min-width: 0; }
 .cz-pick, .cz-rule { display: flex; align-items: flex-start; gap: 10px; font-size: var(--fs-sm); cursor: pointer; min-width: 0; overflow-wrap: anywhere; }
 .cz-pick { font-weight: 600; }
@@ -534,6 +541,7 @@ main { padding-block: 24px 120px; }
   .cz-ev, .cz-ctl, .cz-ex { padding-left: 0; }
   .cz-ctl .field { max-width: none; }
   .cz-ctl select { min-height: 44px; }
+  .py .c-acct select { min-height: 44px; }   /* P22-2 */
   .cz-ex summary { min-height: 44px; display: flex; align-items: center; }
   /* stepper, action bar, panel chrome */
   .stepper { gap: 0; padding-block: 12px 6px; }
@@ -577,12 +585,16 @@ main { padding-block: 24px 120px; }
     <button class="icon-btn" type="button" id="help-close" aria-label="Close"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button></div>
   <div class="help-body">
     <ol class="help-steps">
-      <li><b>Upload.</b> Add bank or credit-card statements as CSV, Excel (XLSX/XLS) or PDF. Each file becomes one account in your books. If you upload several months of the same account as separate files, combine them on the Map step so they share one account and one opening balance. PDFs must contain text: a scanned PDF can't be read, so download a CSV instead.</li>
-      <li><b>Map.</b> Check which columns hold the date, description and amount. Enter the opening balance from the statement (for a card, the amount owed). Add the ending balance too: the page checks that opening + transactions = ending. If every sign is backwards, it offers to flip them.</li>
-      <li><b>Categorize.</b> Before the row-by-row review, the page suggests accounts for uncategorized rows that look like rows you already assigned, and shows categories read from your files. Nothing changes until you apply a suggestion.</li>
-      <li><b>Review.</b> Keyword rules assign accounts; you fix the rest, one row or many at once. Transfers between two of your uploaded accounts (for example a card payment from your bank) are matched and posted to 1950 Transfer Clearing, which should end at 0; they are not income or expense. Anything left goes to 4999 Uncategorized Income or 6999 Uncategorized Expense and counts in net income, so net income and Schedule C aren't final until you assign it.</li>
-      <li><b>Export.</b> Download one Excel workbook: an Overview of the results and checks, then the General Ledger, Trial Balance, Income Statement, Balance Sheet and Schedule C, plus the transactions and chart of accounts. Totals are live formulas on the ledger, so a change in Excel flows through. The income statement can show one column per month or quarter.</li>
+      <li><b>Add files.</b> Drop bank or credit-card statements as PDF, CSV or Excel (XLSX/XLS). Each file becomes one account in your books. Columns and balances are read for you; only a file the page can't read on its own opens Statement settings. PDFs must contain text: a scanned PDF can't be read, so download a CSV instead.</li>
+      <li><b>Check and download.</b> Built-in rules sort most transactions into a Schedule C category. The payee list has one line per payee: pick another category and every row from that payee follows, and a rule is saved for it. Every row, Rules and Chart of accounts below the list are there for detail, including new accounts. Transfers between two of your uploaded accounts (for example a card payment from your bank) are matched and posted to 1950 Transfer Clearing, which should end at 0. Anything left goes to 4999 Uncategorized Income or 6999 Uncategorized Expense and counts in net income. Then download one Excel workbook: an Overview of the results and checks, the General Ledger, Trial Balance, Income Statement, Balance Sheet and Schedule C, plus the transactions and chart of accounts. Totals are live formulas on the ledger, so a change in Excel flows through. The income statement can show one column per month or quarter.</li>
+      <li><b>Statement settings (optional).</b> Open it from the check screen to add opening and ending balances (the page checks that opening + transactions = ending), flip backwards signs, or combine several months of one account.</li>
     </ol>
+    <h3>Personal and business in one account</h3>
+    <ul>
+      <li>Anything you bought for yourself or your home (groceries, rent or mortgage, school, your own car loan) goes to Owner Draws. It isn't a business cost and doesn't lower your tax.</li>
+      <li>Money from a job paycheck, unemployment, a tax refund or your own savings goes to Owner Contributions. It isn't business income, so it doesn't raise your tax.</li>
+      <li>Categories are guessed from the store name, so look at Target, Walmart, Amazon, Costco, restaurants and phone bills. If a purchase was partly for the business, keep the business part and move the rest to Owner Draws.</li>
+    </ul>
     <h3>Cash basis only</h3>
     <p>Income and expenses are counted when money moves through these accounts. There are no receivables, payables, accruals, depreciation or inventory, and a loan payment is posted in full to the one account you choose; it isn't split into principal and interest. The books are a starting point: review the categories before you rely on the numbers, and check with your accountant for tax or financial reporting.</p>
     <p>The chart of accounts is set up for a sole proprietor who files Schedule C (Form 1040): each income and expense account carries a Schedule C line, and the Excel file has a Schedule C sheet for each tax year that totals them. Your own income-tax payments and health insurance are not business expenses, so they are suggested as Owner Draws. This is bookkeeping support, not tax advice.</p>
@@ -617,10 +629,10 @@ main { padding-block: 24px 120px; }
   <section class="panel" data-step="upload" aria-labelledby="h-upload">
     <div class="panel-head">
       <h2 id="h-upload" tabindex="-1">Turn your statements into books</h2>
-      <p>Add bank and credit-card statements as PDF, CSV or Excel files. You get one Excel workbook with a general ledger, trial balance, income statement, balance sheet and Schedule C.</p>
+      <p>Drop your bank and credit-card statements (PDF, CSV or Excel). Every transaction is sorted into a Schedule C category for you. Check it, then download one Excel workbook with a general ledger, trial balance, income statement, balance sheet and Schedule C.</p>
     </div>
     <ul class="points" id="upload-points">
-      <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg><b>Private</b><span>Files are read in this browser tab and never uploaded. Free, no sign-up, and nothing is kept when you close the page.</span></li>
+      <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg><b>Private</b><span>Files are read in this browser tab and never uploaded. Free, no sign-up, and nothing is kept when you close the page. To check, open your browser's DevTools, choose the Network tab and add a file: no request carries it.</span></li>
       <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M6.8 10.2 9 12.4l4.2-4.8"/></svg><b>Reconciles each statement</b><span>Opening balance plus transactions is compared with the ending balance you enter, and any difference is shown before you download. Debits must equal credits to download.</span></li>
       <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="4" width="14" height="12" rx="1.5"/><path d="M3 8h14M3 12h14M8 4v12"/></svg><b>Excel you can keep editing</b><span>Totals are live formulas on the ledger, so a change in Excel flows through every report.</span></li>
     </ul>
@@ -641,54 +653,46 @@ main { padding-block: 24px 120px; }
       <div class="list-head"><h3>Statements</h3><span class="num" id="source-count">0 files</span></div>
       <div class="empty" id="source-empty">
         <strong>No statements yet</strong>
-        <span>Add one file per statement. You can mix banks and cards, and combine months of the same account on the next step.</span>
+        <span>Add one file per statement. You can mix banks and cards.</span>
       </div>
       <ul class="sources" id="sources"></ul>
     </div>
   </section>
 
-  <!-- Step 2: Map -->
+  <!-- Statement settings: shown only when a file needs it, or from the link on the check screen (P22-2, D100) -->
   <section class="panel" data-step="map" aria-labelledby="h-map" hidden>
     <div class="panel-head">
-      <h2 id="h-map" tabindex="-1">Map columns and check balances</h2>
-      <p>Confirm which column holds the date, description, and amount for each file. Enter the opening balance so each account can be reconciled to its statement.</p>
+      <h2 id="h-map" tabindex="-1">Statement settings</h2>
+      <p>Pick the date, description and amount columns where we couldn't tell. Balances are optional: add them to check the books against each statement.</p>
     </div>
     <div class="map-list" id="map-list"></div>
   </section>
 
-  <!-- Step 3: Categorize (P14-2, D84) -->
-  <section class="panel" id="panel-categorize" data-step="categorize" aria-labelledby="h-categorize" hidden>
-    <div class="panel-head">
-      <h2 id="h-categorize" tabindex="-1">Suggested categories</h2>
-      <p>Categories from your files, and accounts suggested from rows you already assigned. Nothing changes until you apply it. You can also skip this and categorize every row on the Review step.</p>
-    </div>
-    <div class="card" id="cz-files" hidden></div>
-    <div class="card" id="cz-sugg"></div>
-  </section>
-
-  <!-- Step 4: Review -->
+  <!-- Check and download: categorize, review and export on one screen (P22-2, D100) -->
   <section class="panel" id="panel-review" data-step="review" aria-labelledby="h-review" hidden>
     <div class="panel-head">
-      <h2 id="h-review" tabindex="-1">Review transactions</h2>
-      <p>Rules assign each transaction to an account. Review what's left, fix anything wrong, and match transfers between your accounts.</p>
+      <h2 id="h-review" tabindex="-1">Check and download</h2>
+      <p>Each transaction is already sorted into a category. Fix any payee that looks wrong, then download your Excel file. Anything you leave uncategorized still downloads.</p>
+      <p><button class="linkish" type="button" id="skip-dl">Skip to download</button></p>
     </div>
+    <div class="card" id="payees"></div>
     <div class="card" id="review-summary"></div>
+    <div class="card" id="cz-files" hidden></div>
+    <div class="card" id="cz-sugg" hidden></div>
     <div class="card">
       <div class="tabs" role="tablist" aria-label="Review sections" id="review-tabs"></div>
       <div class="tab-body" id="review-body" role="tabpanel"></div>
     </div>
-  </section>
-
-  <!-- Step 5: Export -->
-  <section class="panel" id="panel-export" data-step="export" aria-labelledby="h-export" hidden>
-    <div class="panel-head">
-      <h2 id="h-export" tabindex="-1">Download your books</h2>
-      <p>One Excel workbook that opens on an overview of the results and checks, then the General Ledger, Trial Balance, Income Statement, Balance Sheet and Schedule C. Totals are live formulas, so edits in Excel flow through.</p>
+    <div class="dl-sec" id="dl-sec">
+      <div class="panel-head">
+        <h2 id="h-export" tabindex="-1">Download your Excel file</h2>
+        <p>One workbook that opens on an overview of the results and checks, then the General Ledger, Trial Balance, Income Statement, Balance Sheet and Schedule C. Totals are live formulas, so edits in Excel flow through.</p>
+      </div>
+      <div class="card" id="export-summary"></div>
+      <div class="card" id="export-tb"></div>
     </div>
-    <div class="card" id="export-summary"></div>
-    <div class="card" id="export-tb"></div>
   </section>
-  <footer class="app-foot" id="app-foot">BookBuilder Lite <span class="num" id="app-ver"></span>.</footer>
+  <footer class="app-foot" id="app-foot">BookBuilder Lite <span class="num" id="app-ver"></span> by <a href="https://adroitie.com/">Adroitie</a>.</footer>
 </main>
 
 <input id="setup-input" type="file" accept=".json,application/json" hidden>
@@ -707,7 +711,7 @@ main { padding-block: 24px 120px; }
 (() => {
   'use strict';
   if (!document.documentElement.lang) document.documentElement.lang = 'en';   // the host wrapper has no lang (P5-4)
-  const APP_VERSION = '2.1';   // P10-2: footer, and the Overview sheet (P10-5)
+  const APP_VERSION = '2.2';   // P10-2: footer, and the Overview sheet (P10-5)
   document.getElementById('app-ver').textContent = 'v' + APP_VERSION;
 
   // ---------- App state (money in integer cents throughout) ----------
@@ -736,7 +740,7 @@ main { padding-block: 24px 120px; }
   // complete(): the step is done enough to move past it.
   // Reachability of step i = every step before i is complete.
   const STEPS = [
-    { id: 'upload', name: 'Upload', hint: 'Add statements',
+    { id: 'upload', name: 'Add files', hint: 'Your statements',
       complete: () => state.sources.length > 0 && state.sources.every(s => s.status === 'ready'),
       blocker: () => {
         const ss = state.sources;
@@ -744,46 +748,41 @@ main { padding-block: 24px 120px; }
         if (ss.some(s => s.status === 'reading')) return 'Reading files…';
         return 'Remove files that could not be read.';
       } },
-    { id: 'map', name: 'Map', hint: 'Columns & balances',
-      complete: () => state.sources.length > 0 && state.sources.every(s => s.mapped && s.openingCents != null),
+    // P22-2 (D100): Statement settings shows only when a file needs its columns (or the user opens it). Balances never block.
+    { id: 'map', name: 'Settings', hint: 'Only if needed', show: () => state.step === 'map' || state.sources.some(s => s.status === 'ready' && !s.mapped),
+      complete: () => state.sources.length > 0 && state.sources.every(s => s.mapped),
       blocker: () => {
         const n = state.sources.filter(s => !s.mapped).length;
-        if (n) return `Finish the column setup for ${n === 1 ? '1 file' : n + ' files'} (see the red notes).`;
-        const ob = state.sources.filter(s => s.openingCents == null).length;
-        return `Enter the opening balance for ${ob === 1 ? '1 file' : ob + ' files'}.`;
+        return `Finish the column setup for ${n === 1 ? '1 file' : n + ' files'} (see the red notes).`;
       } },
-    // P14-2 (D84): suggestions step; nothing to block on, visiting it changes no books
-    { id: 'categorize', name: 'Categorize', hint: 'Suggestions',
-      complete: () => true, blocker: '' },
-    { id: 'review', name: 'Review', hint: 'Check every row',
-      complete: () => true,  // uncategorized rows post to 4999/6999; export warns (SPEC §4)
+    { id: 'review', name: 'Check & download', hint: 'Categories and Excel',
+      complete: () => true,  // uncategorized rows post to 4999/6999; the download section warns (SPEC §4)
       blocker: '' },
-    { id: 'export', name: 'Export', hint: 'Download workbook',
-      complete: () => false, blocker: '' },
   ];
   const idx = id => STEPS.findIndex(s => s.id === id);
   const firstBlocked = i => { for (let k = 0; k < i; k++) if (!STEPS[k].complete()) return k; return -1; };
   const canEnter = id => firstBlocked(idx(id)) === -1;
+  const shown = () => STEPS.filter(s => !s.show || s.show());   // the steps in the stepper right now
 
   // ---------- Router ----------
   // Hash is a bare token (#upload, #map, …) so a link can open a step; state stays in memory.
   function go(id, { focus = true } = {}) {
+    const toDl = id === 'export';
+    if (id === 'categorize' || id === 'export') id = 'review';   // P22-2 (D100): old links land on the sections of the check screen
     if (idx(id) === -1) id = 'upload';
     if (!canEnter(id)) id = STEPS[firstBlocked(idx(id))].id;
     if (state.step !== id) hideToast();   // P6-12 / N1: an Undo belongs to the step it was offered on
     state.step = id;
     if (id === 'map') renderMap();
-    if (id === 'categorize') { state.cz.msg = null; state.cz.fileErr = ''; syncSourceAccounts(); categorize(); renderCategorize(); }   // P14-2 (D84)
-    if (id === 'review') { syncSourceAccounts(); categorize(); renderReview(); }
-    if (id === 'export') prepareExport();
+    if (id === 'review') { state.cz.msg = null; state.cz.fileErr = ''; syncSourceAccounts(); categorize(); renderReview(); prepareExport(); }
     for (const p of document.querySelectorAll('.panel')) p.hidden = p.dataset.step !== id;
     // P10-1 (LINT N7): always, also after a hashchange, so a refused #export doesn't stay in the URL (replaceState fires no hashchange)
     try { history.replaceState(null, '', '#' + id); } catch (_) {}
     render();
     if (focus) {
-      const h = document.getElementById('h-' + id);
+      const h = document.getElementById(toDl && state.step === 'review' ? 'h-export' : 'h-' + id);
       if (h) h.focus({ preventScroll: true });
-      window.scrollTo({ top: 0 });
+      if (toDl && h) h.scrollIntoView({ block: 'start' }); else window.scrollTo({ top: 0 });
     }
   }
 
@@ -792,8 +791,8 @@ main { padding-block: 24px 120px; }
   const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg>';
 
   function render() {
-    const cur = idx(state.step);
-    $('stepper').innerHTML = STEPS.map((s, i) => {
+    const vis = shown(), cur = vis.findIndex(s => s.id === state.step);
+    $('stepper').innerHTML = vis.map((s, i) => {
       const done = i < cur && s.complete();
       const locked = !canEnter(s.id);
       const cls = ['step', i === cur ? 'is-current' : '', done ? 'is-done' : '', locked ? 'is-locked' : ''].join(' ');
@@ -806,25 +805,25 @@ main { padding-block: 24px 120px; }
           ${status ? `<span class="sr-only">, ${status}</span>` : ''}
         </button></li>`;
     }).join('');
-    $('step-counter').textContent = `Step ${cur + 1} of ${STEPS.length} · ${STEPS[cur].name}`;
+    $('step-counter').textContent = `Step ${cur + 1} of ${vis.length} · ${vis[cur].name}`;
 
     const back = $('btn-back'), next = $('btn-next'), reason = $('next-reason');
     back.disabled = cur === 0;
-    if (cur === STEPS.length - 1) {
+    if (state.step === 'review') {
       const X = state.exp;
-      next.textContent = X && X.busy ? 'Building workbook…' : 'Download workbook'; next.dataset.to = '';
+      next.textContent = X && X.busy ? 'Building workbook…' : 'Download Excel'; next.dataset.to = '';
       const blocked = !X || !X.J ? 'Preparing the books…' : X.B.tbCheck !== 0 ? 'Debits and credits don\'t match, so the workbook can\'t be built.' : '';
       next.disabled = !!blocked || !!(X && X.busy);
       reason.textContent = blocked;
       next.title = blocked;
     } else {
-      const nextStep = STEPS[cur + 1];
+      const nextStep = vis[cur + 1];
       // P14-1 (D82): rewrite the label only when it changes. A blur render() between mousedown and mouseup used to replace
       // the span under the pointer, and Chrome then drops the click (the "0 isn't accepted" report on desktop widths).
       if (next.dataset.to !== nextStep.id) { next.innerHTML = `Continue<span class="to"> to ${nextStep.name}</span>`; next.dataset.to = nextStep.id; }
-      const ok = STEPS[cur].complete();
+      const ok = vis[cur].complete();
       next.disabled = !ok;
-      const b = STEPS[cur].blocker, msg = ok ? '' : (typeof b === 'function' ? b() : b);
+      const b = vis[cur].blocker, msg = ok ? '' : (typeof b === 'function' ? b() : b);
       reason.textContent = msg;
       next.title = msg;
     }
@@ -840,12 +839,12 @@ main { padding-block: 24px 120px; }
     const b = e.target.closest('[data-go]');
     if (b && !b.disabled) go(b.dataset.go);
   });
-  $('btn-back').addEventListener('click', () => { const i = idx(state.step); if (i > 0) go(STEPS[i - 1].id); });
+  $('btn-back').addEventListener('click', () => { const v = shown(), i = v.findIndex(s => s.id === state.step); if (i > 0) go(v[i - 1].id); });
   // P8-3 (U-C): publish the action bar's real height (it grows on phones when a reason line shows) for scroll-padding and the toast.
   const actionbar = document.querySelector('.actionbar');
   const syncBarH = () => document.documentElement.style.setProperty('--bar-h', actionbar.offsetHeight + 'px');
   syncBarH(); if (window.ResizeObserver) new ResizeObserver(syncBarH).observe(actionbar);
-  $('btn-next').addEventListener('click', () => { const i = idx(state.step); if (i < STEPS.length - 1) go(STEPS[i + 1].id); else downloadWorkbook(); });
+  $('btn-next').addEventListener('click', () => { const v = shown(), i = v.findIndex(s => s.id === state.step); if (state.step !== 'review') go(v[i + 1].id); else { prepareExport(); downloadWorkbook(); } });
   window.addEventListener('hashchange', () => go(location.hash.slice(1)));
   // Help dialog: native <dialog> gives focus handling and Esc to close; focus returns to the button.
   const help = $('help');
@@ -1156,7 +1155,8 @@ main { padding-block: 24px 120px; }
     /^\d{4}[/-]\d{1,2}[/-]\d{1,2}$/,                             // 2024-06-03, 2024/06/03
     /^\d{1,2}[/-]\d{1,2}([/-]\d{2,4})?\*?$/,                 // 06/03/24, 06/03, 01/13/2026*
     /^\d{1,2}\.\d{1,2}\.\d{2,4}$/,                                // 02.01.2026 (dotted needs a year, else 9.02 reads as a date)
-    /^[A-Za-z]{3,9}\.? \d{1,2}(st|nd|rd|th)?(,? \d{4})?\*?$/,     // Jul 8, Jul 8th, Jan 5, 2026
+    /^[A-Za-z]{3,9}\.? \d{1,2}(st|nd|rd|th)?((, ?| )\d{4})?\*?$/, // Jul 8, Jul 8th, Jan 5, 2026, Jan 5,2026 (P23-3)
+    /^[A-Za-z]{3,9}-\d{1,2}-\d{4}$/, /^\d{1,2}-[A-Za-z]{3,9}-\d{4}$/,  // Jan-15-2024, 15-Jan-2024 (P23-3)
     /^\d{1,2} [A-Za-z]{3,9}\.?(,? \d{4})?$/,                      // 8 Jul, 8 Jul 2024
   ];
   const looksDate = v => typeof v === 'string' && v.length <= 32 && RE_DATE.some(r => r.test(v.trim().replace(RE_TIME, '').trim()));
@@ -1333,7 +1333,7 @@ main { padding-block: 24px 120px; }
       const heads = grid[header].map(v => norm(v)), free = cols.filter(c => heads[c] && ![m.date, m.transDate, m.desc, m.amount, m.debit, m.credit, m.balance].includes(c));
       for (const re of CAT_HEADS) {
         const c = free.find(c => re.test(heads[c]) && catTextual(rows, c));
-        if (c != null) { m.category = c; notes.push(`Using "${grid[header][c]}" as the category column. You review these categories on the next step.`); break; }
+        if (c != null) { m.category = c; notes.push(`Using "${grid[header][c]}" as the category column. You review these categories on the next screen.`); break; }
       }
     }
     src.map = m; src.mapNotes = notes;
@@ -1389,8 +1389,9 @@ main { padding-block: 24px 120px; }
     if (!t) return { blank: true };
     let neg = 0, crdr = 0;
     t = t.replace(/^=\s*/, '');                                             // "= 1,234.56"
-    const suffix = t.match(/\s*\b(CR|DR)\.?$/i);
+    const suffix = t.match(/(?:\s*\b|(?<=\d))(CR|DR)\.?$/i);                  // "1,234.56 CR", P23-3: "1,234.56CR"
     if (suffix) { crdr = suffix[1].toUpperCase() === 'DR' ? -1 : 1; t = t.slice(0, suffix.index).trim(); }
+    t = t.replace(/^(?:US\$|USD|\$)\s*(?=\()/i, '');                          // P23-3: "$(1,234.56)", the accounting text form
     if (/^\(.*\)$/.test(t)) { neg++; t = t.slice(1, -1).trim(); }
     t = t.replace(/^(USD|US\$)\s*|\s*USD$/i, '');
     if (/-$/.test(t)) { neg++; t = t.slice(0, -1).trim(); }                  // "1,234.56-"
@@ -1456,7 +1457,7 @@ main { padding-block: 24px 120px; }
     else if (/^\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(t))
       return { error: `"${v}" is in the European date format, which isn't supported. Export the file with US dates (MM/DD/YYYY).` };
     else if ((m = t.match(/^(\d{1,2})[/-](\d{1,2})$/))) { const e = needYear(); if (e) return e; mo = +m[1]; d = +m[2]; y = ctx.year; }
-    else if ((m = t.match(/^([A-Za-z]{3,9})\.? (\d{1,2})(?:st|nd|rd|th)?(?:,? (\d{4}))?$/))) {
+    else if ((m = t.match(/^([A-Za-z]{3,9})\.? (\d{1,2})(?:st|nd|rd|th)?(?:(?:, ?| )(\d{4}))?$/))) {   // P23-3: "January 15,2024"
       mo = monthNo(m[1]); d = +m[2];
       if (m[3]) y = +m[3]; else { const e = needYear(); if (e) return e; y = ctx.year; }
     }
@@ -1464,6 +1465,9 @@ main { padding-block: 24px 120px; }
       d = +m[1]; mo = monthNo(m[2]); if (!mo) return { error: `"${v}" isn't a date.` };
       if (m[3]) y = +m[3]; else { const e = needYear(); if (e) return e; y = ctx.year; }
     }
+    // P23-3: "Jan-15-2024", "15-Jan-2024" (the month is named, so no day/month guess, D23); only with the year
+    else if ((m = t.match(/^([A-Za-z]{3,9})-(\d{1,2})-(\d{4})$/))) { mo = monthNo(m[1]); d = +m[2]; y = +m[3]; }
+    else if ((m = t.match(/^(\d{1,2})-([A-Za-z]{3,9})-(\d{4})$/))) { d = +m[1]; mo = monthNo(m[2]); y = +m[3]; }
     else return { error: `"${v}" isn't a date.` };
     if (!mo || !validYmd(y, mo, d)) return { error: `"${v}" isn't a real date.` };
     return { iso: iso(y, mo, d) };
@@ -2005,7 +2009,7 @@ main { padding-block: 24px 120px; }
             : `<div class="field"><label for="m-debit-${id}">Money out</label><select id="m-debit-${id}" data-m="debit" class="${m.debit == null ? 'missing' : ''}">${colOptions(s, m.debit, false)}</select></div>
                <div class="field"><label for="m-credit-${id}">Money in</label><select id="m-credit-${id}" data-m="credit" class="${m.credit == null ? 'missing' : ''}">${colOptions(s, m.credit, false)}</select></div>`}
           <div class="field"><label for="m-balance-${id}">Running balance</label><select id="m-balance-${id}" data-m="balance">${colOptions(s, m.balance, true, 'None')}</select></div>
-          <div class="field"><label for="m-category-${id}">Category <span class="opt">(optional)</span></label><select id="m-category-${id}" data-m="category"${m.category != null ? ` aria-describedby="m-category-n-${id}"` : ''}>${colOptions(s, m.category, true, 'None')}</select>${m.category != null ? `<span class="bal-note" id="m-category-n-${id}">Categories from this column are reviewed on the next step.</span>` : ''}</div>
+          <div class="field"><label for="m-category-${id}">Category <span class="opt">(optional)</span></label><select id="m-category-${id}" data-m="category"${m.category != null ? ` aria-describedby="m-category-n-${id}"` : ''}>${colOptions(s, m.category, true, 'None')}</select>${m.category != null ? `<span class="bal-note" id="m-category-n-${id}">Categories from this column are reviewed on the next screen.</span>` : ''}</div>
           ${s.needsYear || s.yearOverride ? `<div class="field"><label for="yr-${id}">Statement year <span class="opt">(the dates have no year)</span></label><input class="money-in num ${s.needsYear && !s.yearOverride ? 'bad-in' : ''}" id="yr-${id}" data-year="1" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="e.g. 2025" value="${s.yearOverride || ''}"${s.needsYear && !s.yearOverride ? ` aria-describedby="yr-h-${id}"` : ''}>${s.needsYear && !s.yearOverride ? `<span class="bal-note" id="yr-h-${id}">The year the statement ends in.</span>` : ''}</div>` : ''}
         </div>
         <ul class="notes">${s.mapNotes.map(n => `<li>${esc(n)}</li>`).join('')}${(s.mapWarnings || []).map(n => `<li class="warn">${esc(n)}</li>`).join('')}${s.mapErrors.map(n => `<li class="err">${esc(n)}</li>`).join('')}</ul>
@@ -2129,7 +2133,7 @@ main { padding-block: 24px 120px; }
     const L1 = card ? 'Balance owed at start' : 'Opening balance', L2 = card ? 'Balance owed at end' : 'Ending balance';
     let res;
     const show = c => fmtCents(bookSign(s, c));   // show in the statement's own terms
-    if (r.state === 'none') res = `<p class="recon warn">Enter the ${card ? 'balance owed at the start' : 'opening balance'} from the statement.</p>`;
+    if (r.state === 'none') res = `<p class="recon muted">Not checked. Enter the ${card ? 'balance owed at the start' : 'opening balance'} from the statement to check the books against it (optional).</p>`;
     else if (r.state === 'unchecked') res = `<p class="recon muted">Calculated ${card ? 'balance owed at end' : 'ending balance'}: <b class="num">${show(r.expected)}</b>. Enter the ending balance from the statement to check it.</p>`;
     else if (r.state === 'ok') res = `<p class="recon ok"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>Reconciled. Opening balance plus transactions equals the statement's ending balance.</p>`;
     else {
@@ -2143,7 +2147,7 @@ main { padding-block: 24px 120px; }
     }
     return `<div class="balances">
       <div class="fields">
-        <div class="field"><label for="ob-${id}">${L1}</label><input class="money-in num" id="ob-${id}" data-bal="ob" type="text" inputmode="decimal" autocomplete="off" placeholder="Required" aria-required="true" value="${val(s.obEntered, 'ob')}"></div>
+        <div class="field"><label for="ob-${id}">${L1} <span class="opt">(optional)</span></label><input class="money-in num" id="ob-${id}" data-bal="ob" type="text" inputmode="decimal" autocomplete="off" placeholder="Optional" value="${val(s.obEntered, 'ob')}"></div>
         <div class="field"><label for="eb-${id}">${L2} <span class="opt">(from the statement)</span></label><input class="money-in num" id="eb-${id}" data-bal="eb" type="text" inputmode="decimal" autocomplete="off" placeholder="Optional" value="${val(s.ebEntered, 'eb')}"></div>
         <div class="field acct"><span class="lbl" id="t-l-${id}">Account type</span>
           <div class="seg" role="radiogroup" aria-labelledby="t-l-${id}">
@@ -2386,6 +2390,7 @@ main { padding-block: 24px 120px; }
     [1400, 'Prepaid Expenses', 'Asset'], [1500, 'Equipment', 'Asset'], [1900, 'Security Deposits', 'Asset'], [1950, 'Transfer Clearing', 'Asset', '', 1],
     [2200, 'Payroll Liabilities', 'Liability'], [2300, 'Sales Tax Payable', 'Liability'], [2500, 'Loans Payable', 'Liability'],
     [3000, 'Opening Balance Equity', 'Equity', '', 1], [3100, 'Owner Contributions', 'Equity'], [3200, 'Owner Draws / Distributions', 'Equity'],
+    [3210, 'Owner Draw – Estimated Tax Payments', 'Equity'], [3220, 'Owner Draw – Health Insurance', 'Equity'],
     [4000, 'Gross Receipts or Sales', 'Revenue', 'L1'], [4050, 'Returns & Allowances', 'Revenue', 'L2'], [4100, 'Service Revenue', 'Revenue', 'L1'],
     [4800, 'Interest Income', 'Revenue', 'X'], [4900, 'Other Business Income', 'Revenue', 'L6'], [4999, 'Uncategorized Income', 'Revenue', 'U', 1],
     [5000, 'Purchases (Cost of Goods Sold)', 'COGS', 'L36'], [5100, 'Cost of Labor (COGS)', 'COGS', 'L37'], [5200, 'Materials & Supplies (COGS)', 'COGS', 'L38'], [5300, 'Other Costs (COGS)', 'COGS', 'L39'],
@@ -2484,7 +2489,7 @@ main { padding-block: 24px 120px; }
     indexCoa();
     if (gone.length) {                               // before numbers get reused
       const d = dropAccountRefs(gone);
-      // Tell the user their choices were reset (P5-1 L7); shown on the Review step.
+      // Tell the user their choices were reset (P5-1 L7); shown on the check screen.
       if (d.manual || d.rules) state.review.msg = { tab: 'txns', kind: 'warn', text: `A file was removed, combined with another, or its type changed, so ${[d.manual && `${d.manual} row choice${d.manual === 1 ? '' : 's'} you made`, d.rules && `${d.rules} rule${d.rules === 1 ? '' : 's'}`].filter(Boolean).join(' and ')} that pointed at its account ${d.manual + d.rules === 1 ? 'was' : 'were'} reset. ${d.rules ? 'Pick a new account for those rules on the Rules tab.' : ''}`.trim() };
     }
     for (const s of state.sources) s.coaAccountNo = null;
@@ -2578,27 +2583,78 @@ main { padding-block: 24px 120px; }
   // P6-4 (D48): conservative additions only. Each names a specific payee or a processor's own wording and carries a
   // direction, so a refund or a deposit can't land in an expense (and the reverse). Processor fees are a regex so a
   // chargeback (a sales reversal, not a fee) and words like "COFFEE" in the payee field don't match.
+  // P22-1 (D99, CFO): a default set wide enough that a typical solo business needs no rule of its own. Ordered, first match wins.
+  // Personal spending goes to Owner Draws (an under-claim is safe, an over-claim is not); personal money in to Owner Contributions.
   const SEED_RULES = [
-    // P9-1 (D69), Schedule C: a sole proprietor's own tax payments and health insurance are not business expenses (they go
-    // on Form 1040 / Schedule 1), so they post to Owner Draws; EFTPS stays a payroll-tax deposit.
-    ['STRIPE FEE|SQUARE FEE|PAYPAL FEE|PAYPAL FEES', 6100, 'any'], ['STRIPE|SQUARE', 4000, 'in'], ['ADP|GUSTO|PAYCHEX', 6200, 'any'], ['EFTPS', 6250, 'any'],
-    ['IRS|USATAXPYMT|US TREASURY', 3200, 'out'],
-    ['HEALTH INSURANCE|BLUE CROSS|BLUE SHIELD|KAISER|CIGNA|AETNA|ANTHEM|UNITED HEALTHCARE|HEALTHNET', 3200, 'out'],
-    ['GOOGLE ADS|FACEBK|FACEBOOK ADS|META ADS|LINKEDIN ADS|VISTAPRINT', 6000, 'out'],
-    ['SERVICE FEE|MONTHLY FEE|OVERDRAFT|WIRE FEE|FOREIGN TRANSACTION FEE', 6050, 'any'], ['INTEREST PAID|INTEREST EARNED', 4800, 'in'], ['ADOBE|GOOGLE|MICROSOFT|AWS|GITHUB|APPLE.COM/BILL', 6600, 'any'],
-    ['INTEREST CHARGE|INTEREST CHARGED|FINANCE CHARGE|LOAN INTEREST', 7000, 'out'], ['STAPLES|OFFICE DEPOT|OFFICEMAX|AMAZON|AMZN', 6550, 'out'], ['SECRETARY OF STATE|BUSINESS LICENSE|DMV', 6900, 'out'],
-    ['SHELL|CHEVRON|EXXON|EXXONMOBIL|MOBIL|ARCO|UNION 76|VALERO|SUNOCO|PHILLIPS 66', 6500, 'any'], ['UBER|LYFT|AIRLINE|DELTA|UNITED', 6450, 'out'], ['DOORDASH|GRUBHUB|STARBUCKS', 6400, 'out'],
-    ['COMCAST|VERIZON|AT&T|ATT DES PAYMENT|ATT PAYMENT|T-MOBILE', 6750, 'any'], ['USPS|UPS|FEDEX', 6950, 'any'], [TRANSFER_PATTERN, TRANSFER_NO, 'any'],
-    ['MERCHANT BNKCD|BANKCARD DEPOSIT|AMERICAN EXPRESS DES SETTLEMENT|AMERICAN EXPRESS SETTLEMENT|AMEX SETTLEMENT', 4000, 'in'],
+    // A. Transfers and card-bill payments first, so a store name inside a card payment (TARGET CARD SRVC) never books as spending.
+    [TRANSFER_PATTERN, TRANSFER_NO, 'any'],
+    ['AMERICAN EXPRESS BILL|AMEX EPAYMENT|TARGET CARD SRVC|CAPITAL ONE MOBILE PMT|CHASE CREDIT CRD|CITI CARD ONLINE|DISCOVER E PAYMENT|SYF PAYMNT|CREDIT CARD PAYMENT', TRANSFER_NO, 'any'],
+    ['ELECTRONIC PAYMENT|PAYMENT THANK YOU|AUTOMATIC PAYMENT', TRANSFER_NO, 'in'],   // the card side of a bill payment
+    // B. Processors and platforms. Fees before payouts (D48); a chargeback reverses a sale (D72).
+    ['STRIPE FEE|SQUARE FEE|PAYPAL FEE|PAYPAL FEES', 6100, 'any'],
+    ['SELLER FEES|OLO', 6100, 'out'],
     ['\\bMERCHANT BNKCD\\b.*\\b(DISCOUNT|FEE|INTERCHNG)\\b|\\bAXP DISC(NT|OUNT)\\b', 6100, 'out', 'regex'],
-    ['EMPLOYMENT DEVEL|EDD EFTPMT', 6250, 'out'],
-    ['SO CAL EDISON|SOUTHERN CALIFORNIA EDISON|SO CAL GAS|SOCALGAS|PG&E|SDG&E|LADWP|CON EDISON|DUKE ENERGY|XCEL ENERGY', 6700, 'out'],
-    ['INSURANCE|STATE FARM|GEICO|ALLSTATE|TRAVELERS|HISCOX', 6350, 'out'],
-    ['SYSCO|US FOODS|GORDON FOOD|RESTAURANT DEPOT', 5000, 'out'],
-    // P10-4 (D72): warehouse clubs → Supplies (line 22; Young's call: a small-business default, review mixed-use cards);
-    // a processor chargeback reverses a sale, so it reduces sales on line 2 (Returns & Allowances), never a fee.
-    ["SAM'S CLUB|SAMS CLUB|COSTCO|SMART AND FINAL|SMART & FINAL|BJ'S WHOLESALE", 6560, 'out'],
     ['CHARGEBACK', 4050, 'out'],
+    ['STRIPE|SQUARE', 4000, 'in'],
+    ['MERCHANT BNKCD|BANKCARD DEPOSIT|AMERICAN EXPRESS DES SETTLEMENT|AMERICAN EXPRESS SETTLEMENT|AMEX SETTLEMENT', 4000, 'in'],
+    ['OLO|SHOPIFY|ETSY INC', 4000, 'in'],
+    // Gig payouts: payout wording only (a card refund reads "UBER TRIP" / "DOORDASH*…" and stays for review).
+    ['UBER USA|LYFT INC|DOORDASH INC|GRUBHUB INC|MAPLEBEAR|AMAZON FLEX|UPWORK|FIVERR', 4000, 'in'],
+    // C. Personal money in: W-2 pay, benefits and tax refunds are not business income.
+    ['PAYROLL|DIRECT DEP|DIRECT DEPOSIT|SALARY|ADP|GUSTO|PAYCHEX|BENEFIT PAYMENT|UNEMPLOYMENT|EDD|IRS TREAS|TAX REF', 3100, 'in'],
+    ['\\b(AMAZON|AMZN|EBAY|ETSY|WALMART)\\b.*\\b(PAYOUTS?|PAYMENTS|SETTLEMENT|SELLER)\\b', 4000, 'in', 'regex'],   // marketplace payouts
+    // D. Payroll, and the owner's own taxes and health insurance (D69): equity, on their own draw accounts.
+    ['ADP|GUSTO|PAYCHEX', 6200, 'out'],
+    ['EFTPS', 6250, 'any'],
+    ['EMPLOYMENT DEVEL|EDD EFTPMT', 6250, 'out'],
+    ['IRS|USATAXPYMT|US TREASURY|FRANCHISE TAX BD', 3210, 'out'],
+    ['HEALTH INSURANCE|BLUE CROSS|BLUE SHIELD|KAISER|CIGNA|AETNA|ANTHEM|UNITED HEALTHCARE|HEALTHNET|DELTA DENTAL|HUMANA|COVERED CALIFORNIA|HEALTHCARE GOV', 3220, 'out'],
+    ['LIFE INSURANCE|LIFE INS', 3200, 'out'],   // before INSURANCE
+    // E. Bank fees (after transfers, so "OVERDRAFT PROTECTION TRANSFER FROM" stays a transfer).
+    ['SERVICE FEE|MONTHLY FEE|OVERDRAFT|WIRE FEE|FOREIGN TRANSACTION FEE', 6050, 'any'],
+    ['ATM FEE|NSF|LATE FEE|ANNUAL FEE', 6050, 'any'],
+    // P23-1: a fine paid to a government isn't deductible (Schedule C instructions, line 48), so never Car & Truck.
+    ['PARKING CITATION|PARKING VIOLATION|PARKING TICKET|TOLL VIOLATION|TRAFFIC FINE|TRAFFIC CITATION', 3200, 'out'],
+    // F. Fuel and car (before the personal stores, so COSTCO GAS goes to Auto).
+    ['SHELL|CHEVRON|EXXON|EXXONMOBIL|MOBIL|ARCO|UNION 76|VALERO|SUNOCO|PHILLIPS 66', 6500, 'any'],
+    ['COSTCO GAS|SAMS CLUB FUEL|CIRCLE K|SPEEDWAY|7 ELEVEN|WAWA|SHEETZ|QUIKTRIP|CITGO|BP', 6500, 'any'],
+    ['CAR WASH|PARKING|TOLL|AUTOZONE|JIFFY LUBE', 6500, 'out'],
+    // G. Personal spending → Owner Draws, never an expense. A business-property mortgage goes to 7010 by hand.
+    ['HOME MTG|MORTGAGE|TTC|PROPERTY TAX', 3200, 'out'],
+    ['WELLS FARGO AUTO|AUTO LOAN|PERSONAL LOAN|AFFIRM|STUDENT LOAN|SALLIE MAE|NAVIENT', 3200, 'out'],
+    ['TUITION|UNIVERSITY|UNIV OF', 3200, 'out'],
+    ['TRADER JOE|SPROUTS|VONS|KROGER|SAFEWAY|WHOLE FOODS|ALDI|PUBLIX|H MART|GROCERY', 3200, 'out'],
+    ['WAL MART|WALMART|TARGET|DOLLAR TREE|CVS|WALGREENS|DICK S SPORTING', 3200, 'out'],
+    ['AMAZON PRIME|NETFLIX|SPOTIFY|HULU|DONATION|FRIENDS OF', 3200, 'out'],   // before AMAZON (office)
+    ['ATM WITHDRAWAL', 3200, 'out'],
+    // H. Business expenses.
+    ['GOOGLE ADS|FACEBK|FACEBOOK ADS|META ADS|LINKEDIN ADS|VISTAPRINT', 6000, 'out'],
+    ['YELP|THUMBTACK|NEXTDOOR', 6000, 'out'],
+    ['COMCAST|VERIZON|AT&T|ATT DES PAYMENT|ATT PAYMENT|T-MOBILE', 6750, 'any'],
+    ['XFINITY|SPECTRUM|GOOGLE FI|STARLINK', 6750, 'out'],   // before GOOGLE (software)
+    ['CPA|ATTORNEY|LAW OFFICE|LEGALZOOM|TURBOTAX|H&R BLOCK', 6800, 'out'],
+    ['UPWORK|FIVERR', 6150, 'out'],
+    ['ADOBE|GOOGLE|MICROSOFT|AWS|GITHUB|APPLE.COM/BILL', 6600, 'out'],
+    ['SHOPIFY|QBOOKS|DROPBOX|ZOOM US|CANVA|SQUARESPACE|GODADDY|OPENAI', 6600, 'out'],
+    ['WEWORK|REGUS|PUBLIC STORAGE', 6660, 'out'],
+    ['UNITED RENTALS', 6650, 'out'],
+    ['INSURANCE|STATE FARM|GEICO|ALLSTATE|TRAVELERS|HISCOX|PROGRESSIVE', 6350, 'out'],
+    ['SO CAL EDISON|SOUTHERN CALIFORNIA EDISON|SO CAL GAS|SOCALGAS|PG&E|SDG&E|LADWP|CON EDISON|DUKE ENERGY|XCEL ENERGY|PACIFIC GAS|NATIONAL GRID|WASTE MANAGEMENT', 6700, 'out'],
+    ['USPS|UPS|FEDEX', 6950, 'any'],
+    ['STAMPS COM|PIRATE SHIP', 6950, 'out'],
+    ['SECRETARY OF STATE|BUSINESS LICENSE|DMV|CDTFA|SALES TAX', 6900, 'out'],   // sales tax collected is in gross receipts, so paying it is line 23
+    ['SYSCO|US FOODS|GORDON FOOD|RESTAURANT DEPOT', 5000, 'out'],   // before RESTAURANT (meals)
+    // P10-4 (D72): warehouse clubs → Supplies (line 22; a small-business default, review mixed-use cards).
+    ["SAM'S CLUB|SAMS CLUB|COSTCO|SMART AND FINAL|SMART & FINAL|BJ'S WHOLESALE", 6560, 'out'],
+    ['HOME DEPOT|LOWES|LOWE S|ULINE|CHEFS TOYS|WEBSTAURANT', 6560, 'out'],
+    ['STAPLES|OFFICE DEPOT|OFFICEMAX|AMAZON|AMZN', 6550, 'out'],
+    ['DOORDASH|GRUBHUB|STARBUCKS', 6400, 'out'],
+    ['UBER EATS|IN N OUT|MCDONALD|MCDONALDS|CHICK FIL A|CHIPOTLE|SUBWAY|JERSEY MIKES|RESTAURANT|CAFE|PIZZA|COFFEE', 6400, 'out'],   // before UBER (travel)
+    ['UBER|LYFT|AIRLINE|AIRLINES|DELTA AIR|UNITED AIRLINES|AMERICAN AIRLINES|SOUTHWEST AIRLINES|HOTEL|MARRIOTT|HILTON|AIRBNB|EXPEDIA', 6450, 'out'],
+    ['\\b(DELTA|UNITED|AMERICAN|ALASKA|SOUTHWES|JETBLUE|SPIRIT|FRONTIER|HAWAIIAN)\\s+\\d{6,}', 6450, 'out', 'regex'],   // airline + ticket no.
+    ['UDEMY|COURSERA', 6960, 'out'],
+    ['INTEREST PAID|INTEREST EARNED', 4800, 'in'],
+    ['INTEREST CHARGE|INTEREST CHARGED|FINANCE CHARGE|LOAN INTEREST', 7000, 'out'],
   ];
   let ruleSeq = 0;
   let czfPlan = null;   // the last catPlan() the "Categories from your files" card drew (see czfRulesRefresh); categorize() clears it
@@ -2938,9 +2994,9 @@ main { padding-block: 24px 120px; }
   function crossHtml({ remove = false } = {}) {
     return crossChecks().map(x => x.kind === 'dup'
       ? `<div class="banner bad" role="alert"><span><b>${esc(x.a.name)}</b> and <b>${esc(x.b.name)}</b> share ${x.n.toLocaleString()} transaction${x.n === 1 ? '' : 's'} with the same date and amount. If they are copies of one statement, or statements of one account whose dates overlap, remove one (or the overlapping rows), or those transactions are counted twice.</span>${remove ? `<button class="linkish" type="button" data-remove-src="${x.b.id}">Remove ${esc(x.b.name)}</button>` : ''}</div>`
-      : `<div class="banner"><span><b>${esc(x.b.name)}</b> opens at ${fmtCents(Math.abs(x.b.openingCents))}, exactly where <b>${esc(x.a.name)}</b> ends. If they are back-to-back statements of the same account, combine them so they share one account and one opening balance. Otherwise each file is its own account, and cash${x.a.type === 'card' ? ' (here, the card balance)' : ''} and opening balance equity are counted twice.${remove ? '' : ' Combine them on the Map step.'}</span>${remove ? `<button class="btn btn-sm" type="button" data-link="${x.b.id}" data-link-to="${x.a.id}">Combine into one account</button>` : ''}</div>`).join('')
+      : `<div class="banner"><span><b>${esc(x.b.name)}</b> opens at ${fmtCents(Math.abs(x.b.openingCents))}, exactly where <b>${esc(x.a.name)}</b> ends. If they are back-to-back statements of the same account, combine them so they share one account and one opening balance. Otherwise each file is its own account, and cash${x.a.type === 'card' ? ' (here, the card balance)' : ''} and opening balance equity are counted twice.${remove ? '' : ' Combine them in Statement settings.'}</span>${remove ? `<button class="btn btn-sm" type="button" data-link="${x.b.id}" data-link-to="${x.a.id}">Combine into one account</button>` : ''}</div>`).join('')
       // Combined statements that don't chain: shown on Review and Export (the Map card shows its own message).
-      + (remove ? '' : linkGaps().map(j => `<div class="banner bad" role="alert"><span><b>${esc(j.b.name)}</b> is combined with <b>${esc(j.a.name)}</b>, but doesn't open where it ends (difference ${fmtCents(Math.abs(j.diff))}). A statement may be missing between them, or a balance is wrong, so the account won't match the bank. Check it on the Map step.</span></div>`).join(''));
+      + (remove ? '' : linkGaps().map(j => `<div class="banner bad" role="alert"><span><b>${esc(j.b.name)}</b> is combined with <b>${esc(j.a.name)}</b>, but doesn't open where it ends (difference ${fmtCents(Math.abs(j.diff))}). A statement may be missing between them, or a balance is wrong, so the account won't match the bank. Check it in Statement settings.</span></div>`).join(''));
   }
   function linkGaps() {
     const out = [], seen = new Set();
@@ -3387,7 +3443,7 @@ main { padding-block: 24px 120px; }
   const mapStatus = (s, rc, unmapped) => !s.mapped ? `<span class="pill warn">${unmapped}</span>`
     : rc.state === 'ok' ? '<span class="pill ok">Reconciled</span>'
     : rc.state === 'off' ? '<span class="pill bad">Doesn\'t reconcile</span>'
-    : rc.state === 'none' ? '<span class="pill warn">Needs opening balance</span>'
+    : rc.state === 'none' ? '<span class="pill">Not checked</span>'
     : '<span class="pill">Not checked</span>';
   const mapHead = (s, countPill, status) => `<div class="map-head">
         <h3 id="mh-${s.id}">${esc(s.name)}</h3>
@@ -3410,7 +3466,7 @@ main { padding-block: 24px 120px; }
     const off = srcs.filter(s => reconcile(s).state === 'off').length;
     const warns = [];
     if (st.clearing) warns.push(`<div class="banner bad" role="alert">1950 Transfer Clearing is ${fmtCents(st.clearing)}, not 0. A transfer you assigned to 1950 has no other side in these files. Upload the other statement, or assign the row to the right account.</div>`);
-    if (off) warns.push(`<div class="banner">${off} statement${off === 1 ? ' doesn\'t' : 's don\'t'} reconcile. The books will not match the bank until ${off === 1 ? 'it is' : 'they are'} fixed on the Map step.</div>`);
+    if (off) warns.push(`<div class="banner">${off} statement${off === 1 ? ' doesn\'t' : 's don\'t'} reconcile. The books will not match the bank until ${off === 1 ? 'it is' : 'they are'} fixed in Statement settings.</div>`);
     warns.push(crossHtml());
     return `<div class="summary">
       <dl class="stats" aria-label="Categorization summary">
@@ -3422,6 +3478,7 @@ main { padding-block: 24px 120px; }
         <div><dt>1950 Transfer Clearing</dt><dd class="num ${st.clearing ? 'warn-t' : 'ok-t'}" id="clearing-bal">${fmtCents(st.clearing)}</dd></div>
       </dl>
       ${warns.join('')}
+      <p class="bal-note"><button class="linkish" type="button" id="open-settings">Statement settings</button>: columns, opening and ending balances, combine months of one account.</p>
       ${st.unc ? `<p class="bal-note">Uncategorized rows go to 4999 Uncategorized Income (money in) or 6999 Uncategorized Expense (money out) in the workbook. They count in net income, so net income and Schedule C aren't final until you assign them.</p>` : ''}
       ${gridWrap(`<table class="grid" aria-label="Accounts from your statements"><thead><tr><th class="nw">Account</th><th>Name</th><th class="money">Transactions</th><th>Reconciliation</th></tr></thead><tbody>${rows}</tbody></table>`, 'Accounts from your statements (scrolls sideways)')}
     </div>`;
@@ -3631,26 +3688,93 @@ main { padding-block: 24px 120px; }
     const ae = document.activeElement, keep = ae && ae.id, s0 = ae && ae.selectionStart, s1 = ae && ae.selectionEnd;
     const R = state.review;
     $('review-summary').innerHTML = summaryHtml();
-    const tabs = [['txns', 'Transactions', state.txns.length], ['rules', 'Rules', state.rules.length], ['coa', 'Chart of accounts', state.coa.length]];
+    $('payees').innerHTML = payeesHtml();
+    renderCategorizeNow();   // P22-2 (D100): the file-category and suggestion cards sit on this screen
+    const tabs = [['txns', 'Every row', state.txns.length], ['rules', 'Rules', state.rules.length], ['coa', 'Chart of accounts', state.coa.length]];
     $('review-tabs').innerHTML = tabs.map(([id, label, n]) => `<button class="tab" role="tab" type="button" id="tab-${id}" aria-selected="${R.tab === id}" aria-controls="review-body" tabindex="${R.tab === id ? 0 : -1}" data-tab="${id}">${label}<span class="count">${n.toLocaleString()}</span></button>`).join('');
     $('review-body').setAttribute('aria-labelledby', 'tab-' + R.tab);
     $('review-body').innerHTML = R.tab === 'rules' ? rulesHtml() : R.tab === 'coa' ? coaHtml() : txnsHtml();
     const el = keep && document.getElementById(keep);
     if (el) { el.focus({ preventScroll: true }); try { if (s0 != null) el.setSelectionRange(s0, s1); } catch (_) {} }
+    clearTimeout(expTimer); expTimer = setTimeout(() => { if (state.step === 'review') prepareExport(); }, 150);   // the download section follows edits
   }
+  let expTimer = 0;
   function rerender() { categorize(); renderReview(); }
+
+  // ---------- Payees (P22-2, D100): one line per payee and direction. Picking a category sets every row and saves a rule ----------
+  let pyGroups = [];
+  const pyIdx = new Map(), pyN = key => { let n = pyIdx.get(key); if (n == null) pyIdx.set(key, n = pyIdx.size + 1); return n; };
+  function payeeGroups() {
+    const G = new Map();
+    for (const t of state.txns) {
+      if (!t.amountCents || t.transferPairId) continue;
+      const mk = mkOf(t); if (!mk) continue;
+      const dir = t.amountCents > 0 ? 'in' : 'out', key = mk + '|' + dir;
+      let g = G.get(key); if (!g) G.set(key, g = { key, mk, dir, ids: [], cents: 0, accts: new Set(), unc: 0 });
+      g.ids.push(t.id); g.cents += t.amountCents; g.accts.add(t.offsetAccountNo ?? null); if (t.offsetAccountNo == null) g.unc++;
+    }
+    return [...G.values()].sort((a, b) => (b.unc > 0) - (a.unc > 0) || b.ids.length - a.ids.length || Math.abs(b.cents) - Math.abs(a.cents) || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+  }
+  function payeesHtml() {
+    const R = state.review;
+    pyGroups = payeeGroups();
+    if (!pyGroups.length) return '';
+    const nUnc = pyGroups.filter(g => g.unc).length, lim = R.pyAll ? pyGroups.length : 15, list = pyGroups.slice(0, lim);
+    const rows = list.map(g => {
+      const n = pyN(g.key), one = g.accts.size === 1 ? [...g.accts][0] : undefined;
+      const cur = one === undefined ? `<option value="__mixed" selected disabled>Mixed (${g.accts.size} categories)</option>`
+        : one == null ? '<option value="" selected>Uncategorized</option>' : `<option value="${one}" selected>${esc(acctName(one))}</option>`;
+      return `<tr><td class="desc">${esc(g.mk)} <span class="sub">${g.dir === 'in' ? 'money in' : 'money out'}</span></td>
+        <td class="money num">${g.ids.length.toLocaleString()}</td><td class="money num">${fmtCents(g.cents)}</td>
+        <td class="c-acct"><select class="inp${one === null ? ' unc' : ''}" id="py-${n}" data-py="${esc(g.key)}" data-lazy="1" aria-label="Category for ${esc(g.mk)}, ${g.dir === 'in' ? 'money in' : 'money out'}">${cur}</select></td></tr>`;
+    }).join('');
+    const more = pyGroups.length > 15 ? `<button class="linkish py-more" type="button" id="py-more">${R.pyAll ? 'Show fewer payees' : `Show all ${pyGroups.length.toLocaleString()} payees`}</button>` : '';
+    return `<div class="py-wrap"><h3 id="py-h">Who you paid, and who paid you</h3>
+      <p class="cz-sub">One line per payee${nUnc ? `; ${plural(nUnc, 'payee')} still need${nUnc === 1 ? 's' : ''} a category and ${nUnc === 1 ? 'is' : 'are'} listed first` : ''}. Pick a category and every row from that payee follows, now and next time. Bought it for yourself? Pick Owner Draws.</p>
+      ${gridWrap(`<table class="grid py" aria-labelledby="py-h"><thead><tr><th>Payee</th><th class="money">Rows</th><th class="money">Total</th><th>Category</th></tr></thead><tbody>${rows}</tbody></table>`)}
+      ${more}</div>`;
+  }
+  // The payee's own rule: it replaces an earlier one for the same payee and direction (seeds stay), so the last pick wins.
+  function payeeRule(mk, dir, no) {
+    const same = r => !r.seed && r.match === 'contains' && r.pattern === mk && r.direction === dir;
+    state.rules = state.rules.filter(r => !same(r)); state.applied = state.applied.filter(r => !same(r));
+    if (no) addRule({ match: 'contains', pattern: mk, accountNo: no, direction: dir, priority: 5 }, { applied: true });   // 5: as the suggestion rules (D86)
+  }
+  function payeeSet(g, no) {
+    const before = snapAll();
+    payeeRule(g.mk, g.dir, no);
+    categorize();
+    const ids = g.ids.filter(id => { const t = state.txnById.get(id); return t && !t.transferPairId && (t.offsetAccountNo ?? 0) !== no; });
+    if (ids.length) assignTxns(ids, no);   // rows the rule doesn't reach (other wording, a file category, an earlier choice)
+    categorize(); renderReview();
+    undoToast(`${g.mk}: ${no ? acctName(no) : 'Uncategorized'} for ${plural(g.ids.length, 'row')}`, before, () => renderReview());
+  }
+  const pyBox = $('payees');
+  const pyFill = e => {
+    const el = e.target; if (!el.matches || !el.matches('select[data-py][data-lazy]')) return;
+    const g = pyGroups.find(x => x.key === el.dataset.py); if (!g) return;
+    el.removeAttribute('data-lazy');
+    const one = g.accts.size === 1 ? [...g.accts][0] : undefined;
+    el.innerHTML = acctOptions(one ?? null, { tail: NA_NEW, ...(one === undefined ? { extra: `<option value="__mixed" selected disabled>Mixed (${g.accts.size} categories)</option>`, noneSel: false } : {}) });
+  };
+  pyBox.addEventListener('focusin', pyFill);
+  pyBox.addEventListener('mousedown', pyFill);
+  pyBox.addEventListener('touchstart', pyFill, { passive: true });
+  pyBox.addEventListener('change', e => {
+    const el = e.target; if (!el.dataset || !el.dataset.py) return;
+    const g = pyGroups.find(x => x.key === el.dataset.py); if (!g) return;
+    if (el.value === '__new') { state.review.tab = 'txns'; naOpen(g.ids, el.id, { pattern: g.mk, direction: g.dir }); return; }
+    payeeSet(g, el.value === '' ? 0 : Number(el.value));
+  });
+  pyBox.addEventListener('click', e => {
+    if (e.target.id !== 'py-more') return;
+    state.review.pyAll = !state.review.pyAll; renderReview(); const b = $('py-more'); if (b) b.focus();
+  });
 
   // ---------- Categorize step (P14-2, D84) ----------
   // Two cards: #cz-files (categories read from the files) and #cz-sugg (suggestions).
   // Guarded like renderReview; it never touches state.review.msg (syncSourceAccounts' reset notice is shown on Review).
-  let czBusy = false, czAgain = false;
-  function renderCategorize() {
-    if (state.step !== 'categorize') return;
-    if (czBusy) { czAgain = true; return; }
-    czBusy = true;
-    try { renderCategorizeNow(); } finally { czBusy = false; }
-    if (czAgain) { czAgain = false; renderCategorize(); }
-  }
+  function renderCategorize() { if (state.step === 'review') renderReview(); }   // P22-2 (D100): the cards are part of the check screen
   // P14-4 (D86): suggestions. Pure and deterministic: group the uncategorized rows by merchant key + direction and look for
   // rows the user (not a seed rule) already put on an account with the same key + direction.
   //   candidate: no account yet, amount != 0, not a possible transfer, not decided by the user (a manual 0 = "keep uncategorized")
@@ -3710,7 +3834,7 @@ main { padding-block: 24px 120px; }
   const czCount = () => czGroups.reduce((n, g) => n + (czPicked(g) ? 1 : 0), 0);
   function czSync() { const n = czCount(), b = $('cz-apply'); if (b) { b.textContent = `Apply selected (${n})`; b.disabled = n === 0; } }
   function renderCategorizeNow() {
-    const Z = state.cz, ae = document.activeElement, keep = ae && ae.id;
+    const Z = state.cz;
     renderFilesCard();   // P14-5 (D87)
     czGroups = suggestions();
     const live = new Set(czGroups.map(g => g.key));
@@ -3720,8 +3844,9 @@ main { padding-block: 24px 120px; }
     const head = '<h3 id="cz-sugg-h" tabindex="-1">Suggested from rows you assigned</h3><p class="cz-sub">Uncategorized rows that look like rows you already put on an account, grouped by merchant and direction. Tick the ones you want, check the account, then apply.</p>';
     const empty = `<div class="empty">
       <strong>Nothing to suggest yet</strong>
-      <span>Suggestions appear here when rows you assigned (by hand or with your own rules) look like rows that are still uncategorized. Continue to Review to categorize transactions.</span>
+      <span>Suggestions appear here when rows you assigned (by hand or with your own rules) look like rows that are still uncategorized. Use the payee list or Every row to categorize transactions.</span>
     </div>`;
+    $('cz-sugg').hidden = !czGroups.length && !Z.msg;   // P22-2 (D100): nothing to suggest = no card on the check screen
     if (!czGroups.length) { $('cz-sugg').innerHTML = Z.msg ? `<div class="cz-wrap">${head}${msg}</div>${empty}` : empty; }
     else {
       const lazy = czGroups.length > 50;   // up to 50 groups every select is filled now; beyond that it fills on focus, like the Review grid
@@ -3730,8 +3855,6 @@ main { padding-block: 24px 120px; }
         ${msg}<ul class="cz-list">${czGroups.map(g => czItemHtml(g, lazy)).join('')}</ul></div>`;
       czSync();
     }
-    const el = keep && document.getElementById(keep);
-    if (el) el.focus({ preventScroll: true });
   }
 
   // Apply the ticked groups. Account choice, "also add a rule" per group; one Undo through restoreSnapshot (same snapshot shape as naSave).
@@ -3838,7 +3961,7 @@ main { padding-block: 24px 120px; }
     for (const k of [...Z.file.keys()]) if (!live.has(k)) Z.file.delete(k);
     for (const k of [...Z.fileRule.keys()]) if (!liveR.has(k)) Z.fileRule.delete(k);
     const lines = all.filter(s => !catPending(s)).map(s => s.catOn === catSig(s)
-      ? `<p class="cz-sub">Categories from ${esc(s.name)} are applied. Rows keep the account their category goes to until you change a row on the Review step.</p>`
+      ? `<p class="cz-sub">Categories from ${esc(s.name)} are applied. Rows keep the account their category goes to until you change a row on the check screen.</p>`
       : `<p class="cz-sub">Categories from ${esc(s.name)} were skipped. <button class="linkish" type="button" data-czf-use="${esc(s.id)}">Use them</button></p>`).join('');
     let body = '';
     if (plan.items.length) {
@@ -3974,12 +4097,12 @@ main { padding-block: 24px 120px; }
   czfBox.addEventListener('touchstart', czfFill, { passive: true });
 
   // P14-3 (D85): add an account from the Transactions tab and assign the row(s) to it in one step.
-  function naOpen(ids, origin) {
+  function naOpen(ids, origin, rule = null) {   // rule: { pattern, direction } when opened from a payee line (P22-2)
     const R = state.review; ids = ids.filter(id => state.txnById.get(id)); if (!ids.length) return;
     const out = ids.filter(id => state.txnById.get(id).amountCents < 0).length, type = out * 2 >= ids.length ? 'Expense' : 'Revenue';
     const no = nextAcctNo(type, new Set(state.coa.map(a => a.no)));
     R.draft = null; R.msg = null;   // one draft at a time
-    R.newAcct = { ids, origin, no: no == null ? '' : String(no), noTouched: false, name: '', type, taxLine: defaultTaxLine(type, ''), taxTouched: false, err: '' };
+    R.newAcct = { ids, origin, rule, no: no == null ? '' : String(no), noTouched: false, name: '', type, taxLine: defaultTaxLine(type, ''), taxTouched: false, err: '' };
     renderReview();   // also puts a picked "+ New account…" row select back to its account
     const f = $('na-name'); if (f) { f.focus({ preventScroll: true }); window.scrollTo({ top: $('review-body').getBoundingClientRect().top + window.scrollY - 16 }); }
   }
@@ -4011,6 +4134,7 @@ main { padding-block: 24px 120px; }
       return;
     }
     const no = +na.no, name = na.name.trim(), n = na.ids.length;
+    if (na.rule) { payeeRule(na.rule.pattern, na.rule.direction, no); categorize(); }
     assignTxns(na.ids, no);
     R.newAcct = null; if (na.origin === 'bulk-acct') R.sel.clear();
     setMsg('txns', 'ok', `Added ${no} · ${name} and assigned ${n.toLocaleString()} row${n === 1 ? '' : 's'}.`);
@@ -4027,6 +4151,7 @@ main { padding-block: 24px 120px; }
     state.review.tab = n; state.review.msg = null; renderReview(); $('tab-' + n).focus();
   });
   $('review-summary').addEventListener('click', e => {
+    if (e.target.id === 'open-settings') { go('map'); return; }
     const b = e.target.closest('[data-rfilter]'); if (!b) return;
     Object.assign(state.review, { tab: 'txns', filter: b.dataset.rfilter, source: '', account: '', q: '', page: 0, msg: null });
     renderReview();
@@ -4263,21 +4388,24 @@ main { padding-block: 24px 120px; }
   }
   function prepareExport() {
     const J = buildJournal();
-    state.exp = { J, B: booksOf(J), busy: false, status: null };
+    clearTimeout(expTimer);
+    state.exp = { J, B: booksOf(J), busy: false, status: state.exp && !state.exp.busy ? state.exp.status : null };
     renderExport();
     loadLib('exceljs').catch(() => {});   // warm up so the click is quick; a failure is reported on the click
     downloadsCap();
   }
   const balancedHtml = v => v === 0 ? '<span class="ok-t">Balanced</span>' : `<span class="bad-t">Off by ${fmtCents(Math.abs(v))}</span>`;
   function renderExport() {
-    const X = state.exp; if (!X || state.step !== 'export') return;
+    const X = state.exp; if (!X || state.step !== 'review') return;
     const { J, B } = X, n = J.entries.length;
     const warns = [];
     if (B.tbCheck) warns.push(`<div class="banner bad" role="alert">Debits (${fmtCents(J.dr)}) and credits (${fmtCents(J.cr)}) don't match, so the workbook can't be built.</div>`);
     if (B.bsCheck) warns.push(`<div class="banner bad" role="alert">The balance sheet is off by ${fmtCents(Math.abs(B.bsCheck))}. A transaction uses an account that isn't in the chart of accounts.</div>`);
     if (B.unc) warns.push(`<div class="banner">${B.unc.toLocaleString()} transaction${B.unc === 1 ? ' is' : 's are'} uncategorized and post${B.unc === 1 ? 's' : ''} to 4999 Uncategorized Income or 6999 Uncategorized Expense. <button class="linkish" type="button" data-xgo="unc">Review ${B.unc === 1 ? 'it' : 'them'}</button></div>`);
     if (B.clearing) warns.push(`<div class="banner bad">1950 Transfer Clearing is ${fmtCents(B.clearing)}, not 0. A transfer has only one side in these files. <button class="linkish" type="button" data-xgo="clearing">Review 1950</button></div>`);
-    if (B.off.length) warns.push(`<div class="banner">${B.off.length} statement${B.off.length === 1 ? " doesn't" : "s don't"} reconcile (${B.off.map(s => esc(s.name)).join(', ')}), so ${B.off.length === 1 ? 'its' : 'their'} book balance won't match the statement. <button class="linkish" type="button" data-xgo="map">Check on the Map step</button></div>`);
+    if (B.off.length) warns.push(`<div class="banner">${B.off.length} statement${B.off.length === 1 ? " doesn't" : "s don't"} reconcile (${B.off.map(s => esc(s.name)).join(', ')}), so ${B.off.length === 1 ? 'its' : 'their'} book balance won't match the statement. <button class="linkish" type="button" data-xgo="map">Open Statement settings</button></div>`);
+    const nc = J.srcs.filter(s => ['none', 'unchecked'].includes(reconcile(s).state));
+    if (nc.length) warns.push(`<div class="banner">${plural(nc.length, 'statement')} ${nc.length === 1 ? "wasn't" : "weren't"} checked against the statement's balances, so the cash balance in the workbook may not match the bank. Categories and Schedule C are not affected. <button class="linkish" type="button" data-xgo="map">Add balances</button></div>`);
     if (state.rulesDirty) warns.push(`<div class="banner">You changed rules but didn't re-run them, so the books use the rules as they were. <button class="linkish" type="button" data-xgo="rules">Re-run rules</button></div>`);
     warns.push(crossHtml());
     const st = X.status;
@@ -4313,6 +4441,7 @@ main { padding-block: 24px 120px; }
     if (state.exp) state.exp.status = { kind, text };
     const el = $('dl-status'); if (el) { el.className = `dl-status ${kind}`; el.textContent = text; el.hidden = false; }
   }
+  $('skip-dl').addEventListener('click', () => { const h = $('h-export'); h.focus({ preventScroll: true }); h.scrollIntoView({ block: 'start' }); });   // P22-2: past the payee list and grid
   $('export-summary').addEventListener('input', e => {   // in place: no re-render; the file name follows (P6-8)
     if (e.target.id !== 'co-name') return;
     state.company = e.target.value;
@@ -4328,9 +4457,9 @@ main { padding-block: 24px 120px; }
     const b = e.target.closest('[data-xgo]'); if (!b) return;
     const k = b.dataset.xgo;
     if (k === 'map') { go('map'); return; }
-    if (k === 'rules') { Object.assign(state.review, { tab: 'rules', msg: null }); go('review'); return; }
+    if (k === 'rules') { Object.assign(state.review, { tab: 'rules', msg: null }); renderReview(); $('tab-rules').focus(); return; }
     Object.assign(state.review, { tab: 'txns', filter: k === 'unc' ? 'unc' : 'all', source: '', account: k === 'clearing' ? String(TRANSFER_NO) : '', q: '', page: 0, msg: null });
-    go('review');
+    renderReview(); $('tab-txns').focus();
   });
 
   // ---------- Download (P4-6) ----------
@@ -4720,7 +4849,7 @@ main { padding-block: 24px 120px; }
       if (scMulti) rrow('ni', `Net income dated in ${Y} (from the General Ledger)`, `SUM(${dr('K')})`, yNI, 'The years on these sheets add up to the Income Statement (Overview check).');
       else rrow('ni', 'Net income per the Income Statement', NI, B.ni);
       rrow('x', 'Less: accounts marked "Not on Schedule C"', effTag('X'), TE('X'), 'For example interest income, which goes on Form 1040.');
-      rrow('u', 'Less: uncategorized income and expenses', effTag('U'), TE('U'), 'Review these on the Review step; they are on no line.');
+      rrow('u', 'Less: uncategorized income and expenses', effTag('U'), TE('U'), 'Review these on the check screen; they are on no line.');
       rrow('inv', 'Less: inventory change (line 35 − line 41)', `${C('35')}-${C('41')}`, inv);
       rrow('meal', 'Add back: the half of Meals the form does not allow', `${sumTag('L24b')}-${C('24b')}`, meal, 'Line 24b takes 50% of the Meals account.');
       rrow('exp', 'Expected tentative profit (line 29)', `C${rc.ni}-C${rc.x}-C${rc.u}-C${rc.inv}+C${rc.meal}`, expect);
