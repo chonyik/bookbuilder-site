@@ -777,7 +777,7 @@ main { padding-block: 24px 120px; }
     if (state.step !== id) hideToast();   // P6-12 / N1: an Undo belongs to the step it was offered on
     state.step = id;
     if (id === 'map') renderMap();
-    if (id === 'review') { state.cz.msg = null; state.cz.fileErr = ''; syncSourceAccounts(); categorize(); renderReview(); prepareExport(); }
+    if (id === 'review') { state.cz.msg = null; state.cz.fileErr = ''; state.review.pyOrder = null; syncSourceAccounts(); categorize(); renderReview(); prepareExport(); }
     for (const p of document.querySelectorAll('.panel')) p.hidden = p.dataset.step !== id;
     // P10-1 (LINT N7): always, also after a hashchange, so a refused #export doesn't stay in the URL (replaceState fires no hashchange)
     try { history.replaceState(null, '', '#' + id); } catch (_) {}
@@ -3723,10 +3723,15 @@ main { padding-block: 24px 120px; }
       if (!t.amountCents || t.transferPairId) continue;
       const mk = mkOf(t); if (!mk) continue;
       const dir = t.amountCents > 0 ? 'in' : 'out', key = mk + '|' + dir;
-      let g = G.get(key); if (!g) G.set(key, g = { key, mk, dir, ids: [], cents: 0, accts: new Set(), unc: 0 });
-      g.ids.push(t.id); g.cents += t.amountCents; g.accts.add(t.offsetAccountNo ?? null); if (t.offsetAccountNo == null) g.unc++;
+      let g = G.get(key); if (!g) G.set(key, g = { key, mk, dir, ids: [], cents: 0, accts: new Set(), own: new Set(), unc: 0 });
+      g.ids.push(t.id); g.own.add((srcOf(t) || {}).coaAccountNo); g.cents += t.amountCents; g.accts.add(t.offsetAccountNo ?? null); if (t.offsetAccountNo == null) g.unc++;
     }
-    return [...G.values()].sort((a, b) => (b.unc > 0) - (a.unc > 0) || b.ids.length - a.ids.length || Math.abs(b.cents) - Math.abs(a.cents) || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+    const list = [...G.values()].sort((a, b) => (b.unc > 0) - (a.unc > 0) || b.ids.length - a.ids.length || Math.abs(b.cents) - Math.abs(a.cents) || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+    // P25-1: the order is fixed when the screen opens (go('review') clears it), so a payee just set stays on its line
+    // instead of jumping below the uncategorized ones; new payees go after the known ones.
+    const ord = state.review.pyOrder || (state.review.pyOrder = new Map());
+    for (const g of list) if (!ord.has(g.key)) ord.set(g.key, ord.size);
+    return list.sort((a, b) => ord.get(a.key) - ord.get(b.key));
   }
   function payeesHtml() {
     const R = state.review;
@@ -3768,16 +3773,36 @@ main { padding-block: 24px 120px; }
     const g = pyGroups.find(x => x.key === el.dataset.py); if (!g) return;
     el.removeAttribute('data-lazy');
     const one = g.accts.size === 1 ? [...g.accts][0] : undefined;
-    el.innerHTML = acctOptions(one ?? null, { tail: NA_NEW, ...(one === undefined ? { extra: `<option value="__mixed" selected disabled>Mixed (${g.accts.size} categories)</option>`, noneSel: false } : {}) });
+    // P25-1: not the statement's own account (as the row menus): the rows can't post to it, so the pick did nothing
+    el.innerHTML = acctOptions(one ?? null, { exclude: g.own.size === 1 ? [...g.own][0] : null, tail: NA_NEW, ...(one === undefined ? { extra: `<option value="__mixed" selected disabled>Mixed (${g.accts.size} categories)</option>`, noneSel: false } : {}) });
   };
   pyBox.addEventListener('focusin', pyFill);
   pyBox.addEventListener('mousedown', pyFill);
   pyBox.addEventListener('touchstart', pyFill, { passive: true });
+  // P25-1: a closed menu fires 'change' on every key (type-ahead "6600", arrows), and the re-render that follows replaces
+  // the menu and resets the browser's type-ahead ("6600" landed on 6000, then 6050). A keyboard pick waits for a pause
+  // (the browser's own 1 s type-ahead window), Enter, or leaving the menu; a mouse or touch pick applies at once.
+  function kbDefer(box, sel, apply) {
+    let keyAt = -1e9, keyEl = null, timer = 0, pending = null;   // when a key last went to one of these menus, and which
+    const flush = () => { clearTimeout(timer); const el = pending; pending = null; if (el) apply(el); };
+    box.addEventListener('keydown', e => { if (!e.target.matches(sel)) return; if (e.key === 'Enter') flush(); else if (e.key !== 'Tab' && e.key !== 'Shift') { keyAt = performance.now(); keyEl = e.target; } });
+    box.addEventListener('focusout', e => { if (pending && e.target === pending) { clearTimeout(timer); timer = setTimeout(flush); } });   // after focus lands, so the re-render keeps it
+    return el => {
+      if (el.value === '__new' || el !== keyEl || performance.now() - keyAt > 300) { if (pending === el) { clearTimeout(timer); pending = null; } return false; }
+      pending = el; clearTimeout(timer); timer = setTimeout(flush, 1000); return true;
+    };
+  }
+  const pyApply = el => {
+    const g = pyGroups.find(x => x.key === el.dataset.py); if (!g) return;
+    payeeSet(g, el.value === '' ? 0 : Number(el.value));
+  };
+  const pyKb = kbDefer(pyBox, 'select[data-py]', pyApply);
   pyBox.addEventListener('change', e => {
     const el = e.target; if (!el.dataset || !el.dataset.py) return;
     const g = pyGroups.find(x => x.key === el.dataset.py); if (!g) return;
+    if (pyKb(el)) return;
     if (el.value === '__new') { state.review.tab = 'txns'; naOpen(g.ids, el.id, { pattern: g.mk, direction: g.dir }); return; }
-    payeeSet(g, el.value === '' ? 0 : Number(el.value));
+    pyApply(el);
   });
   pyBox.addEventListener('click', e => {
     if (e.target.id !== 'py-more') return;
@@ -4193,6 +4218,8 @@ main { padding-block: 24px 120px; }
     const k = el.dataset.d;
     d[k] = k === 'accountNo' ? (el.value === '' ? null : Number(el.value)) : k === 'priority' ? (Number.isFinite(+el.value) && el.value !== '' ? Math.trunc(+el.value) : d.priority) : el.value;
   }
+  const rowApply = el => { assignTxns([el.dataset.assign], el.value === '' ? 0 : Number(el.value)); renderReview(); };
+  const rowKb = kbDefer(body, 'select[data-assign]', rowApply);   // P25-1
   body.addEventListener('change', e => {
     const el = e.target, R = state.review;
     if (el.dataset.na) { naChange(el); return; }
@@ -4207,7 +4234,7 @@ main { padding-block: 24px 120px; }
       renderReview(); return;
     }
     if (el.dataset.ciPick && R.coaImport) { R.coaImport.picks.set(Number(el.dataset.ciPick), el.value); renderReview(); return; }
-    if (el.dataset.assign) { if (el.value === '__new') { naOpen([el.dataset.assign], el.id); return; } assignTxns([el.dataset.assign], el.value === '' ? 0 : Number(el.value)); renderReview(); return; }
+    if (el.dataset.assign) { if (rowKb(el)) return; if (el.value === '__new') { naOpen([el.dataset.assign], el.id); return; } rowApply(el); return; }
     if (el.dataset.sel) { if (el.checked) R.sel.add(el.dataset.sel); else R.sel.delete(el.dataset.sel); renderReview(); return; }
     if (el.id === 'sel-page' || el.id === 'sel-page-m') {   // header box on wide screens, a labelled box above the cards on phones (P6-5)
       const list = filteredTxns(), rows = list.slice(R.page * R.pageSize, (R.page + 1) * R.pageSize);
