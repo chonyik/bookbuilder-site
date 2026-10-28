@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net blob:; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob:; worker-src blob:; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net blob:; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://cdn.jsdelivr.net https://fonts.googleapis.com https://young0321.goatcounter.com; img-src 'self' data: blob: https://young0321.goatcounter.com; worker-src blob:; base-uri 'none'; form-action 'none'">
 <script>/* P24-1: frame-ancestors works only as a header, which GitHub Pages can't send, so a framed copy stops before the app loads */ if (window.top !== window.self) { window.stop(); document.documentElement.innerHTML = ''; }</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -609,6 +609,7 @@ main { padding-block: 24px 120px; }
     </ul>
     <h3>Privacy</h3>
     <p>Your files are read inside this browser tab and are never uploaded. The page loads its reading and Excel tools from the jsDelivr CDN and from this site, and its fonts from Google Fonts; no file data is sent to any of them, or anywhere else. Check it yourself: open your browser's DevTools, choose the Network tab, then add a file. You will see the tools load, but no request carries your file. Nothing is saved when you close the page.</p>
+    <p>To learn how many people use the tool, the page counts visits with GoatCounter, a privacy-friendly counter: one visit when the page opens, and one "workbook finished" event when you download a workbook. GoatCounter uses no cookies and doesn't store your IP address. The count never includes your files, file names, bank names, amounts or anything you type; it gets the page address and title (including any text after a ? in the address), the site that linked you here, your screen size and your browser type. <a href="https://www.goatcounter.com/help/gdpr" target="_blank" rel="noopener">How GoatCounter handles data</a>.</p>
     <p>This page sets no cookies. Your browser may hold Google Analytics and HubSpot cookies from adroitie.com, Adroitie's main site. The browser sends them to this site's host, GitHub, with each page request, but this page never reads them or sends them anywhere.</p>
     <h3>Limits</h3>
     <ul>
@@ -994,6 +995,20 @@ main { padding-block: 24px 120px; }
     xlsx: { url: '/xlsx-0.20.3.full.min.js', global: 'XLSX', sri: 'sha256-zAFRMKqFIefwiPiImOupSczcv7ON8L0Sm0S3Jzw6b0E=' },
     exceljs: { url: 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js', global: 'ExcelJS', sri: 'sha256-fknaaFiOJQ27i7oZDSyqirN4fMAoS9odiy+AXE33Qsk=' },   // P4: workbook writer
   };
+  // P26-1 (D104): the counter. GoatCounter's pinned count.v5.js, served by this site (SRI = GoatCounter's published hash), counts
+  // one pageview on load and one `converted` event per downloaded workbook. Cookieless; it sends the path (the canonical "/"),
+  // title, referrer, query string and screen size, never file data. Only on the live host, never under ?stb-test.
+  const COUNTER = { url: '/goatcounter-count.v5.js', sri: 'sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ', endpoint: 'https://young0321.goatcounter.com/count' };
+  const COUNT_ON = !STB_TEST && location.hostname === 'bookbuilder.adroitie.com';
+  function startCounter() {
+    if (!COUNT_ON) return;
+    const el = document.createElement('script');
+    el.src = COUNTER.url; el.async = true; el.integrity = COUNTER.sri; el.crossOrigin = 'anonymous';
+    el.dataset.goatcounter = COUNTER.endpoint; el.dataset.goatcounterSettings = '{"no_events":true}';   // no click tracking
+    document.head.appendChild(el);
+  }
+  // try: count.js reads localStorage, which throws where site data is blocked; a failed count must never touch the download
+  const countConverted = () => { try { if (COUNT_ON && window.goatcounter && goatcounter.count) goatcounter.count({ path: 'converted', title: 'Workbook downloaded', event: true }); } catch (_) {} };
   // One load per library: the first call starts it, later calls share it, a failure is forgotten so the next call retries (P17-4).
   const loadCache = {};
   function loadOnce(key, start) {
@@ -4524,6 +4539,7 @@ main { padding-block: 24px 120px; }
       } catch (err) { setDl('bad', (err && err.message) || 'The workbook could not be built.'); return; }
       const r = await saveBlob(blob, name, { again: 'Download workbook', tooLarge: 'The workbook is too large to save here. Try fewer statements at a time.' });
       setDl(r.kind, r.text);
+      if (r.kind === 'ok') countConverted();   // P26-1: a saved workbook counts once; a cancelled save doesn't
     } finally { X.busy = false; render(); }
   }
   // Save a file through the downloads capability, else a blob link (P4-6; shared with the setup file since P6-3).
@@ -5050,6 +5066,7 @@ main { padding-block: 24px 120px; }
     catKey, catSig, catMatch, catPlan, catCtx, snapAll };   // P14-5 (D87)
 
   go((location.hash || '#upload').slice(1), { focus: false });
+  startCounter();
 })();
 </script>
 
