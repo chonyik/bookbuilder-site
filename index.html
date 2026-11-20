@@ -187,6 +187,7 @@ main { padding-block: 24px 120px; }
 .dropzone-icon { width: 40px; height: 40px; color: var(--accent); }
 .dropzone strong { font-size: var(--fs-md); }
 .dropzone p { color: var(--muted); font-size: var(--fs-sm); }
+.dropzone .sample-try { margin-top: 8px; }   /* P27-1: the sample link, after the file types */
 .types { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
 .chip {
   font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 500;
@@ -236,7 +237,7 @@ main { padding-block: 24px 120px; }
 .acc { --tone: var(--accent); --tone-soft: var(--accent-soft); }
 .muted { --tone: var(--muted); --tone-soft: var(--surface-2); }
 :is(.pill, .recon, .dl-status):is(.ok, .warn, .bad, .muted),
-:is(.notice, .banner):is(.warn, .bad),
+:is(.notice, .banner):is(.warn, .bad), .banner.acc,
 .st .tagx:is(.ok, .warn, .acc) { color: var(--tone); background: var(--tone-soft); }
 .notice:is(.bad, .warn) { border-color: color-mix(in srgb, var(--tone) 25%, transparent); }
 .msg:is(.ok, .warn, .err) { color: var(--tone); }
@@ -508,6 +509,7 @@ main { padding-block: 24px 120px; }
 @media (max-width: 640px) {
   /* what you get: the drop zone stays on the first screen */
   .points { grid-template-columns: minmax(0, 1fr); gap: 12px; order: 1; }
+  .sample-try .linkish { min-height: 44px; }   /* P27-1: a full-size touch target */
   /* export / chart-of-accounts tables */
   .stats.even > div:last-child { grid-column: auto; }
   .grid .c-type { display: none; }
@@ -651,6 +653,7 @@ main { padding-block: 24px 120px; }
       <div class="types">
         <span class="chip">CSV</span><span class="chip">XLSX</span><span class="chip">XLS</span><span class="chip">PDF</span>
       </div>
+      <p class="sample-try">No statement handy? <button class="linkish" id="btn-sample" type="button">Try a sample statement</button></p>
     </div>
     <div class="notices" id="notices" aria-live="polite"></div>
     <div class="card">
@@ -679,6 +682,7 @@ main { padding-block: 24px 120px; }
       <p>Each transaction is already sorted into a category. Fix any payee that looks wrong, then download your Excel file. Anything you leave uncategorized still downloads.</p>
       <p><button class="linkish" type="button" id="skip-dl">Skip to download</button></p>
     </div>
+    <div class="banner acc" id="sample-note" role="status" hidden><span>This is sample data. Add your own statements to make your books.</span></div>
     <div class="card" id="payees"></div>
     <div class="card" id="review-summary"></div>
     <div class="card" id="cz-files" hidden></div>
@@ -796,6 +800,7 @@ main { padding-block: 24px 120px; }
 
   function render() {
     const vis = shown(), cur = vis.findIndex(s => s.id === state.step);
+    $('sample-note').hidden = !state.sources.some(s => s.sample);   // P27-1
     $('stepper').innerHTML = vis.map((s, i) => {
       const done = i < cur && s.complete();
       const locked = !canEnter(s.id);
@@ -855,7 +860,9 @@ main { padding-block: 24px 120px; }
   $('btn-help').addEventListener('click', () => { if (typeof help.showModal === 'function') help.showModal(); else help.setAttribute('open', ''); });
   $('help-close').addEventListener('click', () => help.close ? help.close() : help.removeAttribute('open'));
   help.addEventListener('click', e => { if (e.target === help) help.close(); });   // click on the backdrop
-  help.addEventListener('close', () => $('btn-help').focus());
+  // P27-2: the browser returns focus to "How it works" when the dialog closes, but the close event comes a task later, so only
+  // step in when focus is lost (on the body or still in the dialog): a key pressed meanwhile (Tab, Enter) must not be undone.
+  help.addEventListener('close', () => { const a = document.activeElement; if (!a || a === document.body || help.contains(a)) $('btn-help').focus(); });
 
   // ---------- Upload (P1-2) ----------
   const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -925,7 +932,58 @@ main { padding-block: 24px 120px; }
   }
   const XICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
 
-  async function addFiles(fileList) {
+  // P27-1 (E4, D105): "Try a sample statement". A made-up sole proprietor's checking account (a freelance designer, Jan–Mar 2026,
+  // 45 rows with a running balance, so it reconciles with no typing). Most payees match the default rules; MOBILE DEPOSIT CHECK,
+  // VENMO CASHOUT and CHECK 1043 are left for review on purpose. It goes through addFiles like any upload, marked `sample`, so
+  // the check screen says it is sample data and a workbook made with it counts as `converted-sample`, never `converted`.
+  const SAMPLE = { name: 'Sample_Checking_2026.csv', time: Date.UTC(2026, 3, 1), csv: `Date,Description,Amount,Balance
+01/02/2026,STRIPE PAYOUT,1850.00,6662.36
+01/03/2026,ADOBE CREATIVE CLOUD,-59.99,6602.37
+01/05/2026,GOOGLE WORKSPACE,-14.40,6587.97
+01/06/2026,VERIZON WIRELESS,-85.00,6502.97
+01/08/2026,STARBUCKS STORE 1234,-12.45,6490.52
+01/09/2026,SQUARE INC DEPOSIT,640.00,7130.52
+01/12/2026,SHELL OIL 5739,-48.20,7082.32
+01/14/2026,STAPLES 0112,-36.75,7045.57
+01/15/2026,STATE FARM INSURANCE,-112.00,6933.57
+01/16/2026,MOBILE DEPOSIT CHECK 1042,900.00,7833.57
+01/20/2026,FACEBK ADS,-75.00,7758.57
+01/22/2026,USPS PO 0517,-18.60,7739.97
+01/26/2026,MONTHLY SERVICE FEE,-12.00,7727.97
+01/28/2026,WEWORK MEMBERSHIP,-295.00,7432.97
+01/30/2026,INTEREST EARNED,1.12,7434.09
+02/02/2026,STRIPE PAYOUT,2215.50,9649.59
+02/03/2026,ADOBE CREATIVE CLOUD,-59.99,9589.60
+02/05/2026,GOOGLE WORKSPACE,-14.40,9575.20
+02/06/2026,VERIZON WIRELESS,-85.00,9490.20
+02/09/2026,UBER TRIP,-23.80,9466.40
+02/10/2026,SQUARE INC DEPOSIT,480.00,9946.40
+02/11/2026,TRADER JOE S 552,-64.18,9882.22
+02/13/2026,HOME DEPOT 6611,-142.37,9739.85
+02/15/2026,STATE FARM INSURANCE,-112.00,9627.85
+02/17/2026,VENMO CASHOUT,350.00,9977.85
+02/19/2026,DROPBOX,-11.99,9965.86
+02/23/2026,SHELL OIL 5739,-51.06,9914.80
+02/25/2026,MONTHLY SERVICE FEE,-12.00,9902.80
+02/26/2026,WEWORK MEMBERSHIP,-295.00,9607.80
+02/27/2026,INTEREST EARNED,1.08,9608.88
+03/02/2026,STRIPE PAYOUT,1975.25,11584.13
+03/03/2026,ADOBE CREATIVE CLOUD,-59.99,11524.14
+03/05/2026,GOOGLE WORKSPACE,-14.40,11509.74
+03/06/2026,VERIZON WIRELESS,-85.00,11424.74
+03/09/2026,SQUARE INC DEPOSIT,725.00,12149.74
+03/10/2026,STARBUCKS STORE 1234,-9.85,12139.89
+03/12/2026,OFFICE DEPOT 2290,-58.40,12081.49
+03/15/2026,STATE FARM INSURANCE,-112.00,11969.49
+03/16/2026,IRS USATAXPYMT,-1200.00,10769.49
+03/18/2026,CHECK 1043,-400.00,10369.49
+03/20/2026,PIRATE SHIP POSTAGE,-27.15,10342.34
+03/24/2026,FACEBK ADS,-75.00,10267.34
+03/25/2026,MONTHLY SERVICE FEE,-12.00,10255.34
+03/26/2026,WEWORK MEMBERSHIP,-295.00,9960.34
+03/31/2026,INTEREST EARNED,1.15,9961.49
+` };
+  async function addFiles(fileList, { sample = false } = {}) {
     const files = [...fileList];
     if (!files.length) return;
     // P17-1 (D92): the duplicate checks read state.sources after every await, so a second drop while this one is still
@@ -945,6 +1003,7 @@ main { padding-block: 24px 120px; }
       if (twin) { pushNotice('warn', `<b>${esc(f.name)}</b> has the same contents as <b>${esc(twin.fileName)}</b>, which is already added. Skipped.`); continue; }
       const src = makeSource(f, r.kind, r.note);
       src.hash = hash;
+      if (sample) src.sample = true;
       state.sources.push(src); added.push(src);
     }
     if (added.length) { renderSources(); render(); }
@@ -1008,7 +1067,8 @@ main { padding-block: 24px 120px; }
     document.head.appendChild(el);
   }
   // try: count.js reads localStorage, which throws where site data is blocked; a failed count must never touch the download
-  const countConverted = () => { try { if (COUNT_ON && window.goatcounter && goatcounter.count) goatcounter.count({ path: 'converted', title: 'Workbook downloaded', event: true }); } catch (_) {} };
+  // P27-1 (D105): a workbook made with the sample statement is `converted-sample`, so trying the demo never counts as a user
+  const countConverted = () => { try { if (COUNT_ON && window.goatcounter && goatcounter.count) { const demo = state.sources.some(s => s.sample); goatcounter.count({ path: demo ? 'converted-sample' : 'converted', title: demo ? 'Sample workbook downloaded' : 'Workbook downloaded', event: true }); } } catch (_) {} };
   // One load per library: the first call starts it, later calls share it, a failure is forgotten so the next call retries (P17-4).
   const loadCache = {};
   function loadOnce(key, start) {
@@ -2386,6 +2446,7 @@ main { padding-block: 24px 120px; }
   // Picker + drag and drop. A counter avoids flicker when dragging over child elements.
   const dz = $('dropzone'), input = $('file-input');
   $('btn-choose').addEventListener('click', () => input.click());
+  $('btn-sample').addEventListener('click', () => addFiles([new File([SAMPLE.csv], SAMPLE.name, { type: 'text/csv', lastModified: SAMPLE.time })], { sample: true }));
   input.addEventListener('change', () => { addFiles(input.files); input.value = ''; });
   let depth = 0;
   dz.addEventListener('dragenter', e => { e.preventDefault(); depth++; dz.classList.add('is-over'); });
