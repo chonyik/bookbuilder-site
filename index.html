@@ -176,6 +176,8 @@ main { padding-block: 24px 120px; }
 .points span { color: var(--muted); }
 .app-foot { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: var(--fs-xs); color: var(--muted); }
 .app-foot a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }   /* P23-2: the publisher link */
+.app-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; }   /* P28-1: Privacy, Terms, Contact */
+.foot-links { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); }
 
@@ -510,6 +512,8 @@ main { padding-block: 24px 120px; }
   /* what you get: the drop zone stays on the first screen */
   .points { grid-template-columns: minmax(0, 1fr); gap: 12px; order: 1; }
   .sample-try .linkish { min-height: 44px; }   /* P27-1: a full-size touch target */
+  .foot-links { gap: 0 4px; }
+  .foot-links a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; }   /* P28-1 */
   /* export / chart-of-accounts tables */
   .stats.even > div:last-child { grid-column: auto; }
   .grid .c-type { display: none; }
@@ -613,6 +617,7 @@ main { padding-block: 24px 120px; }
     <p>Your files are read inside this browser tab and are never uploaded. The page loads its reading and Excel tools from the jsDelivr CDN and from this site, and its fonts from Google Fonts; no file data is sent to any of them, or anywhere else. Check it yourself: open your browser's DevTools, choose the Network tab, then add a file. You will see the tools load, but no request carries your file. Nothing is saved when you close the page.</p>
     <p>To learn how many people use the tool, the page counts visits with GoatCounter, a privacy-friendly counter: one visit when the page opens, and one "workbook finished" event when you download a workbook. GoatCounter uses no cookies and doesn't store your IP address. The count never includes your files, file names, bank names, amounts or anything you type; it gets the page address and title (including any text after a ? in the address), the site that linked you here, your screen size and your browser type. <a href="https://www.goatcounter.com/help/gdpr" target="_blank" rel="noopener">How GoatCounter handles data</a>.</p>
     <p>This page sets no cookies. Your browser may hold Google Analytics and HubSpot cookies from adroitie.com, Adroitie's main site. The browser sends them to this site's host, GitHub, with each page request, but this page never reads them or sends them anywhere.</p>
+    <p>The full <a href="/privacy.html" target="_blank" rel="noopener">Privacy</a> and <a href="/terms.html" target="_blank" rel="noopener">Terms of use</a> pages open in a new tab; questions go to <a href="mailto:young@adroitie.com">young@adroitie.com</a>.</p>
     <h3>Limits</h3>
     <ul>
       <li>US number and date formats only (1,234.56 and MM/DD/YYYY).</li>
@@ -700,7 +705,7 @@ main { padding-block: 24px 120px; }
       <div class="card" id="export-tb"></div>
     </div>
   </section>
-  <footer class="app-foot" id="app-foot">BookBuilder Lite <span class="num" id="app-ver"></span> by <a href="https://adroitie.com/">Adroitie</a>.</footer>
+  <footer class="app-foot"><span id="app-foot">BookBuilder Lite <span class="num" id="app-ver"></span> by <a href="https://adroitie.com/">Adroitie</a>.</span> <nav class="foot-links" aria-label="About this site"><a href="/privacy.html" target="_blank" rel="noopener">Privacy</a><span aria-hidden="true">·</span><a href="/terms.html" target="_blank" rel="noopener">Terms</a><span aria-hidden="true">·</span><a href="mailto:young@adroitie.com">Contact</a></nav></footer>
 </main>
 
 <input id="setup-input" type="file" accept=".json,application/json" hidden>

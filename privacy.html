@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy - BookBuilder Lite</title>
+<meta name="description" content="How BookBuilder Lite handles your data: statements are read in your browser and never uploaded, the page sets no cookies, and a cookieless counter counts visits and finished workbooks.">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<style>
+:root { color-scheme: light dark; --bg: #f4f6f9; --fg: #16202f; --muted: #556275; --accent: #1d5fc4; --line: #d9e0ea; }
+@media (prefers-color-scheme: dark) { :root { --bg: #0d131d; --fg: #e4e9f1; --muted: #98a4b7; --accent: #6ea4ff; --line: #2a3649; } }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.page { box-sizing: border-box; max-width: 40rem; margin: 0 auto; padding: 16px 16px 48px; overflow-wrap: break-word; }
+.site { display: flex; align-items: center; min-height: 44px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+h1 { font-size: 1.75rem; line-height: 1.25; margin: 16px 0 4px; }
+h2 { font-size: 1.2rem; line-height: 1.3; margin: 32px 0 8px; }
+p, ul, ol { margin: 0 0 1rem; }
+ul, ol { padding-left: 1.5rem; }
+li { margin-bottom: .5rem; }
+.updated { color: var(--muted); }
+a { color: var(--accent); text-underline-offset: 2px; }
+.site a, .back a { font-weight: 600; display: inline-flex; align-items: center; min-height: 44px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.back { margin-top: 40px; padding-top: 8px; border-top: 1px solid var(--line); }
+@media (forced-colors: active) { a:focus-visible { outline-color: CanvasText; } }
+</style>
+</head>
+<body>
+<div class="page">
+<header class="site"><a href="https://bookbuilder.adroitie.com/">BookBuilder Lite</a></header>
+<main>
+<h1>Privacy</h1>
+<p class="updated">Last updated: November 20, 2026</p>
+<p>BookBuilder Lite is a free web tool by Adroitie that turns bank and card statements into an Excel workbook. This page explains what happens to your data when you use it.</p>
+
+<h2>Your files never leave your browser</h2>
+<p>The statements you add are read inside your browser tab. They are never uploaded to us or to anyone else. The workbook is built in the tab and saved straight to your computer. When you close the page, nothing is kept.</p>
+<p>You can check this yourself: open your browser's DevTools, choose the Network tab, then add a file. You will see the page's tools load, but no request carries your file.</p>
+
+<h2>What the page loads, and from where</h2>
+<ul>
+<li><strong>The page itself</strong> is hosted on GitHub Pages. Like any web host, GitHub receives your IP address and browser details when your browser asks for the page. See <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>.</li>
+<li><strong>The reading and Excel tools</strong> load from the jsDelivr CDN and from this site.</li>
+<li><strong>Fonts</strong> load from Google Fonts.</li>
+</ul>
+<p>Each of these services sees an ordinary web request from your browser. None of them receives your files, names, amounts or anything you type.</p>
+
+<h2>Cookies</h2>
+<p>This page sets no cookies. Your browser may hold Google Analytics and HubSpot cookies from adroitie.com, Adroitie's main site. The browser sends them to this site's host, GitHub, with each page request, but this page never reads them or sends them anywhere.</p>
+
+<h2>Counting visits</h2>
+<p>We use GoatCounter, a privacy-friendly counter, to learn how many people use the tool. It counts two things:</p>
+<ul>
+<li>a visit when the page opens, and</li>
+<li>one "workbook finished" event when you download a workbook. A workbook made from the built-in sample statement is counted as a sample instead.</li>
+</ul>
+<p>GoatCounter uses no cookies and doesn't store your IP address. The count never includes your files, file names, bank names, amounts or anything you type. It gets the page address and title (including any text after a ? in the address), the site that linked you here, your screen size and your browser type. <a href="https://www.goatcounter.com/help/gdpr">How GoatCounter handles data</a>.</p>
+
+<h2>Setup files</h2>
+<p>If you use <strong>Save setup file</strong>, it is saved to your own computer. It holds your rule patterns and account names, not transactions. We never see it.</p>
+
+<h2>Contact</h2>
+<p>Questions about privacy: <a href="mailto:young@adroitie.com">young@adroitie.com</a></p>
+<p>See also the <a href="/terms.html">Terms of use</a>.</p>
+</main>
+<footer class="back"><a href="https://bookbuilder.adroitie.com/">Back to BookBuilder Lite</a></footer>
+</div>
+</body>
+</html>
