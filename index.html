@@ -733,6 +733,8 @@ main { padding-block: 24px 120px; }
 (() => {
   'use strict';
   if (!document.documentElement.lang) document.documentElement.lang = 'en';   // the host wrapper has no lang (P5-4)
+  // P31-2 (D109): the contact inbox, the same address as the footer's Contact link (t_p31 pins them equal). The unsupported-bank link adds only this fixed subject, never a body or anything from the file.
+  const CONTACT_MAIL = 'young@adroitie.com', BANK_MAIL = `mailto:${CONTACT_MAIL}?subject=Unsupported%20bank`;
   const APP_VERSION = '2.2';   // P10-2: footer, and the Overview sheet (P10-5)
   document.getElementById('app-ver').textContent = 'v' + APP_VERSION;
 
@@ -939,6 +941,7 @@ main { padding-block: 24px 120px; }
 
   const notices = [];
   function pushNotice(level, html) { notices.push({ id: ++noticeSeq, level, html }); renderNotices(); }
+  const bankHelp = () => `Bank not supported yet? <a href="${esc(BANK_MAIL)}">Tell us which bank</a> (don't attach the statement).`;
   function renderNotices() {
     $('notices').innerHTML = notices.map(n => `<div class="notice ${n.level}" role="${n.level === 'bad' ? 'alert' : 'status'}">
       <span>${n.html}</span>
@@ -1206,6 +1209,7 @@ main { padding-block: 24px 120px; }
   }
 
   async function readSource(src) {
+    src.unsupported = false;
     try {
       if (src.kind === 'pdf') { const was = src.type; await parsePdfSource(src); src.status = 'ready'; if (src.type !== was) renderSources(); return; }
       const t = src.kind === 'csv' ? await parseCsv(src) : await parseWorkbook(src);
@@ -1214,7 +1218,7 @@ main { padding-block: 24px 120px; }
       src.status = 'ready';
       autoMap(src);
     } catch (err) {
-      src.status = 'error';
+      src.status = 'error'; src.unsupported = !!(err && err.unsupported);   // P31-2: the bank/layout is not recognized
       src.error = err && err.message ? err.message : 'This file could not be read.';
     } finally {
       updateStatus(src); render();
@@ -1223,7 +1227,7 @@ main { padding-block: 24px 120px; }
 
   function statusHtml(s) {
     if (s.status === 'reading') return '<span class="spinner" aria-hidden="true"></span><span>Reading…</span>';
-    if (s.status === 'error') return `<span class="err">${esc(s.error)}</span>`;
+    if (s.status === 'error') return `<span class="err">${esc(s.error)}</span>${s.unsupported ? `<span class="bank-help">${bankHelp()}</span>` : ''}`;
     if (s.kind === 'pdf' && s.pdf) {
       const n = s.txns.length, np = s.pdf.periodOrder.length;
       return `<span class="ok num">${s.pdf.pages} page${s.pdf.pages === 1 ? '' : 's'} · ${n.toLocaleString()} transaction${n === 1 ? '' : 's'}${np > 1 ? ` · ${np} statements` : ''}</span>${s.typeFromPdf ? `<span>Read as a ${s.type === 'card' ? 'credit card' : 'bank'} statement</span>` : ''}`;
@@ -2013,7 +2017,7 @@ main { padding-block: 24px 120px; }
     const used = P.periods.filter(p => p.ob || p.eb || P.raws.some(r => r.period === p.idx));
     const key = p => p.ebDate || p.obDate || (P.raws.filter(r => r.period === p.idx).map(r => r.date).sort()[0]) || '';
     P.periodOrder = used.slice().sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : a.idx - b.idx)).map(p => p.idx);
-    if (!P.raws.length) throw new Error('No transactions were found in this PDF. Its layout may not be supported yet. Export a CSV from your bank instead.');
+    if (!P.raws.length) throw Object.assign(new Error('No transactions were found in this PDF. Its layout may not be supported yet. Export a CSV from your bank instead.'), { unsupported: true });
     src.pdf = P;
     src.rowCount = P.raws.length; src.colCount = 0;
     // The statement layout beats the file-name guess; a type the user picked always wins (D26).
@@ -2114,7 +2118,7 @@ main { padding-block: 24px 120px; }
           <div class="field"><label for="m-category-${id}">Category <span class="opt">(optional)</span></label><select id="m-category-${id}" data-m="category"${m.category != null ? ` aria-describedby="m-category-n-${id}"` : ''}>${colOptions(s, m.category, true, 'None')}</select>${m.category != null ? `<span class="bal-note" id="m-category-n-${id}">Categories from this column are reviewed on the next screen.</span>` : ''}</div>
           ${s.needsYear || s.yearOverride ? `<div class="field"><label for="yr-${id}">Statement year <span class="opt">(the dates have no year)</span></label><input class="money-in num ${s.needsYear && !s.yearOverride ? 'bad-in' : ''}" id="yr-${id}" data-year="1" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="e.g. 2025" value="${s.yearOverride || ''}"${s.needsYear && !s.yearOverride ? ` aria-describedby="yr-h-${id}"` : ''}>${s.needsYear && !s.yearOverride ? `<span class="bal-note" id="yr-h-${id}">The year the statement ends in.</span>` : ''}</div>` : ''}
         </div>
-        <ul class="notes">${s.mapNotes.map(n => `<li>${esc(n)}</li>`).join('')}${(s.mapWarnings || []).map(n => `<li class="warn">${esc(n)}</li>`).join('')}${s.mapErrors.map(n => `<li class="err">${esc(n)}</li>`).join('')}</ul>
+        <ul class="notes">${s.mapNotes.map(n => `<li>${esc(n)}</li>`).join('')}${(s.mapWarnings || []).map(n => `<li class="warn">${esc(n)}</li>`).join('')}${s.mapErrors.map(n => `<li class="err">${esc(n)}</li>`).join('')}${m.date == null && m.amount == null && m.debit == null && m.credit == null ? `<li class="bank-help">${bankHelp()}</li>` : ''}</ul>
         ${parsedHtml(s)}
         ${balancesHtml(s)}
         <div class="preview-wrap" tabindex="0" role="region" aria-label="Preview of ${esc(s.name)}">
@@ -4733,7 +4737,7 @@ main { padding-block: 24px 120px; }
 
     // Trial Balance: summary block (statements, checks), then every COA account (so a GL edit to any account shows up).
     heading(tbS, 'Trial Balance (Cash Basis)', `Period ${usDate(J.first)} – ${usDate(J.last)} · US dollars`);   // P13-2: the basis is in the title (AU-C 800 / AR-C 80)
-    tbS.getCell('A3').value = `Built by BookBuilder Lite on ${usDate(todayIso())}. Debit balances are positive in the Net column.`;
+    tbS.getCell('A3').value = `Built by BookBuilder Lite (https://bookbuilder.adroitie.com) on ${usDate(todayIso())}. Debit balances are positive in the Net column.`;
     let r = 5;
     tbS.getRow(r).values = ['No', 'Statement', 'Reconciliation', 'Ending per books (Dr − Cr)', 'Ending per statement', 'Difference']; styleHeader(tbS.getRow(r));
     r++;
@@ -5037,7 +5041,7 @@ main { padding-block: 24px 120px; }
     {
       const T = L(IS.tc), ref = (sh, cell) => sref(sh, cell);
       heading(ovS, 'Overview', `Period ${usDate(J.first)} – ${usDate(J.last)} · Cash basis · US dollars`);
-      ovS.getCell('A3').value = `Built by BookBuilder Lite v${APP_VERSION} on ${usDate(todayIso())}. Every amount below is a live formula on the sheet named next to it.`;
+      ovS.getCell('A3').value = `Built by BookBuilder Lite v${APP_VERSION} (https://bookbuilder.adroitie.com) on ${usDate(todayIso())}. Every amount below is a live formula on the sheet named next to it.`;
       const para = (r, h) => { ovS.mergeCells(`A${r}:F${r}`); ovS.getCell(`A${r}`).alignment = { wrapText: true, vertical: 'top' }; ovS.getRow(r).height = h; };   // long notes wrap inside A–F, so fit-to-width keeps a readable size
       para(3, 30);
       let o = 5;
