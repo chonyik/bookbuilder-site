@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://fonts.googleapis.com https://young0321.goatcounter.com; img-src 'self' data: https://young0321.goatcounter.com; base-uri 'none'; form-action 'none'">
+<script>/* P30-1 (D110): same as index.html (P24-1): frame-ancestors works only as a header, which GitHub Pages can't send, so a framed copy stops before the page loads */ if (window.top !== window.self) { window.stop(); document.documentElement.innerHTML = ''; }</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trust tax projection - BookBuilder Lite</title>
+<meta name="description" content="Project a trust's federal (Form 1041) and California (Form 541) income tax from a client Excel file: taxable income, distributable net income and tax due. Runs in your browser; the file is never uploaded.">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eef2f7; --line: #d9e0ea; --control-line: #7d8ba0;
+  --fg: #16202f; --muted: #5a6679; --accent: #1d5fc4; --accent-fg: #ffffff; --accent-soft: #e3edfb;
+  --ok: #17784a; --ok-soft: #e2f3ea; --warn: #9a5a06; --warn-soft: #fbf0dc; --bad: #b42318; --bad-soft: #fbe6e4;
+  --focus: #1d5fc4; --shadow: 0 1px 2px rgba(22, 32, 47, .06), 0 2px 8px rgba(22, 32, 47, .05);
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --fs-xs: .75rem; --fs-sm: .875rem; --fs-md: 1rem; --fs-lg: 1.25rem; --fs-xl: 1.5rem; --r: 8px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d131d; --surface: #151d2a; --surface-2: #1b2535; --line: #2a3649; --control-line: #5f7088;
+    --fg: #e4e9f1; --muted: #98a4b7; --accent: #6ea4ff; --accent-fg: #0d131d; --accent-soft: #1b2c48;
+    --ok: #5cc98f; --ok-soft: #15311f; --warn: #f0b252; --warn-soft: #36280f; --bad: #ff8a80; --bad-soft: #3a1917; --focus: #6ea4ff;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4); color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--fs-md); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { margin: 0; line-height: 1.25; text-wrap: balance; }
+p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+h2:focus { outline: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+a { color: var(--accent); text-underline-offset: 2px; }
+
+.wrap { max-width: 960px; margin: 0 auto; padding-inline: 16px; }
+.app-header { background: var(--surface); border-bottom: 1px solid var(--line); }
+.app-header .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding-block: 12px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; text-decoration: none; color: var(--fg); }
+.brand-mark { width: 30px; height: 30px; border-radius: 6px; flex: none; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font-weight: 700; font-size: var(--fs-sm); }
+.privacy { display: inline-flex; align-items: center; font-size: var(--fs-xs); color: var(--ok); background: var(--ok-soft); padding: 4px 10px; border-radius: 999px; font-weight: 500; }
+
+main { padding-block: 24px 40px; }
+.title h1 { font-size: var(--fs-xl); font-weight: 600; letter-spacing: -.01em; }
+.title p { margin-top: 4px; color: var(--muted); max-width: 62ch; }
+.stepper { list-style: none; margin: 20px 0 20px; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; counter-reset: s; }
+.stepper li { counter-increment: s; border-top: 3px solid var(--line); padding-top: 6px; font-size: var(--fs-sm); color: var(--muted); }
+.stepper li::before { content: counter(s) ". "; }
+.stepper li[aria-current="step"] { border-top-color: var(--accent); color: var(--fg); font-weight: 600; }
+.stepper li.done { border-top-color: var(--ok); }
+
+section[id^="step-"] { display: grid; gap: 16px; }
+h2 { font-size: var(--fs-lg); font-weight: 600; }
+h3 { font-size: var(--fs-md); font-weight: 600; }
+.lead { color: var(--muted); max-width: 66ch; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 16px; display: grid; gap: 12px; }
+.fine { font-size: var(--fs-sm); color: var(--muted); max-width: 66ch; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border-radius: var(--r); border: 1px solid var(--control-line); background: var(--surface); cursor: pointer; font-weight: 500; }
+.btn:hover:not(:disabled) { background: var(--surface-2); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.primary:hover:not(:disabled) { background: var(--accent); filter: brightness(1.08); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; margin-top: 8px; }
+.actions .right { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.field { display: grid; gap: 4px; min-width: 0; }
+.field > span:first-child, .field > label { font-size: var(--fs-sm); font-weight: 500; }
+input[type="text"], select, input[type="file"] { width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--control-line); border-radius: var(--r); background: var(--surface); }
+input[type="file"] { padding: 8px; }
+input[aria-invalid="true"] { border-color: var(--bad); }
+.num-in { text-align: right; font-family: var(--font-mono); }
+.hint { font-size: var(--fs-xs); color: var(--muted); }
+
+.msg { padding: 10px 12px; border-radius: var(--r); font-size: var(--fs-sm); border: 1px solid transparent; }
+.msg.bad { background: var(--bad-soft); color: var(--bad); border-color: var(--bad); }
+.msg.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+.msg.ok { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.rows > li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); gap: 6px 16px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
+.rows > li:first-child { border-top: 0; }
+.acct-id { display: grid; gap: 2px; min-width: 0; }
+.acct-id .name { overflow-wrap: anywhere; }
+.acct-id .meta { font-size: var(--fs-xs); color: var(--muted); }
+.tag { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; font-size: var(--fs-xs); font-weight: 500; background: var(--accent-soft); color: var(--accent); vertical-align: 1px; }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+.tag.ok { background: var(--ok-soft); color: var(--ok); }
+.mrow { grid-template-columns: minmax(0, 1fr) 170px 170px !important; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 16px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+
+.headline { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 14px 16px; box-shadow: var(--shadow); }
+.headline p:first-child { font-size: var(--fs-lg); font-weight: 600; }
+.headline p + p { margin-top: 2px; color: var(--muted); font-size: var(--fs-sm); }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 14px 16px; display: grid; gap: 8px; }
+table.fin { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+table.fin caption { text-align: left; font-weight: 600; font-size: var(--fs-md); padding-bottom: 6px; }
+table.fin th, table.fin td { padding: 6px 8px; border-top: 1px solid var(--line); vertical-align: baseline; }
+table.fin thead th { border-top: 0; color: var(--muted); font-weight: 500; text-align: right; }
+table.fin thead th:first-child { text-align: left; }
+table.fin tbody th { text-align: left; font-weight: 400; }
+table.fin td { text-align: right; white-space: nowrap; }
+table.fin .ln { display: inline-block; min-width: 2.6rem; color: var(--muted); font-family: var(--font-mono); font-size: var(--fs-xs); }
+table.fin tr.total th, table.fin tr.total td { font-weight: 600; background: var(--surface-2); }
+table.fin tr.sub th { color: var(--muted); font-size: var(--fs-xs); font-weight: 600; padding-top: 12px; }
+.chk { list-style: none; margin: 0; padding: 0; display: grid; font-size: var(--fs-sm); }
+.chk li { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; padding: 6px 0; border-top: 1px solid var(--line); }
+.chk li:first-child { border-top: 0; }
+.badge { flex: none; font-weight: 600; font-size: var(--fs-xs); padding: 1px 10px; border-radius: 999px; }
+.badge.ok { background: var(--ok-soft); color: var(--ok); }
+.badge.bad { background: var(--bad-soft); color: var(--bad); }
+.foot { margin-top: 32px; padding-top: 12px; border-top: 1px solid var(--line); font-size: var(--fs-xs); color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: space-between; }
+.foot a { color: inherit; display: inline-flex; align-items: center; min-height: 44px; }
+.foot nav { display: flex; gap: 4px 14px; flex-wrap: wrap; }
+
+@media (max-width: 640px) {
+  main { padding-block: 16px 32px; }
+  .stepper { gap: 4px; }
+  .stepper li { font-size: var(--fs-xs); }
+  .rows > li, .mrow { grid-template-columns: minmax(0, 1fr) !important; }
+  table.fin thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  table.fin, table.fin tbody { display: block; }
+  table.fin tr { display: grid; grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr)); gap: 2px 8px; padding: 8px 0; border-top: 1px solid var(--line); }
+  table.fin tr.total { background: var(--surface-2); }
+  table.fin th, table.fin td { border-top: 0; padding: 0 4px; }
+  table.fin tbody th { grid-column: 1 / -1; font-weight: 500; }
+  table.fin td { text-align: left; white-space: normal; overflow-wrap: anywhere; }
+  table.fin caption { display: block; }
+  table.fin[style*="--cols:1"] tr { grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; }
+  table.fin[style*="--cols:1"] tbody th { grid-column: auto; }
+  table.fin[style*="--cols:1"] td { text-align: right; }
+  table.fin[style*="--cols:1"] td[data-label]::before { display: none; }
+  table.fin td[data-label]::before { content: attr(data-label); display: block; font-family: var(--font-body); font-size: var(--fs-xs); color: var(--muted); font-weight: 400; }
+  table.fin tr.sub { display: block; padding-top: 12px; }
+  .actions { flex-direction: column-reverse; }
+  .actions .right, .actions .btn { width: 100%; }
+}
+@media (forced-colors: active) { .btn, input, select { border-color: ButtonText; } .stepper li[aria-current="step"] { border-top-color: Highlight; } }
+/* P29-1 (D108): tool switcher. Segmented pill; the current tool is the filled segment. 44px tall on phones, own row there. */
+.tool-nav { display: inline-flex; gap: 2px; padding: 2px; background: var(--surface-2); border: 1px solid var(--control-line); border-radius: 999px; }
+.tool-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 14px; border-radius: 999px; color: var(--fg); font-size: var(--fs-sm); font-weight: 500; text-decoration: none; white-space: nowrap; }
+.tool-nav a:hover { color: var(--accent); }
+.tool-nav a[aria-current="page"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+@media (max-width: 640px) { .tool-nav { order: 3; flex: 1 1 100%; } .tool-nav a { flex: 1; min-height: 44px; padding: 0 8px; } }
+@media (forced-colors: active) { .tool-nav { border-color: CanvasText; } .tool-nav a[aria-current="page"] { forced-color-adjust: none; background: Highlight; color: HighlightText; } .tool-nav a:focus-visible { outline: 2px solid CanvasText; } }</style>
+</head>
+<body>
+<header class="app-header"><div class="wrap">
+  <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">B</span><span>BookBuilder Lite</span></a>
+  <nav class="tool-nav" aria-label="Tools"><a href="/">Statements to Excel</a><a href="/trust.html" aria-current="page">Trust tax projection</a></nav>
+  <span class="privacy">Your file stays in this browser</span>
+</div></header>
+<main class="wrap">
+  <div class="title">
+    <h1>Trust tax projection</h1>
+    <p>Projects the federal (Form 1041) and California (Form 541) income tax of a trust for the year, from the client's Excel file. It is a projection to help a preparer plan, not tax advice. The file is read in this tab and never leaves your browser.</p>
+  </div>
+  <noscript><p class="msg warn">This page needs JavaScript to read your Excel file.</p></noscript>
+  <ol class="stepper" id="stepper" aria-label="Steps">
+    <li data-s="upload">Upload</li><li data-s="accounts">Accounts</li><li data-s="questions">Questions</li><li data-s="results">Results</li>
+  </ol>
+
+  <section id="step-upload" aria-labelledby="h-upload">
+    <h2 id="h-upload" tabindex="-1">Upload the client's workbook</h2>
+    <p class="lead">Choose the completed trust workbook (.xlsx) with the tabs Trust_Info, Ledger, Broker_1099 and Chart_of_Accounts. Columns are matched by their header names.</p>
+    <div class="card">
+      <div class="field"><label for="file-input">Trust workbook (.xlsx)</label>
+        <input type="file" id="file-input" accept=".xlsx,.xlsm,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-describedby="upload-error upload-ok"></div>
+      <p id="upload-error" class="msg bad" role="alert" hidden></p>
+      <p id="upload-ok" class="msg ok" role="status" hidden></p>
+    </div>
+  </section>
+
+  <section id="step-accounts" aria-labelledby="h-accounts" hidden>
+    <h2 id="h-accounts" tabindex="-1">Tax category for each account</h2>
+    <p class="lead">Each ledger account needs a tax category. The page suggests one from the account number or name; change any that are wrong. An account with no category is left out of the projection, and a check will flag it.</p>
+    <div class="toolbar"><button class="btn" type="button" id="btn-accept-suggestions">Accept suggestions</button><span id="sugg-note" class="fine" role="status"></span></div>
+    <ul class="rows" id="acct-list"></ul>
+    <div class="card">
+      <div class="field"><label for="ca-payment-account">Account that holds the California estimated payments</label><select id="ca-payment-account"></select></div>
+      <p class="hint">Payments from this account count as California estimates already paid this year.</p>
+    </div>
+  </section>
+
+  <section id="step-questions" aria-labelledby="h-questions" hidden>
+    <h2 id="h-questions" tabindex="-1">Questions for the rest of the year</h2>
+    <p class="lead">For each category choose how to project the full year. Annualize scales the year to date up to twelve months. Actual only adds nothing more. Manual adds the amount you enter for the rest of the year.</p>
+    <ul class="rows" id="method-list"></ul>
+    <div class="card">
+      <h3>Elections and distributions</h3>
+      <div class="grid2">
+        <div class="field"><label for="sec68">Apply the section 68 two-thirty-sevenths limit?</label><select id="sec68"><option value="Y">Yes</option><option value="N">No</option></select><span class="hint">Federal only; follows the JCT Blue Book position.</span></div>
+        <div class="field"><label for="bundled-fee">Bundled trustee fee for investment advice (%)</label><input type="text" id="bundled-fee" class="num-in" inputmode="decimal" autocomplete="off"><span class="hint">Part of the trustee fee that is not deductible.</span></div>
+        <div class="field"><label for="add-dist">Additional distributions planned ($)</label><input type="text" id="add-dist" class="num-in" inputmode="decimal" autocomplete="off"><span class="hint">By 12/31, or within 65 days with the section 663(b) election.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Tax payments still to come</h3>
+      <div class="grid2">
+        <div class="field"><label for="plan-fed-est">Federal estimates still to pay ($)</label><input type="text" id="plan-fed-est" class="num-in" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="plan-ca-est">California estimates still to pay ($)</label><input type="text" id="plan-ca-est" class="num-in" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="plan-fed-py">Federal prior-year overpayment applied ($)</label><input type="text" id="plan-fed-py" class="num-in" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="plan-ca-py">California prior-year overpayment applied ($)</label><input type="text" id="plan-ca-py" class="num-in" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="plan-fed-other">Federal extension and other payments ($)</label><input type="text" id="plan-fed-other" class="num-in" inputmode="decimal" autocomplete="off"></div>
+        <div class="field"><label for="plan-ca-other">California extension and other payments ($)</label><input type="text" id="plan-ca-other" class="num-in" inputmode="decimal" autocomplete="off"></div>
+      </div>
+    </div>
+    <p id="q-error" class="msg bad" role="alert" hidden></p>
+  </section>
+
+  <section id="step-results" aria-labelledby="h-results" hidden>
+    <h2 id="h-results" tabindex="-1">Projection</h2>
+    <div id="chk-warning" class="msg warn" role="alert" hidden></div>
+    <div id="res-summary"></div>
+    <div id="res-t1" class="block"></div>
+    <div id="res-dni1" class="block"></div>
+    <div id="res-p1" class="block"></div>
+    <div id="res-chk" class="block"></div>
+    <p class="fine">A projection from the figures in the file, using the built-in federal and California tax tables for the tax year. It does not replace a prepared return or tax advice; the preparer checks the result.</p>
+  </section>
+
+  <div class="actions" id="actions">
+    <button class="btn" type="button" id="btn-back" hidden>Back</button>
+    <div class="right"><button class="btn" type="button" id="btn-restart" hidden>Start over</button><button class="btn primary" type="button" id="btn-next" disabled>Continue</button></div>
+  </div>
+
+  <footer class="foot"><span>BookBuilder Lite by <a href="https://adroitie.com/">Adroitie</a>. A projection, not tax advice.</span>
+    <nav aria-label="About this site"><a href="/">Statements to Excel</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
+</main>
+
+<script src="/xlsx-0.20.3.full.min.js" integrity="sha256-zAFRMKqFIefwiPiImOupSczcv7ON8L0Sm0S3Jzw6b0E=" crossorigin="anonymous"></script>
+<script>
+'use strict';
+(() => {
+/* ================================================================================================================
+   Engine. Mirrors the client's workpaper in its order: Setup -> MAP -> CHK -> INC-1 -> FAI-1 -> A-2 -> A-1 -> A-3 ->
+   T-1 -> DNI-1 -> K-1 -> P-1. Excel's ROUND points are copied exactly. Floats with those roundings, not integer cents
+   (the workpaper's own arithmetic; this page is the one exception to the repo's integer-cents rule, D108).
+   ================================================================================================================ */
+const CATEGORIES = ['INT', 'USINT', 'TE_CA', 'TE_OS', 'QDIV', 'NQDIV', 'STCG', 'LTCG', 'RENT', 'K1', 'FEE_TR', 'FEE_TAX', 'FEE_LEG', 'FEE_INV', 'RENT_EXP', 'SALT', 'CHAR', 'DIST', 'FEDPAY'];
+const PROJECTED = CATEGORIES.slice(0, 17);
+const CAT_LABEL = {
+  INT: 'Interest income, taxable', USINT: 'Interest, U.S. Treasury obligations', TE_CA: 'Tax-exempt interest, California', TE_OS: 'Tax-exempt interest, other states',
+  QDIV: 'Dividends, qualified', NQDIV: 'Dividends, nonqualified', STCG: 'Capital gain or loss, short-term', LTCG: 'Capital gain or loss, long-term', RENT: 'Rental income, gross',
+  K1: 'Partnership K-1 ordinary income', FEE_TR: 'Trustee fees', FEE_TAX: 'Tax preparation fees', FEE_LEG: 'Legal fees, trust administration', FEE_INV: 'Investment advisory fees',
+  RENT_EXP: 'Rental expenses incl. property tax', SALT: 'State income tax paid', CHAR: 'Charitable contributions (section 642(c))', DIST: 'Distributions to beneficiaries', FEDPAY: 'Federal estimated tax payments'
+};
+const SIGN = { FEE_TR: -1, FEE_TAX: -1, FEE_LEG: -1, FEE_INV: -1, RENT_EXP: -1, SALT: -1, CHAR: -1 };   // INC-1 column C (all others +1)
+const FAI_SHARE = { INT: 1, USINT: 1, TE_CA: 1, TE_OS: 1, QDIV: 1, NQDIV: 1, RENT: 1, STCG: 0, LTCG: 0, FEE_TR: .5, FEE_TAX: .5, FEE_LEG: 0, FEE_INV: .5, RENT_EXP: 1, SALT: 0 };   // FAI-1 column F
+const FAI_REC = ['INT', 'USINT', 'TE_CA', 'TE_OS', 'QDIV', 'NQDIV', 'RENT', 'STCG', 'LTCG'], FAI_DIS = ['FEE_TR', 'FEE_TAX', 'FEE_LEG', 'FEE_INV', 'RENT_EXP', 'SALT'];
+
+// the workpaper's Tax Tables tab, 2025 and 2026 columns
+const TT = {
+  2025: { fedBr: [0, 3150, 11450, 15650], fedRate: [.10, .24, .35, .37], pref0: 3250, pref15: 15900, niitThr: 15650, exSimple: 300, exComplex: 100, exQdt: 5100, saltCap: 40000, saltThr: 500000, saltFloor: 10000, capLoss: 3000, s68: 0, shAgi: 150000,
+    caBr: [0, 11079, 26264, 41452, 57542, 72724, 371479, 445771, 742953], caRate: [.01, .02, .04, .06, .08, .093, .103, .113, .123], bhstThr: 1000000, caExSimple: 1, caExComplex: 1, caExQdt: 153, caFloor: .02 },
+  2026: { fedBr: [0, 3300, 11700, 16000], fedRate: [.10, .24, .35, .37], pref0: 3300, pref15: 16250, niitThr: 16000, exSimple: 300, exComplex: 100, exQdt: 5100, saltCap: 40400, saltThr: 505000, saltFloor: 10000, capLoss: 3000, s68: 1, shAgi: 150000,
+    caBr: [0, 11456, 27157, 42861, 59498, 75197, 384109, 460927, 768213], caRate: [.01, .02, .04, .06, .08, .093, .103, .113, .123], bhstThr: 1000000, caExSimple: 1, caExComplex: 1, caExQdt: 158, caFloor: .02 }
+};
+const NIIT_RATE = .038, SALT_PHASE = .3, S68_FRAC = 2 / 37, BHST_RATE = .01;
+const diffs = r => r.map((x, i) => i === 0 ? x : x - r[i - 1]);
+
+// Excel ROUND: half away from zero, on the 15 significant digits Excel keeps
+const xr = (x, d) => { const p = Math.pow(10, d), a = Math.round(Number((Math.abs(x) * p).toPrecision(15))) / p; return x < 0 ? -a : a; };
+const N = v => (typeof v === 'number' && isFinite(v)) ? v : 0;
+const str = v => v === null || v === undefined ? '' : String(v).trim();
+const yn = v => /^y/i.test(str(v)) ? 'Y' : 'N';
+const frac = v => { const n = num(v); return n > 1 ? n / 100 : n; };
+function num(v) {
+  if (typeof v === 'number') return isFinite(v) ? v : 0;
+  let s = str(v).replace(/[$,\s]/g, ''), neg = false;
+  if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : (neg ? -n : n);
+}
+function isoDate(v) {
+  if (v === null || v === undefined || v === '') return null;
+  if (typeof v === 'number') return new Date(Date.UTC(1899, 11, 30) + Math.floor(v) * 864e5).toISOString().slice(0, 10);
+  const s = str(v); let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+  const pad = n => String(n).padStart(2, '0');
+  if (m) return m[1] + '-' + pad(m[2]) + '-' + pad(m[3]);
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(s);
+  return m ? m[3] + '-' + pad(m[1]) + '-' + pad(m[2]) : null;
+}
+const ymd = iso => [+iso.slice(0, 4), +iso.slice(5, 7), +iso.slice(8, 10)];
+
+// ---- suggestions: the sample MAP by account number, then keywords in the account name ----
+const SAMPLE_MAP = { 4010: 'INT', 4020: 'USINT', 4030: 'TE_CA', 4040: 'TE_OS', 4110: 'QDIV', 4120: 'NQDIV', 4210: 'STCG', 4220: 'LTCG', 4310: 'RENT', 6010: 'FEE_TR', 6020: 'FEE_TAX', 6030: 'FEE_LEG', 6040: 'FEE_INV',
+  6110: 'RENT_EXP', 6120: 'RENT_EXP', 6211: 'SALT', 6212: 'SALT', 6310: 'CHAR', 7010: 'DIST', 7020: 'DIST', 8010: 'FEDPAY' };
+const NAME_RULES = [
+  [/federal.*(estimat|tax)|\birs\b|form 1041/i, 'FEDPAY'],
+  [/(state|\bca\b|california|franchise).*(income )?tax|\bftb\b/i, 'SALT'],
+  [/charit|donation|642\(c\)/i, 'CHAR'],
+  [/\brent/i, null],   // handled below: rental income vs rental expense
+  [/treasur/i, 'USINT'],
+  [/(tax.?exempt|municipal|\bmuni)/i, null],   // handled below: California vs other states
+  [/short.?term/i, 'STCG'], [/long.?term/i, 'LTCG'],
+  [/\bdistribution/i, 'DIST'],
+  [/trustee.*fee|fee.*trustee/i, 'FEE_TR'],
+  [/tax prep|preparation|accounting|\bcpa\b/i, 'FEE_TAX'],
+  [/legal|attorney/i, 'FEE_LEG'],
+  [/advis|invest.*(manag|fee)|custod/i, 'FEE_INV'],
+  [/property tax|real estate tax|repair|maintenance/i, 'RENT_EXP'],
+  [/k-?1|partnership/i, 'K1'],
+  [/non-?qualified|ordinary dividend/i, 'NQDIV'], [/qualified/i, 'QDIV'], [/dividend/i, 'NQDIV'],
+  [/interest/i, 'INT']
+];
+function suggestCategory(no, name) {
+  const k = String(no).trim();
+  if (Object.prototype.hasOwnProperty.call(SAMPLE_MAP, k)) return SAMPLE_MAP[k];
+  const s = str(name);
+  if (!s) return null;
+  for (const [re, code] of NAME_RULES) {
+    if (!re.test(s)) continue;
+    if (code) return code;
+    if (/\brent/i.test(s) && re.source === '\\brent') return /expens|operat|manag|repair|maint|tax|insur|utilit|fee/i.test(s) ? 'RENT_EXP' : 'RENT';
+    if (/tax.?exempt|municipal|\bmuni/i.test(s) && re.source.indexOf('municipal') > 0) return /\b(ca|california)\b/i.test(s) ? 'TE_CA' : /other|out.?of|non.?ca/i.test(s) ? 'TE_OS' : null;
+  }
+  return null;
+}
+function defaultMethods() {
+  const out = {};
+  for (const c of PROJECTED) out[c] = { method: ['INT', 'QDIV', 'NQDIV', 'RENT', 'FEE_TR', 'FEE_INV', 'RENT_EXP'].includes(c) ? 'Annualize' : c === 'K1' ? 'Manual' : 'Actual only', amount: 0 };
+  return out;
+}
+// the California estimates account: a California tax account whose name says estimates or current year
+function suggestCaAccount(accounts) {
+  const c = accounts.filter(a => /\b(ca|california)\b.*(tax|estimat)|state.*tax/i.test(a.name));
+  const best = c.find(a => /estimat|current/i.test(a.name)) || c[0];
+  return best ? String(best.no) : '';
+}
+
+// ---- reading the client's workbook ----
+const TABS = [['trustinfo', 'Trust_Info'], ['ledger', 'Ledger'], ['broker1099', 'Broker_1099'], ['chartofaccounts', 'Chart_of_Accounts']];
+const normName = s => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
+function findHeader(rows, spec, required, tab) {
+  for (let i = 0; i < Math.min(rows.length, 60); i++) {
+    const row = rows[i] || [], cols = {};
+    for (const [key, re] of Object.entries(spec)) { const j = row.findIndex(c => typeof c === 'string' && re.test(c.trim())); if (j >= 0) cols[key] = j; }
+    if (required.every(k => k in cols)) return { at: i, cols };
+  }
+  throw new Error('The ' + tab + ' tab has no header row with the columns ' + required.join(', ') + '. Keep the template\'s tab names and column headers.');
+}
+const isExample = row => row.some(c => typeof c === 'string' && /example\b.*overwrite/i.test(c));
+function parseWorkbook(buf) {
+  return new Promise((resolve, reject) => {
+    try {
+      const u8 = new Uint8Array(buf);
+      const zip = u8.length > 4 && u8[0] === 0x50 && u8[1] === 0x4B, ole = u8.length > 4 && u8[0] === 0xD0 && u8[1] === 0xCF && u8[2] === 0x11 && u8[3] === 0xE0;
+      if (!zip && !ole) throw new Error('That file is not an Excel workbook. Choose the .xlsx file the client filled in.');
+      let wb;
+      try { wb = XLSX.read(u8, { type: 'array' }); } catch (e) { throw new Error('That file is not an Excel workbook, or it could not be read. Choose the .xlsx file the client filled in.'); }
+      const sheets = {}, missing = [];
+      for (const [key, label] of TABS) {
+        const nm = wb.SheetNames.find(n => normName(n) === key);
+        if (!nm) { missing.push(label); continue; }
+        sheets[key] = XLSX.utils.sheet_to_json(wb.Sheets[nm], { header: 1, raw: true, defval: null, blankrows: true });
+      }
+      if (missing.length) throw new Error('The workbook is missing the ' + missing.map(m => '"' + m + '"').join(' and ') + ' tab' + (missing.length > 1 ? 's' : '') + '. Use the client template and keep its tab names.');
+      resolve(readInput(sheets));
+    } catch (e) { reject(e); }
+  });
+}
+function readInput(sheets) {
+  // Trust_Info: labelled rows in sections A (facts), B (trustees), C (beneficiaries), D (planned payments)
+  const TR = [['begin', /begin/i], ['end', /end date/i], ['asOf', /as-of|data through/i], ['taxYear', /^tax year\s*$/i], ['name', /^trust name/i], ['type', /trust type/i], ['situs', /situs/i],
+    ['cgAlloc', /capital gains? allocated/i], ['incomeRequired', /income required/i], ['k1Passive', /partnership k-?1/i], ['rentalNII', /materially participate/i], ['bundledFeePct', /bundled/i],
+    ['pyFedTax', /prior-year total tax.*federal/i], ['pyCaTax', /prior-year total tax.*californ/i], ['pyAgi', /prior-year agi/i], ['stLossCarry', /carryover.*short/i], ['ltLossCarry', /carryover.*long/i], ['rentalDepreciation', /depreciation/i]];
+  const raw = {}, trustees = [], bens = [], planned = { fedEst: 0, caEst: 0, fedPriorYear: 0, caPriorYear: 0, fedOther: 0, caOther: 0, additionalDistributions: 0 };
+  let sec = 'A', bcols = null;
+  for (const row of sheets.trustinfo) {
+    const a = str(row[0]), b = str(row[1]), mk = /^([A-E])\.\s/.exec(a);
+    if (mk) { sec = mk[1]; bcols = null; continue; }
+    if (!b) continue;
+    if (sec === 'A') { for (const [k, re] of TR) if (re.test(b)) { if (!(k in raw)) raw[k] = row[2]; break; } }
+    else if (sec === 'B') { if (!/^name$/i.test(b) && !/^\(/.test(b)) trustees.push({ name: b, state: str(row[2]).toUpperCase(), kind: str(row[3]) || 'Individual' }); }
+    else if (sec === 'C') {
+      if (/^name$/i.test(b)) {
+        bcols = {}; const want = { state: /^state\b(?!.*marginal)/i, nonContingent: /contingent/i, share: /share/i, fedRate: /^fed.*marginal/i, stateRate: /^state.*marginal/i, niit: /niit/i, account: /ledger account/i, qdivRate: /fed rate on qualified/i };
+        for (const [k, re] of Object.entries(want)) { const j = row.findIndex(c => typeof c === 'string' && re.test(c.trim())); if (j >= 0) bcols[k] = j; }
+      } else if (bcols && !/^\(/.test(b)) {
+        const g = k => bcols[k] === undefined ? null : row[bcols[k]];
+        const acc = g('account');
+        bens.push({ name: b, state: str(g('state')).toUpperCase(), nonContingent: yn(g('nonContingent')), share: frac(g('share')), fedRate: frac(g('fedRate')), stateRate: frac(g('stateRate')), niit: yn(g('niit')),
+          account: acc !== null && !isNaN(Number(acc)) && str(acc) !== '' ? Number(acc) : str(acc), qdivRate: frac(g('qdivRate')) });
+      }
+    } else if (sec === 'D') {
+      const P = [['fedEst', 'caEst', /estimated tax payments/i], ['fedPriorYear', 'caPriorYear', /prior-year overpayment/i], ['fedOther', 'caOther', /extension|other payments/i], ['additionalDistributions', null, /additional distributions/i]];
+      for (const [f, c, re] of P) if (re.test(b)) { planned[f] = num(row[2]); if (c) planned[c] = num(row[3]); break; }
+    }
+  }
+  const taxYear = num(raw.taxYear);
+  if (!TT[taxYear]) throw new Error('The tax tables built into this page cover 2025 and 2026; the Trust_Info tab says ' + (taxYear || 'no tax year') + '.');
+  const asOf = isoDate(raw.asOf);
+  if (!asOf) throw new Error('Trust_Info needs the "Ledger data through (as-of date)".');
+  const type = /simple/i.test(str(raw.type)) ? 'Simple' : /disab|qdt/i.test(str(raw.type)) ? 'Qualified Disability Trust' : 'Complex';
+  const trust = { name: str(raw.name), type, taxYear, begin: isoDate(raw.begin) || taxYear + '-01-01', end: isoDate(raw.end) || taxYear + '-12-31', asOf, situs: str(raw.situs),
+    cgAlloc: /income/i.test(str(raw.cgAlloc)) ? 'Income' : 'Principal', incomeRequired: num(raw.incomeRequired), k1Passive: raw.k1Passive === undefined || str(raw.k1Passive) === '' ? 'Y' : yn(raw.k1Passive),
+    // the template asks "does a trustee materially participate? (Y = no NII)"; the workpaper's Setup C21 asks the opposite, so invert
+    rentalNII: yn(raw.rentalNII) === 'Y' ? 'N' : 'Y', bundledFeePct: frac(raw.bundledFeePct), pyFedTax: num(raw.pyFedTax), pyCaTax: num(raw.pyCaTax), pyAgi: num(raw.pyAgi),
+    stLossCarry: num(raw.stLossCarry), ltLossCarry: num(raw.ltLossCarry), rentalDepreciation: num(raw.rentalDepreciation) };
+
+  const acctNo = v => { const s = str(v); return s !== '' && !isNaN(Number(s)) ? Number(s) : s; };
+  // Ledger
+  let h = findHeader(sheets.ledger, { date: /^date/i, acct: /^account\s*(no|number|#)/i, name: /^account\s*name/i, desc: /^desc/i, ip: /income|^\(?i\/p/i, receipts: /^receipts?/i, disb: /^disb/i, ref: /^ref/i }, ['acct', 'receipts', 'disb'], 'Ledger');
+  const ledger = [];
+  for (const row of sheets.ledger.slice(h.at + 1)) {
+    if (isExample(row)) continue;
+    const c = h.cols, no = acctNo(row[c.acct]);
+    if (no === '') continue;
+    ledger.push({ date: c.date === undefined ? null : isoDate(row[c.date]), acct: no, name: c.name === undefined ? '' : str(row[c.name]), desc: c.desc === undefined ? '' : str(row[c.desc]),
+      ip: c.ip === undefined ? '' : (/^[ip]/i.test(str(row[c.ip])) ? str(row[c.ip])[0].toUpperCase() : ''), receipts: num(row[c.receipts]), disb: num(row[c.disb]), ref: c.ref === undefined ? '' : str(row[c.ref]) });
+  }
+  // Broker_1099
+  h = findHeader(sheets.broker1099, { name: /custodian|payer|account/i, date: /statement date/i, taxableInterest: /taxable interest/i, treasuryInterest: /treasury/i, teCA: /tax-exempt.*\bca\b/i, teOther: /tax-exempt.*other/i,
+    qdiv: /^qualified/i, nqdiv: /^non-?qualified/i, st: /^st\b/i, lt: /^lt\b/i, foreignTax: /foreign/i }, ['taxableInterest', 'qdiv', 'st', 'lt'], 'Broker_1099');
+  const broker = [], BK = ['taxableInterest', 'treasuryInterest', 'teCA', 'teOther', 'qdiv', 'nqdiv', 'st', 'lt', 'foreignTax'];
+  for (const row of sheets.broker1099.slice(h.at + 1)) {
+    if (isExample(row)) continue;
+    const c = h.cols, nm = c.name === undefined ? '' : str(row[c.name]);
+    if (/^total/i.test(nm)) continue;
+    const o = { name: nm, date: c.date === undefined ? null : isoDate(row[c.date]) };
+    for (const k of BK) o[k] = c[k] === undefined ? 0 : num(row[c[k]]);
+    if (!nm && BK.every(k => o[k] === 0)) continue;
+    broker.push(o);
+  }
+  // Chart_of_Accounts
+  h = findHeader(sheets.chartofaccounts, { no: /^account\s*(no|number|#)/i, name: /^account\s*name/i, type: /^type/i }, ['no', 'name'], 'Chart_of_Accounts');
+  const accounts = [];
+  for (const row of sheets.chartofaccounts.slice(h.at + 1)) {
+    if (isExample(row)) continue;
+    const no = acctNo(row[h.cols.no]);
+    if (no === '') continue;
+    const t = h.cols.type === undefined ? '' : str(row[h.cols.type]);
+    accounts.push({ no, name: str(row[h.cols.name]), type: /^r/i.test(t) ? 'Receipt' : /^d/i.test(t) ? 'Disbursement' : (typeof no === 'number' && no < 5000 ? 'Receipt' : 'Disbursement') });
+  }
+  return { trust, trustees, beneficiaries: bens, planned, ledger, broker, accounts };
+}
+
+// ---- the projection ----
+function compute(input, choices) {
+  choices = choices || {};
+  const t = input.trust, T = TT[t.taxYear], V = {};
+  if (!T) throw new Error('No tax tables for ' + t.taxYear);
+  const put = (k, v) => { V[k] = v; return v; };
+  const cat = choices.categories || {}, methods = choices.methods || defaultMethods();
+  const sec68 = choices.sec68 || 'Y';
+  const bundled = choices.bundledFeePct === undefined ? t.bundledFeePct : N(choices.bundledFeePct);
+  const addl = choices.additionalDistributions === undefined ? input.planned.additionalDistributions : N(choices.additionalDistributions);
+  const pl = Object.assign({}, input.planned, choices.planned || {});
+  const bens = input.beneficiaries;
+
+  // Setup
+  const [yb, mb] = ymd(t.begin), [ya, ma] = ymd(t.asOf);
+  const months = put('setup.months', Math.max(1, (ya - yb) * 12 + ma - mb + 1));
+  const fidN = input.trustees.length, fidCA = input.trustees.filter(x => x.state === 'CA').length;
+  const fidShare = put('setup.caFiduciaryShare', fidN === 0 ? 0 : fidCA / fidN);
+  const ncN = bens.filter(b => b.nonContingent === 'Y').length;
+  const benShare = put('setup.caBeneficiaryShare', ncN === 0 ? 0 : bens.filter(b => b.nonContingent === 'Y' && b.state === 'CA').length / ncN);
+  const caPct = put('setup.caPct', fidShare + (1 - fidShare) * benShare);
+  const deadline = new Date(Date.UTC(t.taxYear + 1, 0, 1) + 64 * 864e5).toISOString().slice(0, 10);
+
+  // MAP applied to the ledger
+  const catOf = acct => cat[String(acct)] || 'UNMAPPED';
+  const sumNet = {}, sumI = {}, sumP = {};
+  let unmapped = 0, blankIP = 0;
+  const ca = String(choices.caPaymentAccount === undefined || choices.caPaymentAccount === null ? '' : choices.caPaymentAccount);
+  let caNet = 0;
+  const netByAcct = {};
+  for (const r of input.ledger) {
+    const c = catOf(r.acct), net = N(r.receipts) - N(r.disb);
+    if (c === 'UNMAPPED') unmapped++;
+    if (!r.ip) blankIP++;
+    sumNet[c] = (sumNet[c] || 0) + net;
+    if (r.ip === 'I') sumI[c] = (sumI[c] || 0) + net; else if (r.ip === 'P') sumP[c] = (sumP[c] || 0) + net;
+    netByAcct[String(r.acct)] = (netByAcct[String(r.acct)] || 0) + net;
+    if (ca !== '' && String(r.acct) === ca) caNet += net;
+  }
+  const S = (m, c) => m[c] || 0;
+
+  // INC-1
+  const ytd = {}, rem = {}, full = {};
+  for (const c of PROJECTED) {
+    const m = methods[c] || { method: 'Actual only', amount: 0 };
+    const y = (SIGN[c] || 1) * S(sumNet, c);
+    const r = m.method === 'Annualize' ? xr(y * (12 - months) / months, 2) : m.method === 'Manual' ? N(m.amount) : 0;
+    ytd[c] = y; rem[c] = r; full[c] = y + r;
+    put('inc1.' + c + '.ytd', y); put('inc1.' + c + '.remaining', r); put('inc1.' + c + '.full', y + r);
+  }
+  const dist = put('inc1.memo.distributions', -S(sumNet, 'DIST'));
+  const fedPaid = put('inc1.memo.fedPaid', -S(sumNet, 'FEDPAY'));
+  const caPaid = put('inc1.memo.caPaid', -caNet);
+
+  // CHK (before the numbers that need it; some checks read later tabs, so they are assigned at the end)
+  // FAI-1
+  let totRec = 0, totDis = 0;
+  for (const c of FAI_REC.concat(FAI_DIS)) {
+    const s = FAI_REC.includes(c) ? 1 : -1;
+    const yi = s * S(sumI, c), yp = s * S(sumP, c), g = yi + xr(rem[c] * FAI_SHARE[c], 2);
+    put('fai1.' + c + '.ytdIncome', yi); put('fai1.' + c + '.ytdPrincipal', yp); put('fai1.' + c + '.remaining', rem[c]); put('fai1.' + c + '.fullIncome', g);
+    if (FAI_REC.includes(c)) totRec += g; else totDis += g;
+  }
+  put('fai1.totalReceipts', totRec); put('fai1.totalDisbursements', totDis);
+  const fai = put('fai1.total', totRec - totDis);
+
+  // A-2 capital gains
+  const a2 = {};
+  for (const col of ['fed', 'ca']) {
+    const o = {}; o.stFull = full.STCG; o.stCarry = -t.stLossCarry; o.stNet = o.stFull + o.stCarry; o.ltFull = full.LTCG; o.ltCarry = -t.ltLossCarry; o.ltNet = o.ltFull + o.ltCarry;
+    o.net = o.stNet + o.ltNet; o.line4 = o.net >= 0 ? o.net : Math.max(o.net, -T.capLoss); o.carryover = o.net < 0 ? o.line4 - o.net : 0;
+    o.inDni = t.cgAlloc === 'Income' ? Math.max(0, o.line4) : 0; o.excludedFromDni = -(o.line4 - o.inDni);
+    a2[col] = o;
+    for (const k of Object.keys(o)) put('a2.' + col + '.' + k, o[k]);
+  }
+  put('a2.fed.preferential', a2.fed.preferential = Math.max(0, Math.min(a2.fed.ltNet, a2.fed.net)));
+
+  // T-1 income lines (A-1's SALT test needs total income first)
+  const t1 = { fed: {}, caAdj: {}, ca: {} };
+  const fedIncome = { L1: full.INT + full.USINT, L2a: full.QDIV + full.NQDIV, L4: a2.fed.line4, L5rent: full.RENT - full.RENT_EXP - t.rentalDepreciation, L5k1: full.K1 };
+  fedIncome.L9 = fedIncome.L1 + fedIncome.L2a + fedIncome.L4 + fedIncome.L5rent + fedIncome.L5k1;
+
+  // A-1 deductions
+  const grossInc = full.INT + full.USINT + full.QDIV + full.NQDIV + full.RENT + full.K1, teInt = full.TE_CA + full.TE_OS, totExCg = grossInc + teInt;
+  const sec265 = totExCg === 0 ? 0 : teInt / totExCg, netCg = Math.max(0, a2.fed.line4);
+  const charRatio = totExCg + netCg === 0 ? 0 : teInt / (totExCg + netCg);
+  put('a1.ratio.grossIncome', grossInc); put('a1.ratio.teInterest', teInt); put('a1.ratio.total', totExCg); put('a1.ratio.sec265Ratio', sec265); put('a1.ratio.netCapGain', netCg); put('a1.ratio.charitableRatio', charRatio);
+  const fees = {}, tot = { amount: 0, notDeductible: 0, beforeSec265: 0, sec265: 0, deductible: 0 };
+  for (const [nm, c] of [['trustee', 'FEE_TR'], ['taxPrep', 'FEE_TAX'], ['legal', 'FEE_LEG'], ['investment', 'FEE_INV']]) {
+    const amount = full[c], notDed = c === 'FEE_TR' ? amount * bundled : c === 'FEE_INV' ? amount : 0, before = amount - notDed, s265 = xr(before * sec265, 2), ded = before - s265;
+    fees[nm] = { amount, notDeductible: notDed, beforeSec265: before, sec265: s265, deductible: ded };
+    for (const k of Object.keys(tot)) tot[k] += fees[nm][k];
+    for (const k of Object.keys(fees[nm])) put('a1.fees.' + nm + '.' + k, fees[nm][k]);
+  }
+  for (const k of Object.keys(tot)) put('a1.fees.total.' + k, tot[k]);
+  const line12 = put('a1.line12', fees.trustee.deductible), line14 = put('a1.line14', fees.taxPrep.deductible + fees.legal.deductible), sec265Memo = put('a1.sec265Memo', tot.sec265);
+  const saltPaid = full.SALT, capBefore = T.saltCap, phase = xr(SALT_PHASE * Math.max(0, fedIncome.L9 - T.saltThr), 2), capAfter = Math.max(T.saltFloor, capBefore - phase), saltDed = Math.min(saltPaid, capAfter);
+  put('a1.salt.paid', saltPaid); put('a1.salt.magi', fedIncome.L9); put('a1.salt.capBefore', capBefore); put('a1.salt.phaseDown', phase); put('a1.salt.capAfter', capAfter); put('a1.salt.deductible', saltDed);
+  const charPaid = full.CHAR, charLess = -xr(charPaid * charRatio, 2), charDed = charPaid + charLess;
+  put('a1.charitable.paid', charPaid); put('a1.charitable.lessTaxExempt', charLess); put('a1.charitable.deduction', charDed);
+
+  // T-1 fed deductions through line 17
+  const fed = t1.fed; Object.assign(fed, fedIncome);
+  fed.L11 = saltDed; fed.L12 = line12; fed.L13 = charDed; fed.L14 = line14; fed.L15a = 0;
+  fed.L16 = fed.L11 + fed.L12 + fed.L13 + fed.L14 + fed.L15a; fed.L17 = fed.L9 - fed.L16;
+
+  // A-3 California adjustments
+  const a3 = { otherStateMuni: full.TE_OS, treasury: -full.USINT };
+  a3.interestNet = a3.otherStateMuni + a3.treasury; a3.stateTax = -saltDed; a3.miscItemized = tot.notDeductible;
+  a3.caAgiProxy = fed.L17 + a3.interestNet - a3.stateTax; a3.floor = -xr(T.caFloor * a3.caAgiProxy, 2); a3.miscAllowed = Math.max(0, a3.miscItemized + a3.floor); a3.teCA = full.TE_CA;
+  for (const k of Object.keys(a3)) put('a3.' + k, a3[k]);
+
+  // T-1 California column through line 17
+  const adj = t1.caAdj;
+  adj.L1 = a3.interestNet; adj.L2a = 0; adj.L4 = a2.ca.line4 - a2.fed.line4; adj.L5rent = 0; adj.L5k1 = 0; adj.L9 = adj.L1 + adj.L2a + adj.L4 + adj.L5rent + adj.L5k1;
+  adj.L11 = a3.stateTax; adj.L12 = 0; adj.L13 = 0; adj.L14 = 0; adj.L15a = a3.miscAllowed; adj.L16 = adj.L11 + adj.L12 + adj.L13 + adj.L14 + adj.L15a; adj.L17 = adj.L9 - adj.L16;
+  const caT = t1.ca;
+  for (const k of ['L1', 'L2a', 'L4', 'L5rent', 'L5k1', 'L9', 'L11', 'L12', 'L13', 'L14', 'L15a', 'L16', 'L17']) caT[k] = fed[k] + adj[k];
+
+  // DNI-1
+  const d = { fed: {}, ca: {} };
+  d.fed.L1 = fed.L17; d.ca.L1 = caT.L17;
+  d.fed.L2 = teInt - sec265Memo + charLess; d.ca.L2 = teInt === 0 ? 0 : a3.teCA * d.fed.L2 / teInt;
+  d.fed.L6 = a2.fed.excludedFromDni; d.ca.L6 = a2.ca.excludedFromDni;
+  for (const c of ['fed', 'ca']) {
+    const o = d[c];
+    o.L7 = Math.max(0, o.L1 + o.L2 + o.L6); o.L8 = fai;
+    o.L9 = t.type === 'Simple' ? fai : t.incomeRequired;
+    o.paidYtd = dist; o.additional = addl; o.L10 = Math.max(0, o.paidYtd + o.additional - o.L9); o.L11 = o.L9 + o.L10;
+    o.L12 = o.L7 <= 0 ? 0 : xr(o.L2 * Math.min(1, o.L11 / o.L7), 2); o.L13 = o.L11 - o.L12; o.L14 = Math.max(0, o.L7 - o.L2); o.L15 = Math.min(o.L13, o.L14);
+    o.shareCarriedOut = o.L14 === 0 ? 0 : o.L15 / o.L14; o.roomLeft = Math.max(0, o.L14 - o.L15);
+    for (const k of Object.keys(o)) put('dni1.' + c + '.' + k, o[k]);
+  }
+  put('dni1.election.deadline', deadline); put('dni1.election.amount', addl);
+
+  // T-1 remaining lines
+  fed.L18 = d.fed.L15; adj.L18 = d.ca.L15 - d.fed.L15; caT.L18 = fed.L18 + adj.L18;
+  fed.L21 = t.type === 'Simple' ? T.exSimple : t.type === 'Complex' ? T.exComplex : T.exQdt; adj.L21 = -fed.L21; caT.L21 = fed.L21 + adj.L21;
+  fed.L22 = fed.L18 + fed.L21; adj.L22 = adj.L18 + adj.L21; caT.L22 = fed.L22 + adj.L22;
+  fed.s68 = (sec68 === 'Y' && T.s68 === 1) ? xr(S68_FRAC * Math.min(fed.L16 + fed.L22, Math.max(0, fed.L9 - T.fedBr[3])), 2) : 0; adj.s68 = -fed.s68; caT.s68 = fed.s68 + adj.s68;
+  fed.L23 = Math.max(0, fed.L17 - fed.L22 + fed.s68); caT.L23 = Math.max(0, caT.L17 - caT.L22 + caT.s68);
+  for (const col of ['fed', 'caAdj', 'ca']) for (const k of Object.keys(t1[col])) put('t1.' + col + '.' + k, t1[col][k]);
+  put('t1.memo.qdiv', full.QDIV); put('t1.memo.teInt.fed', teInt); put('t1.memo.teInt.ca', a3.teCA); put('t1.memo.niitAgi', fed.L17 - fed.L18); put('t1.memo.caPct', caPct);
+  const caIncomeInCA = put('t1.memo.caIncomeInCA', xr(caT.L23 * caPct, 2));
+
+  // K-1
+  const share = d.fed.shareCarriedOut;
+  const cls = [['interest', fed.L1], ['nqdiv', full.NQDIV], ['qdiv', full.QDIV], ['rental', fed.L5rent], ['partnership', full.K1], ['capGain', a2.fed.inDni]];
+  const gsum = cls.reduce((a, c) => a + c[1], 0), K = {}, kt = { gross: 0, allocated: 0, net: 0, distributed: 0, retained: 0 };
+  for (const [nm, g] of cls) {
+    const al = gsum === 0 ? 0 : fed.L16 * g / gsum, nt = g - al, di = nt * share, re = nt - di;
+    K[nm] = { gross: g, allocated: al, net: nt, distributed: di, retained: re };
+    for (const k of Object.keys(kt)) kt[k] += K[nm][k];
+  }
+  K.total = kt;
+  { const g = teInt, nt = d.fed.L2, di = d.fed.L12; K.teInterest = { gross: g, allocated: g - nt, net: nt, distributed: di, retained: nt - di }; }
+  for (const nm of Object.keys(K)) for (const k of Object.keys(K[nm])) put('k1.char.' + nm + '.' + k, K[nm][k]);
+  const k1check = put('k1.check', K.total.distributed - d.fed.L15);
+  const BK = { share: 0, interest: 0, ordDiv: 0, qdiv: 0, capGain: 0, other: 0, rental: 0, teInterest: 0, totalTaxable: 0, tax: 0 };
+  bens.forEach((b, i) => {
+    const o = {}, s = N(b.share), ordRate = b.fedRate + b.stateRate + (b.niit === 'Y' ? NIIT_RATE : 0), qRate = b.qdivRate + b.stateRate + (b.niit === 'Y' ? NIIT_RATE : 0);
+    o.share = s; o.interest = xr(K.interest.distributed * s, 2); o.ordDiv = xr((K.nqdiv.distributed + K.qdiv.distributed) * s, 2); o.qdiv = xr(K.qdiv.distributed * s, 2);
+    o.capGain = xr(K.capGain.distributed * s, 2); o.other = xr(K.partnership.distributed * s, 2); o.rental = xr(K.rental.distributed * s, 2); o.teInterest = xr(K.teInterest.distributed * s, 2);
+    o.totalTaxable = o.interest + o.ordDiv + o.capGain + o.other + o.rental; o.tax = xr((o.totalTaxable - o.qdiv) * ordRate + o.qdiv * qRate, 2);
+    for (const k of Object.keys(o)) { put('k1.ben.' + (i + 1) + '.' + k, o[k]); BK[k] += o[k]; }
+  });
+  for (const k of Object.keys(BK)) put('k1.total.' + k, BK[k]);
+
+  // P-1 federal
+  const rateTax = (x, br, g) => br.reduce((a, e, i) => a + (x > e ? (x - e) * g[i] : 0), 0);
+  const gFed = diffs(T.fedRate), gCa = diffs(T.caRate);
+  const f = {};
+  f.taxableIncome = fed.L23;
+  f.qdivRetained = Math.max(0, full.QDIV - K.qdiv.distributed);
+  f.cgRetained = xr(a2.fed.preferential * (t.cgAlloc === 'Income' ? 1 - share : 1), 2);
+  f.prefIncome = Math.max(0, Math.min(f.taxableIncome, f.qdivRetained + f.cgRetained));
+  f.ordinaryIncome = f.taxableIncome - f.prefIncome;
+  f.taxOrdinary = xr(rateTax(f.ordinaryIncome, T.fedBr, gFed), 2);
+  f.pref0 = Math.min(f.prefIncome, Math.max(0, Math.min(f.taxableIncome, T.pref0) - f.ordinaryIncome));
+  f.pref15 = Math.min(f.prefIncome - f.pref0, Math.max(0, Math.min(f.taxableIncome, T.pref15) - f.ordinaryIncome - f.pref0));
+  f.pref20 = f.prefIncome - f.pref0 - f.pref15;
+  f.taxPref = xr(.15 * f.pref15 + .2 * f.pref20, 2);
+  f.taxAllOrdinary = xr(rateTax(f.taxableIncome, T.fedBr, gFed), 2);
+  f.regularTax = f.taxableIncome <= 0 ? 0 : Math.min(f.taxOrdinary + f.taxPref, f.taxAllOrdinary);
+  const nii = {};
+  nii.ati = fed.L17;
+  nii.nonNii = -((t.k1Passive === 'N' ? full.K1 : 0) + (t.rentalNII === 'N' ? fed.L5rent : 0));
+  nii.niiBefore = nii.ati + nii.nonNii;
+  nii.cgRetained = Math.max(0, -a2.fed.excludedFromDni);
+  nii.carriedOut = d.fed.L14 === 0 ? 0 : xr(d.fed.L15 * Math.min(1, Math.max(0, nii.niiBefore - nii.cgRetained) / d.fed.L14), 2);
+  nii.undistributed = Math.max(0, nii.niiBefore - nii.carriedOut);
+  nii.agi = fed.L17 - fed.L18; nii.agiOverThreshold = Math.max(0, nii.agi - T.niitThr);
+  nii.tax = xr(NIIT_RATE * Math.min(nii.undistributed, nii.agiOverThreshold), 2);
+  const foreign = input.broker.reduce((a, r) => a + N(r.foreignTax), 0);
+  f.ftc = -xr(foreign * 12 / months * (1 - share), 2);
+  f.taxBeforeCredits = f.regularTax + nii.tax; f.credits = f.ftc; f.total = Math.max(0, f.taxBeforeCredits + f.credits);
+  f.paidYtd = fedPaid; f.remaining = N(pl.fedEst); f.priorYear = N(pl.fedPriorYear); f.other = N(pl.fedOther); f.payments = f.paidYtd + f.remaining + f.priorYear + f.other; f.balance = f.total - f.payments;
+  const shMult = t.pyAgi > T.shAgi ? 1.1 : 1;
+  const sh = (total, py, paid, remaining, prior) => { const required = Math.min(.9 * total, shMult * py), excess = paid + remaining + prior - required; return { required, excess, status: excess >= 0 ? 'met' : 'shortfall' }; };
+  const fsh = sh(f.total, t.pyFedTax, f.paidYtd, f.remaining, f.priorYear);
+  for (const k of Object.keys(f)) put('p1.fed.' + k, f[k]);
+  for (const k of Object.keys(nii)) put('p1.fed.niit.' + k, nii[k]);
+  for (const k of Object.keys(fsh)) put('p1.fed.safeHarbor.' + k, fsh[k]);
+
+  // P-1 California
+  const c = {};
+  c.taxableIncome = caIncomeInCA; c.tax = xr(rateTax(c.taxableIncome, T.caBr, gCa), 2); c.bhst = xr(BHST_RATE * Math.max(0, c.taxableIncome - T.bhstThr), 2);
+  c.exemptionCredit = -(t.type === 'Qualified Disability Trust' ? T.caExQdt : t.type === 'Simple' ? T.caExSimple : T.caExComplex);
+  c.total = Math.max(0, c.tax + c.bhst + c.exemptionCredit);
+  c.paidYtd = caPaid; c.remaining = N(pl.caEst); c.priorYear = N(pl.caPriorYear); c.other = N(pl.caOther); c.payments = c.paidYtd + c.remaining + c.priorYear + c.other; c.balance = c.total - c.payments;
+  const csh = sh(c.total, t.pyCaTax, c.paidYtd, c.remaining, c.priorYear);
+  for (const k of Object.keys(c)) put('p1.ca.' + k, c[k]);
+  for (const k of Object.keys(csh)) put('p1.ca.safeHarbor.' + k, csh[k]);
+  for (const [nm, a, b] of [['totalTax', f.total, c.total], ['payments', f.payments, c.payments], ['balance', f.balance, c.balance]]) { put('p1.summary.' + nm + '.fed', a); put('p1.summary.' + nm + '.ca', b); put('p1.summary.' + nm + '.total', a + b); }
+  const trustTax = put('p1.family.trustTax', f.total + c.total), benTax = put('p1.family.beneficiaryTax', BK.tax); put('p1.family.combined', trustTax + benTax);
+
+  // CHK
+  const brokerSum = k => input.broker.reduce((a, r) => a + N(r[k]), 0);
+  const chk = {};
+  const ok = diff => Math.abs(diff) < .005 ? 'OK' : 'Exception';
+  chk[1] = ok(unmapped); chk[2] = ok(blankIP);
+  [['INT', 'taxableInterest'], ['USINT', 'treasuryInterest'], ['TE_CA', 'teCA'], ['TE_OS', 'teOther'], ['QDIV', 'qdiv'], ['NQDIV', 'nqdiv'], ['STCG', 'st'], ['LTCG', 'lt']].forEach(([code, bk], i) => { chk[3 + i] = ok(ytd[code] - brokerSum(bk)); });
+  chk[11] = ok(bens.reduce((a, b) => a + N(b.share), 0) - 1); chk[12] = ok(fidN > 0 ? 0 : 1); chk[13] = ok(k1check);
+  chk[16] = ok(dist - -bens.reduce((a, b) => a + (netByAcct[String(b.account)] || 0), 0));
+  let exc = 0;
+  for (const k of Object.keys(chk)) { put('chk.' + k, chk[k]); if (chk[k] === 'Exception') exc++; }
+  put('chk.exceptions', exc); put('chk.overall', exc === 0 ? 'ALL CHECKS PASSED' : 'EXCEPTIONS - REVIEW CHK');
+  return { values: V };
+}
+// YTD by category from the ledger (the questions step shows it next to each projection method)
+function ytdByCode(input, categories) {
+  const out = {};
+  for (const c of PROJECTED) out[c] = 0;
+  for (const r of input.ledger) { const c = categories[String(r.acct)]; if (c && PROJECTED.includes(c)) out[c] += (SIGN[c] || 1) * (N(r.receipts) - N(r.disb)); }
+  return out;
+}
+// every account the ledger or the chart mentions (a ledger-only account is listed too, so it can be mapped)
+function accountList(input) {
+  const list = input.accounts.map(a => ({ no: a.no, name: a.name, type: a.type })), seen = new Set(list.map(a => String(a.no)));
+  for (const r of input.ledger) if (!seen.has(String(r.acct))) { seen.add(String(r.acct)); list.push({ no: r.acct, name: r.name, type: r.receipts ? 'Receipt' : 'Disbursement' }); }
+  return list;
+}
+
+/* ================================================================================================================
+   The page
+   ================================================================================================================ */
+const STB_TEST = /[?&]stb-test(&|=|$)/.test(location.search);
+const STEPS = ['upload', 'accounts', 'questions', 'results'];
+const state = { step: 'upload', input: null, choices: null, result: null };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const money = v => { v = Math.round(v * 100) / 100; if (Math.abs(v) < .005) v = 0; return (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+const pct = v => (v * 100).toFixed(2) + '%';
+const mdy = iso => iso.slice(5, 7) + '/' + iso.slice(8, 10) + '/' + iso.slice(0, 4);
+
+// counter (the site's GoatCounter, same rules as the main page: live host only, never under ?stb-test)
+const COUNTER = { url: '/goatcounter-count.v5.js', sri: 'sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ', endpoint: 'https://young0321.goatcounter.com/count' };
+const COUNT_ON = !STB_TEST && location.hostname === 'bookbuilder.adroitie.com';
+let converted = false;
+function startCounter() {
+  if (!COUNT_ON) return;
+  const el = document.createElement('script');
+  el.src = COUNTER.url; el.async = true; el.integrity = COUNTER.sri; el.crossOrigin = 'anonymous';
+  el.dataset.goatcounter = COUNTER.endpoint; el.dataset.goatcounterSettings = '{"no_events":true}';
+  document.head.appendChild(el);
+}
+function countConverted() {
+  if (converted) return; converted = true;
+  try { if (COUNT_ON && window.goatcounter && goatcounter.count) goatcounter.count({ path: 'converted', title: 'Trust projection finished', event: true }); } catch (_) {}
+}
+
+function show(step) {
+  state.step = step;
+  for (const s of STEPS) $('step-' + s).hidden = s !== step;
+  const at = STEPS.indexOf(step);
+  document.querySelectorAll('#stepper li').forEach((li, i) => { li.classList.toggle('done', i < at); if (i === at) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
+  $('btn-back').hidden = step === 'upload';
+  $('btn-restart').hidden = step !== 'results';
+  $('btn-next').hidden = step === 'results';
+  $('btn-next').textContent = step === 'questions' ? 'Show the projection' : 'Continue';
+  if (step === 'upload') $('btn-next').disabled = !state.input;
+  else $('btn-next').disabled = false;
+  const h = $('h-' + step); window.scrollTo(0, 0); if (h && step !== 'upload') h.focus({ preventScroll: true });
+}
+
+// ---- upload ----
+const MAX_BYTES = 50 * 1048576;
+async function onFile() {
+  const f = $('file-input').files[0], err = $('upload-error'), okb = $('upload-ok');
+  err.hidden = true; okb.hidden = true; state.input = null; state.choices = null; state.result = null; $('btn-next').disabled = true;
+  if (!f) return;
+  if (f.size > MAX_BYTES) { err.textContent = f.name + ' is ' + (f.size / 1048576).toFixed(1) + ' MB. The limit is 50 MB.'; err.hidden = false; return; }   // P30-1 (D110): refused before it is read, same limit as index.html
+  try {
+    const input = await parseWorkbook(await f.arrayBuffer());
+    state.input = input; state.choices = null;
+    okb.textContent = 'Read ' + (input.trust.name || 'the trust') + ', tax year ' + input.trust.taxYear + ', data through ' + mdy(input.trust.asOf) + ': ' + input.ledger.length + ' ledger lines, ' + input.accounts.length + ' accounts.';
+    okb.hidden = false; $('btn-next').disabled = false;
+  } catch (e) { err.textContent = e && e.message ? e.message : 'That file could not be read.'; err.hidden = false; }
+}
+
+// ---- accounts ----
+const catOptions = sel => '<option value="">Not mapped (leave out)</option>' + CATEGORIES.map(c => '<option value="' + c + '"' + (c === sel ? ' selected' : '') + '>' + c + ' - ' + esc(CAT_LABEL[c]) + '</option>').join('');
+function initChoices() {
+  const inp = state.input, accts = accountList(inp), categories = {};
+  for (const a of accts) categories[String(a.no)] = suggestCategory(a.no, a.name);
+  state.choices = { categories, caPaymentAccount: suggestCaAccount(accts), methods: defaultMethods(), sec68: 'Y', bundledFeePct: inp.trust.bundledFeePct, additionalDistributions: inp.planned.additionalDistributions,
+    planned: { fedEst: inp.planned.fedEst, caEst: inp.planned.caEst, fedPriorYear: inp.planned.fedPriorYear, caPriorYear: inp.planned.caPriorYear, fedOther: inp.planned.fedOther, caOther: inp.planned.caOther } };
+  state.sugg = Object.assign({}, categories);
+  renderAccounts(accts); renderQuestionsFromChoices();
+}
+function acctTag(no) {
+  const v = $('cat-' + no).value, tag = $('tag-' + no);
+  if (!v) { tag.textContent = 'Not mapped'; tag.className = 'tag warn'; }
+  else if (v === state.sugg[String(no)]) { tag.textContent = 'Suggested'; tag.className = 'tag ok'; }
+  else { tag.textContent = 'Changed'; tag.className = 'tag'; }
+}
+function noteMapped() {
+  const sels = [...document.querySelectorAll('#acct-list select')], n = sels.filter(s => !s.value).length;
+  $('sugg-note').textContent = n === 0 ? 'Every account has a category.' : n + (n === 1 ? ' account has' : ' accounts have') + ' no category and will be left out.';
+}
+function renderAccounts(accts) {
+  const lines = {}, net = {};
+  for (const r of state.input.ledger) { const k = String(r.acct); lines[k] = (lines[k] || 0) + 1; net[k] = (net[k] || 0) + N(r.receipts) - N(r.disb); }
+  $('acct-list').innerHTML = accts.map(a => {
+    const k = String(a.no);
+    return '<li data-acct="' + esc(k) + '"><div class="acct-id"><span><span class="num">' + esc(k) + '</span> <span class="name">' + esc(a.name) + '</span><span class="tag" id="tag-' + esc(k) + '"></span></span>' +
+      '<span class="meta">' + (lines[k] || 0) + (lines[k] === 1 ? ' ledger line, net ' : ' ledger lines, net ') + money(net[k] || 0) + '</span></div>' +
+      '<div class="field"><label class="sr-only" for="cat-' + esc(k) + '">Tax category for ' + esc(k) + ' ' + esc(a.name) + '</label><select id="cat-' + esc(k) + '">' + catOptions(state.choices.categories[k]) + '</select></div></li>';
+  }).join('');
+  $('ca-payment-account').innerHTML = '<option value="">None (no California estimates paid)</option>' + accts.map(a => '<option value="' + esc(a.no) + '"' + (String(a.no) === state.choices.caPaymentAccount ? ' selected' : '') + '>' + esc(a.no) + ' ' + esc(a.name) + '</option>').join('');
+  accts.forEach(a => acctTag(a.no)); noteMapped();
+}
+function readAccounts() {
+  const categories = {};
+  document.querySelectorAll('#acct-list select').forEach(s => { categories[s.id.slice(4)] = s.value || null; });
+  state.choices.categories = categories; state.choices.caPaymentAccount = $('ca-payment-account').value;
+}
+
+// ---- questions ----
+function buildMethodRows() {
+  $('method-list').innerHTML = PROJECTED.map(c => '<li class="mrow" data-code="' + c + '"><div class="acct-id"><span><span class="num">' + c + '</span> ' + esc(CAT_LABEL[c]) + '</span><span class="meta">Year to date <span class="num" id="ytd-' + c + '"></span></span></div>' +
+    '<div class="field"><label for="method-' + c + '">Method for ' + esc(CAT_LABEL[c]) + '</label><select id="method-' + c + '"><option>Annualize</option><option>Actual only</option><option>Manual</option></select></div>' +
+    '<div class="field" id="mw-' + c + '" hidden><label for="manual-' + c + '">Amount for the rest of the year ($)</label><input type="text" id="manual-' + c + '" class="num-in" inputmode="decimal" autocomplete="off" value="0"></div></li>').join('');
+  PROJECTED.forEach(c => $('method-' + c).addEventListener('change', () => { $('mw-' + c).hidden = $('method-' + c).value !== 'Manual'; }));
+}
+function renderQuestionsFromChoices() {
+  const ch = state.choices;
+  for (const c of PROJECTED) { $('method-' + c).value = ch.methods[c].method; $('manual-' + c).value = String(ch.methods[c].amount); $('mw-' + c).hidden = ch.methods[c].method !== 'Manual'; }
+  $('sec68').value = ch.sec68; $('bundled-fee').value = String(+(ch.bundledFeePct * 100).toFixed(6)); $('add-dist').value = String(ch.additionalDistributions);
+  const p = ch.planned;
+  [['plan-fed-est', p.fedEst], ['plan-ca-est', p.caEst], ['plan-fed-py', p.fedPriorYear], ['plan-ca-py', p.caPriorYear], ['plan-fed-other', p.fedOther], ['plan-ca-other', p.caOther]].forEach(([id, v]) => { $(id).value = String(v); });
+  $('q-error').hidden = true;
+}
+function refreshYtd() { const y = ytdByCode(state.input, state.choices.categories); for (const c of PROJECTED) $('ytd-' + c).textContent = money(y[c]); }
+function readNumber(id) {
+  const el = $(id), s = el.value.trim().replace(/[$,\s]/g, '');
+  const bad = s === '' ? false : !/^\(?-?\d*\.?\d+\)?$/.test(s);
+  el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  return { v: bad ? 0 : num(el.value), bad, el };
+}
+function readQuestions() {
+  const bad = [], ch = state.choices, rd = id => { const r = readNumber(id); if (r.bad) bad.push(r.el); return r.v; };
+  for (const c of PROJECTED) { const m = $('method-' + c).value; ch.methods[c] = { method: m, amount: m === 'Manual' ? rd('manual-' + c) : 0 }; if (m !== 'Manual') $('manual-' + c).setAttribute('aria-invalid', 'false'); }
+  ch.sec68 = $('sec68').value; ch.bundledFeePct = rd('bundled-fee') / 100; ch.additionalDistributions = rd('add-dist');
+  ch.planned = { fedEst: rd('plan-fed-est'), caEst: rd('plan-ca-est'), fedPriorYear: rd('plan-fed-py'), caPriorYear: rd('plan-ca-py'), fedOther: rd('plan-fed-other'), caOther: rd('plan-ca-other') };
+  if (ch.bundledFeePct < 0 || ch.bundledFeePct > 1) { const el = $('bundled-fee'); el.setAttribute('aria-invalid', 'true'); bad.push(el); }
+  return bad;
+}
+
+// ---- results ----
+const CHK_LABEL = { 1: 'Ledger lines with an unmapped account', 2: 'Ledger lines missing the income/principal flag', 3: 'Taxable interest: ledger = brokerage statements', 4: 'U.S. Treasury interest: ledger = statements',
+  5: 'Tax-exempt California: ledger = statements', 6: 'Tax-exempt other states: ledger = statements', 7: 'Qualified dividends: ledger = statements', 8: 'Nonqualified dividends: ledger = statements',
+  9: 'Short-term gain or loss: ledger = statements', 10: 'Long-term gain or loss: ledger = statements', 11: 'Beneficiary shares total 100%', 12: 'At least one trustee listed',
+  13: 'K-1 amounts distributed = income distribution deduction', 16: 'Ledger distributions = the beneficiaries\' distribution accounts' };
+let V = {};
+function fmt(k, v) {
+  if (k === 'dni1.election.deadline') return mdy(v);
+  if (/safeHarbor\.status$/.test(k)) return v === 'met' ? 'Met' : 'Shortfall';
+  if (/(shareCarriedOut|caPct)$/.test(k)) return pct(v);
+  return money(v);
+}
+const cell = (k, label) => V[k] === undefined ? '<td></td>' : '<td class="num" data-label="' + esc(label || '') + '" data-ref="' + k + '">' + esc(fmt(k, V[k])) + '</td>';
+function table(caption, cols, rows) {
+  const n = cols.length;
+  return '<table class="fin" style="--cols:' + n + '"><caption>' + esc(caption) + '</caption><thead><tr><th scope="col"><span class="sr-only">Line</span></th>' + cols.map(c => '<th scope="col">' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
+    rows.map(r => r.sub ? '<tr class="sub"><th scope="row" colspan="' + (n + 1) + '">' + esc(r.sub) + '</th></tr>' :
+      '<tr' + (r.total ? ' class="total"' : '') + '><th scope="row">' + (r.ln ? '<span class="ln">' + esc(r.ln) + '</span>' : '') + esc(r.label) + '</th>' + r.keys.map((k, i) => k ? cell(k, cols[i]) : '<td></td>').join('') + '</tr>').join('') + '</tbody></table>';
+}
+function renderResults() {
+  V = state.result.values; const t = state.input.trust;
+  const bal = V['p1.summary.balance.total'];
+  $('chk-warning').hidden = V['chk.exceptions'] === 0;
+  $('chk-warning').textContent = V['chk.exceptions'] === 0 ? '' : 'Some data checks need review (' + V['chk.exceptions'] + '). The projection is still shown below, but check the list at the end before relying on it.';
+  $('res-summary').innerHTML = '<div class="headline"><p>' + (bal >= 0 ? 'Projected balance due: ' : 'Projected overpayment: ') + esc(money(Math.abs(bal))) + '</p><p>' + esc(t.name || 'Trust') + ', tax year ' + t.taxYear + ', data through ' + mdy(t.asOf) + ' (' + V['setup.months'] + ' months of actual data).</p></div>' +
+    '<div class="block">' + table('P-1 summary: total projected tax', ['Federal', 'California', 'Total'], [
+      { label: 'Total projected tax', keys: ['p1.summary.totalTax.fed', 'p1.summary.totalTax.ca', 'p1.summary.totalTax.total'] },
+      { label: 'Payments and credits', keys: ['p1.summary.payments.fed', 'p1.summary.payments.ca', 'p1.summary.payments.total'] },
+      { label: 'Balance due / (overpayment)', total: true, keys: ['p1.summary.balance.fed', 'p1.summary.balance.ca', 'p1.summary.balance.total'] }]) + '</div>';
+  const L = (ln, label, key, o) => Object.assign({ ln, label, keys: [`t1.fed.${key}`, `t1.caAdj.${key}`, `t1.ca.${key}`] }, o || {});
+  $('res-t1').innerHTML = table('T-1 Taxable income (Form 1041 and Form 541, page 1)', ['Federal', 'CA adjustment', 'California'], [
+    L('L1', 'Interest income', 'L1'), L('L2a', 'Total ordinary dividends', 'L2a'), L('L4', 'Capital gain or (loss)', 'L4'), L('L5', 'Rents, net of expenses and depreciation', 'L5rent'), L('L5', 'Partnership K-1 ordinary income', 'L5k1'),
+    L('L9', 'Total income', 'L9', { total: true }), L('L11', 'Taxes', 'L11'), L('L12', 'Fiduciary fees', 'L12'), L('L13', 'Charitable deduction', 'L13'), L('L14', 'Attorney, accountant and preparer fees', 'L14'),
+    L('L15a', 'Other deductions (CA: miscellaneous itemized)', 'L15a'), L('L16', 'Total deductions', 'L16', { total: true }), L('L17', 'Adjusted total income', 'L17', { total: true }),
+    L('L18', 'Income distribution deduction', 'L18'), L('L21', 'Exemption (CA: credit instead)', 'L21'), L('L22', 'Total of lines 18 through 21', 'L22'), L('', 'Section 68 add-back (federal only)', 's68'),
+    { ln: 'L23', label: 'Taxable income', total: true, keys: ['t1.fed.L23', null, 't1.ca.L23'] },
+    { sub: 'Memo' },
+    { label: 'Qualified dividends (gross)', keys: ['t1.memo.qdiv', null, null] }, { label: 'Tax-exempt interest', keys: ['t1.memo.teInt.fed', null, 't1.memo.teInt.ca'] },
+    { label: 'Trust AGI for NIIT (L17 less L18)', keys: ['t1.memo.niitAgi', null, null] }, { label: 'California taxable share (residency)', keys: [null, null, 't1.memo.caPct'] },
+    { label: 'California taxable income attributable to California', keys: [null, null, 't1.memo.caIncomeInCA'] }]);
+  const D = (ln, label, key, o) => Object.assign({ ln, label, keys: [`dni1.fed.${key}`, `dni1.ca.${key}`] }, o || {});
+  $('res-dni1').innerHTML = table('DNI-1 Distributable net income and distribution deduction (Schedule B)', ['Federal', 'California'], [
+    D('L1', 'Adjusted total income', 'L1'), D('L2', 'Adjusted tax-exempt interest', 'L2'), D('L6', 'Capital gains excluded from DNI', 'L6'), D('L7', 'Distributable net income', 'L7', { total: true }),
+    D('L8', 'Fiduciary accounting income', 'L8'), D('L9', 'Income required to be distributed currently', 'L9'), D('', 'Distributions paid year to date', 'paidYtd'), D('', 'Additional distributions planned', 'additional'),
+    D('L10', 'Other amounts paid, credited or required', 'L10'), D('L11', 'Total distributions', 'L11'), D('L12', 'Tax-exempt income included in distributions', 'L12'), D('L13', 'Tentative deduction (L11 less L12)', 'L13'),
+    D('L14', 'Tentative deduction (L7 less L2)', 'L14'), D('L15', 'Income distribution deduction', 'L15', { total: true }), D('', 'Share of taxable DNI carried out', 'shareCarriedOut'), D('', 'Taxable DNI left for more distributions', 'roomLeft'),
+    { sub: '65-day election (section 663(b))' },
+    { label: 'Election deadline', keys: ['dni1.election.deadline', null] }, { label: 'Amount to elect (planned additional distributions)', keys: ['dni1.election.amount', null] }]);
+  const R = (label, key, o) => Object.assign({ label, keys: [key] }, o || {});
+  $('res-p1').innerHTML = table('P-1 Projection: federal (Schedule G) and California (Form 541)', ['Amount'], [
+    { sub: 'Federal' },
+    R('Taxable income', 'p1.fed.taxableIncome'), R('Qualified dividends retained by the trust', 'p1.fed.qdivRetained'), R('Net capital gain retained by the trust', 'p1.fed.cgRetained'), R('Income at preferential rates', 'p1.fed.prefIncome'),
+    R('Ordinary taxable income', 'p1.fed.ordinaryIncome'), R('Tax on ordinary income', 'p1.fed.taxOrdinary'), R('Preferential income taxed at 0%', 'p1.fed.pref0'), R('Preferential income taxed at 15%', 'p1.fed.pref15'),
+    R('Preferential income taxed at 20%', 'p1.fed.pref20'), R('Tax on preferential income', 'p1.fed.taxPref'), R('Tax on all income at ordinary rates (comparison)', 'p1.fed.taxAllOrdinary'), R('Regular income tax', 'p1.fed.regularTax', { total: true }),
+    R('NIIT: adjusted total income', 'p1.fed.niit.ati'), R('NIIT: less income that is not net investment income', 'p1.fed.niit.nonNii'), R('NIIT: net investment income before distributions', 'p1.fed.niit.niiBefore'),
+    R('NIIT: capital gains retained', 'p1.fed.niit.cgRetained'), R('NIIT: carried out by the distribution deduction', 'p1.fed.niit.carriedOut'), R('NIIT: undistributed net investment income', 'p1.fed.niit.undistributed'),
+    R('NIIT: adjusted gross income', 'p1.fed.niit.agi'), R('NIIT: AGI over the threshold', 'p1.fed.niit.agiOverThreshold'), R('Net investment income tax', 'p1.fed.niit.tax', { total: true }),
+    R('Foreign tax credit', 'p1.fed.ftc'), R('Total tax before credits', 'p1.fed.taxBeforeCredits'), R('Credits', 'p1.fed.credits'), R('Total federal tax', 'p1.fed.total', { total: true }),
+    R('Estimated payments made year to date', 'p1.fed.paidYtd'), R('Estimated payments still to be made', 'p1.fed.remaining'), R('Prior-year overpayment applied', 'p1.fed.priorYear'), R('Extension and other payments', 'p1.fed.other'),
+    R('Total payments', 'p1.fed.payments'), R('Balance due / (overpayment)', 'p1.fed.balance', { total: true }),
+    R('Safe harbor: required annual payment', 'p1.fed.safeHarbor.required'), R('Safe harbor: timely estimates less required', 'p1.fed.safeHarbor.excess'), R('Safe harbor status', 'p1.fed.safeHarbor.status'),
+    { sub: 'California' },
+    R('Taxable income attributable to California', 'p1.ca.taxableIncome'), R('Tax (fiduciary rate schedule)', 'p1.ca.tax'), R('Behavioral Health Services Tax', 'p1.ca.bhst'), R('Exemption credit', 'p1.ca.exemptionCredit'),
+    R('Total California tax', 'p1.ca.total', { total: true }), R('Estimated payments made year to date', 'p1.ca.paidYtd'), R('Estimated payments still to be made', 'p1.ca.remaining'), R('Prior-year overpayment applied', 'p1.ca.priorYear'),
+    R('Extension and other payments', 'p1.ca.other'), R('Total payments', 'p1.ca.payments'), R('Balance due / (overpayment)', 'p1.ca.balance', { total: true }),
+    R('Safe harbor: required annual payment', 'p1.ca.safeHarbor.required'), R('Safe harbor: timely estimates less required', 'p1.ca.safeHarbor.excess'), R('Safe harbor status', 'p1.ca.safeHarbor.status'),
+    { sub: 'Family view' },
+    R('Trust tax (federal and California)', 'p1.family.trustTax'), R('Estimated beneficiary tax on K-1 income', 'p1.family.beneficiaryTax'), R('Combined family tax', 'p1.family.combined', { total: true })]);
+  const allOk = V['chk.overall'] === 'ALL CHECKS PASSED';
+  $('res-chk').innerHTML = '<h3>CHK Data checks</h3><ul class="chk">' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16].map(n => '<li><span>' + n + '. ' + esc(CHK_LABEL[n]) + '</span><span class="badge ' + (V['chk.' + n] === 'OK' ? 'ok' : 'bad') + '" data-ref="chk.' + n + '">' + V['chk.' + n] + '</span></li>').join('') + '</ul>' +
+    '<p><strong data-ref="chk.overall">' + (allOk ? 'All checks passed' : 'Exceptions - review the failing checks') + '</strong></p>';
+}
+
+// ---- navigation ----
+function next() {
+  if (state.step === 'upload') {
+    if (!state.input) return;
+    if (!state.choices) initChoices();
+    show('accounts');
+  } else if (state.step === 'accounts') {
+    readAccounts(); refreshYtd(); show('questions');
+  } else if (state.step === 'questions') {
+    const bad = readQuestions(), err = $('q-error');
+    if (bad.length) { err.textContent = 'Check the highlighted ' + (bad.length === 1 ? 'amount' : 'amounts') + ': enter numbers only (a % for the fee, dollars elsewhere).'; err.hidden = false; bad[0].focus(); return; }
+    err.hidden = true;
+    try { state.result = compute(state.input, state.choices); } catch (e) { err.textContent = 'The projection could not be calculated: ' + (e && e.message || e); err.hidden = false; return; }
+    renderResults(); show('results'); countConverted();
+  }
+}
+function back() { const i = STEPS.indexOf(state.step); if (i > 0) { if (state.step === 'questions') readQuestions(); show(STEPS[i - 1]); } }
+function restart() { $('file-input').value = ''; state.input = null; state.choices = null; state.result = null; $('upload-error').hidden = true; $('upload-ok').hidden = true; show('upload'); $('file-input').focus(); }
+
+buildMethodRows();
+$('file-input').addEventListener('change', onFile);
+$('btn-next').addEventListener('click', next);
+$('btn-back').addEventListener('click', back);
+$('btn-restart').addEventListener('click', restart);
+$('btn-accept-suggestions').addEventListener('click', () => {
+  document.querySelectorAll('#acct-list select').forEach(s => { const sg = state.sugg[s.id.slice(4)]; if (!s.value && sg) s.value = sg; acctTag(s.id.slice(4)); });
+  noteMapped();
+});
+$('acct-list').addEventListener('change', e => { if (e.target.matches('select')) { acctTag(e.target.id.slice(4)); noteMapped(); } });
+show('upload');
+startCounter();
+if (STB_TEST) { window.__stb = window.__stb || {}; window.__stb.trust = { CATEGORIES, suggestCategory, defaultMethods, parseWorkbook, compute, state }; }
+})();
+</script>
+</body>
+</html>

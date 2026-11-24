@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Privacy - BookBuilder Lite</title>
-<meta name="description" content="How BookBuilder Lite handles your data: statements are read in your browser and never uploaded, the page sets no cookies, and a cookieless counter counts visits and finished workbooks.">
+<meta name="description" content="How BookBuilder Lite handles your data: statements are read in your browser and never uploaded, the page sets no cookies, and a cookieless counter counts visits, finished workbooks and finished trust projections.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <style>
 :root { color-scheme: light dark; --bg: #f4f6f9; --fg: #16202f; --muted: #556275; --accent: #1d5fc4; --line: #d9e0ea; }
@@ -31,11 +31,11 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
 <header class="site"><a href="https://bookbuilder.adroitie.com/">BookBuilder Lite</a></header>
 <main>
 <h1>Privacy</h1>
-<p class="updated">Last updated: November 20, 2026</p>
-<p>BookBuilder Lite is a free web tool by Adroitie that turns bank and card statements into an Excel workbook. This page explains what happens to your data when you use it.</p>
+<p class="updated">Last updated: November 23, 2026</p>
+<p>BookBuilder Lite is a free web tool by Adroitie that turns bank and card statements into an Excel workbook, and projects a trust's income tax from a client file on its trust tax page. This page explains what happens to your data when you use it.</p>
 
 <h2>Your files never leave your browser</h2>
-<p>The statements you add are read inside your browser tab. They are never uploaded to us or to anyone else. The workbook is built in the tab and saved straight to your computer. When you close the page, nothing is kept.</p>
+<p>The statements and trust files you add are read inside your browser tab. They are never uploaded to us or to anyone else. The workbook is built in the tab and saved straight to your computer; a trust projection is shown in the tab only. When you close the page, nothing is kept.</p>
 <p>You can check this yourself: open your browser's DevTools, choose the Network tab, then add a file. You will see the page's tools load, but no request carries your file.</p>
 
 <h2>What the page loads, and from where</h2>
@@ -50,10 +50,11 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-
 <p>This page sets no cookies. Your browser may hold Google Analytics and HubSpot cookies from adroitie.com, Adroitie's main site. The browser sends them to this site's host, GitHub, with each page request, but this page never reads them or sends them anywhere.</p>
 
 <h2>Counting visits</h2>
-<p>We use GoatCounter, a privacy-friendly counter, to learn how many people use the tool. It counts two things:</p>
+<p>We use GoatCounter, a privacy-friendly counter, to learn how many people use the tool. It counts these things:</p>
 <ul>
 <li>a visit when the page opens, and</li>
 <li>one "workbook finished" event when you download a workbook. A workbook made from the built-in sample statement is counted as a sample instead.</li>
+<li>On the trust tax page, the same "finished" event is counted once when it shows a finished projection.</li>
 </ul>
 <p>GoatCounter uses no cookies and doesn't store your IP address. The count never includes your files, file names, bank names, amounts or anything you type. It gets the page address and title (including any text after a ? in the address), the site that linked you here, your screen size and your browser type. <a href="https://www.goatcounter.com/help/gdpr">How GoatCounter handles data</a>.</p>
 

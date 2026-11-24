@@ -569,7 +569,13 @@ main { padding-block: 24px 120px; }
   .stats { grid-template-columns: 1fr 1fr; }
   .stats > div:last-child { grid-column: 1 / -1; }
 }
-</style>
+/* P29-1 (D108): tool switcher. Segmented pill; the current tool is the filled segment. 44px tall on phones, own row there. */
+.tool-nav { display: inline-flex; gap: 2px; padding: 2px; background: var(--surface-2); border: 1px solid var(--control-line); border-radius: 999px; }
+.tool-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 14px; border-radius: 999px; color: var(--fg); font-size: var(--fs-sm); font-weight: 500; text-decoration: none; white-space: nowrap; }
+.tool-nav a:hover { color: var(--accent); }
+.tool-nav a[aria-current="page"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+@media (max-width: 640px) { .tool-nav { order: 3; flex: 1 1 100%; } .tool-nav a { flex: 1; min-height: 44px; padding: 0 8px; } }
+@media (forced-colors: active) { .tool-nav { border-color: CanvasText; } .tool-nav a[aria-current="page"] { forced-color-adjust: none; background: Highlight; color: HighlightText; } .tool-nav a:focus-visible { outline: 2px solid CanvasText; } }</style>
 </head><body>
 <header class="app-header">
   <div class="wrap">
@@ -577,6 +583,7 @@ main { padding-block: 24px 120px; }
       <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 2.5h7l3 3v8H3z"/><path d="M5.5 7.5h5M5.5 10h5M8 7.5V12.5"/></svg></div>
       <h1>BookBuilder Lite</h1>
     </div>
+    <nav class="tool-nav" aria-label="Tools"><a href="/" aria-current="page">Statements to Excel</a><a href="/trust.html">Trust tax projection</a></nav>
     <div class="head-actions">
       <span class="privacy" title="Files are read in this browser tab. Nothing is uploaded to a server.">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/></svg>
@@ -618,6 +625,8 @@ main { padding-block: 24px 120px; }
     <p>To learn how many people use the tool, the page counts visits with GoatCounter, a privacy-friendly counter: one visit when the page opens, and one "workbook finished" event when you download a workbook. GoatCounter uses no cookies and doesn't store your IP address. The count never includes your files, file names, bank names, amounts or anything you type; it gets the page address and title (including any text after a ? in the address), the site that linked you here, your screen size and your browser type. <a href="https://www.goatcounter.com/help/gdpr" target="_blank" rel="noopener">How GoatCounter handles data</a>.</p>
     <p>This page sets no cookies. Your browser may hold Google Analytics and HubSpot cookies from adroitie.com, Adroitie's main site. The browser sends them to this site's host, GitHub, with each page request, but this page never reads them or sends them anywhere.</p>
     <p>The full <a href="/privacy.html" target="_blank" rel="noopener">Privacy</a> and <a href="/terms.html" target="_blank" rel="noopener">Terms of use</a> pages open in a new tab; questions go to <a href="mailto:young@adroitie.com">young@adroitie.com</a>.</p>
+    <h3>For trusts</h3>
+    <p>Preparing the income tax of a trust? The <a href="/trust.html">trust tax projection</a> page projects Form 1041 and California Form 541 tax from the client's Excel workbook, in your browser.</p>
     <h3>Limits</h3>
     <ul>
       <li>US number and date formats only (1,234.56 and MM/DD/YYYY).</li>
